@@ -1,7 +1,7 @@
 package com.example.review_study_app.notification;
 
-import static com.example.review_study_app.ReviewStudyInfo.createIssueUrl;
-import static com.example.review_study_app.ReviewStudyInfo.createLabelUrl;
+import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createIssueUrl;
+import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createLabelUrl;
 
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;

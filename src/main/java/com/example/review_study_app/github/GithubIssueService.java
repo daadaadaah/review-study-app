@@ -1,6 +1,6 @@
 package com.example.review_study_app.github;
 
-import com.example.review_study_app.ReviewStudyInfo;
+import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.io.IOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

@@ -5,6 +5,7 @@ import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.github.GithubIssueService;
 import com.example.review_study_app.notification.NotificationService;
+import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

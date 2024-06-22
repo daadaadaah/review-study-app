@@ -2,6 +2,7 @@ package com.example.review_study_app;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -42,9 +42,9 @@ public class ReviewStudyInfo {
     public static String getFormattedThisWeekNumberLabelDescription(int year, int weekNumber) {
         String dateFormat = "yyyy.MM.dd";
 
-        String mondayOfWeekNumber = ReviewStudyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.MONDAY, dateFormat);
+        String mondayOfWeekNumber = MyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.MONDAY, dateFormat);
 
-        String sundayOfWeekNumber = ReviewStudyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.SUNDAY, dateFormat);
+        String sundayOfWeekNumber = MyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.SUNDAY, dateFormat);
 
         return mondayOfWeekNumber+"~"+sundayOfWeekNumber; // 예 : 2024.01.01~2024.01.07
     }
@@ -53,9 +53,9 @@ public class ReviewStudyInfo {
     public static String getFormattedWeeklyReviewIssueTitle(int year, int weekNumber, String memberFullName) {
         String dateFormat = "yyyy.MM.dd";
 
-        String mondayOfWeekNumber = ReviewStudyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.MONDAY, dateFormat);
+        String mondayOfWeekNumber = MyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.MONDAY, dateFormat);
 
-        String sundayOfWeekNumber = ReviewStudyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.SUNDAY, dateFormat);
+        String sundayOfWeekNumber = MyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, DayOfWeek.SUNDAY, dateFormat);
 
         String currentWeekPeriod = mondayOfWeekNumber+"~"+sundayOfWeekNumber;
 

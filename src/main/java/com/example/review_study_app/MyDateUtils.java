@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 
-public class ReviewStudyDateUtils {
+public class MyDateUtils {
 
     private static final ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")); // 서버가 서울이 아니라 다른 나라에 있을 수도 있어서
 

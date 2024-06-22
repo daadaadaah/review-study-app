@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("ReviewStudyDateUtilsTest")
-class ReviewStudyDateUtilsTest {
+class MyDateUtilsTest {
 
     @Nested
     @DisplayName("getDateOfDayOfCurrentWeekNumberInYear()")
@@ -25,7 +25,7 @@ class ReviewStudyDateUtilsTest {
             String dateFormat = "yyyy.MM.dd";
 
             // when
-            String actualDate = ReviewStudyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, dayOfWeek, dateFormat);
+            String actualDate = MyDateUtils.getDateOfDayOfCurrentWeekNumberInYear(year, weekNumber, dayOfWeek, dateFormat);
 
             // then
             String expectedDate = "2024.01.01"; // 첫 번째 월요일이 1월 1일로 시작하는 경우

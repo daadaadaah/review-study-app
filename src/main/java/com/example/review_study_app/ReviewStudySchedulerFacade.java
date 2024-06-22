@@ -32,9 +32,9 @@ public class ReviewStudySchedulerFacade {
      * Failed","errors":[{"resource":"Label","code":"already_exists","field":"name"}],"documentation_url":"https://docs.github.com/rest/issues/labels#create-a-label"}
      */
     public void createNewWeekNumberLabel() {
-        int currentYear = ReviewStudyDateUtils.getCurrentYear();
+        int currentYear = MyDateUtils.getCurrentYear();
 
-        int currentWeekNumber = ReviewStudyDateUtils.getCurrentWeekNumber();
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
 
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(
             currentYear, currentWeekNumber);
@@ -67,9 +67,9 @@ public class ReviewStudySchedulerFacade {
      */
     public void createNewWeeklyReviewIssues() {
         // 1. 날짜 계산
-        int currentYear = ReviewStudyDateUtils.getCurrentYear();
+        int currentYear = MyDateUtils.getCurrentYear();
 
-        int currentWeekNumber = ReviewStudyDateUtils.getCurrentWeekNumber();
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
 
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
 
@@ -137,9 +137,9 @@ public class ReviewStudySchedulerFacade {
      */
     public void closeWeeklyReviewIssues() {
         // 1. 날짜 계산
-        int currentYear = ReviewStudyDateUtils.getCurrentYear();
+        int currentYear = MyDateUtils.getCurrentYear();
 
-        int currentWeekNumber = ReviewStudyDateUtils.getCurrentWeekNumber();
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
 
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
 

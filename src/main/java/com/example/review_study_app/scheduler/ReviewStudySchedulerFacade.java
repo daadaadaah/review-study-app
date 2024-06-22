@@ -1,4 +1,4 @@
-package com.example.review_study_app;
+package com.example.review_study_app.scheduler;
 
 
 import com.example.review_study_app.common.utils.MyDateUtils;

@@ -1,7 +1,7 @@
 package com.example.review_study_app.notification;
 
-import com.example.review_study_app.GithubApiFailureResult;
-import com.example.review_study_app.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubApiFailureResult;
+import com.example.review_study_app.github.GithubApiSuccessResult;
 
 public interface NotificationService {
 

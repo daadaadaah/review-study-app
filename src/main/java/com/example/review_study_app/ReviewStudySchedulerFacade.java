@@ -1,6 +1,9 @@
 package com.example.review_study_app;
 
 
+import com.example.review_study_app.github.GithubApiFailureResult;
+import com.example.review_study_app.github.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubIssueService;
 import com.example.review_study_app.notification.NotificationService;
 import java.util.ArrayList;
 import java.util.List;

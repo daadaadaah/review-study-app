@@ -1,12 +1,15 @@
 package com.example.review_study_app;
 
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class GithubIssueService {
 
@@ -37,5 +40,42 @@ public class GithubIssueService {
         GHLabel ghLabel = repo.createLabel(labelName, labelColor, labelDescription);
 
         return ghLabel.getName();
+    }
+
+    // 라벨 존재 여부 판단 함수
+    public boolean isWeekNumberLabelPresent(String labelName) {
+        try {
+            connectGithub();
+
+            repo.getLabel(labelName);
+            log.info("라벨이 존재합니다. labelName = {}", labelName);
+
+            return true;
+        } catch (Exception exception) {
+            log.warn("라벨이 존재하지 않습니다. exception = {}, labelName = {}", exception.getMessage(), labelName);
+            return false;
+        }
+    }
+
+    // 새로운 주간회고 Issue 생성하는 함수
+    public GHIssue createNewIssue(
+        int currentYear,
+        int currentWeekNumber,
+        String memberFullName,
+        String memberGithubName
+    ) throws IOException {
+        connectGithub();
+
+        String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(currentYear, currentWeekNumber, memberFullName);
+
+        String issueBody = ReviewStudyInfo.WEEKLY_REVIEW_ISSUE_BODY_TEMPLATE;
+
+        String thisWeekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
+
+        return repo.createIssue(issueTitle)
+            .assignee(memberGithubName)
+            .label(thisWeekNumberLabelName)
+            .body(issueBody)
+            .create();
     }
 }

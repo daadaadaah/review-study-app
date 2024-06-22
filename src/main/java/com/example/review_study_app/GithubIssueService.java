@@ -1,8 +1,10 @@
 package com.example.review_study_app;
 
 import java.io.IOException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -77,5 +79,24 @@ public class GithubIssueService {
             .label(thisWeekNumberLabelName)
             .body(issueBody)
             .create();
+    }
+
+    // Close 할 이슈 목록 가져오는 함수
+    public List<GHIssue> getIssuesToClose(String labelNameToClose) throws IOException {
+        connectGithub();
+
+        return repo.getIssues(GHIssueState.OPEN)
+            .stream()
+            .filter(ghIssue -> ghIssue.getLabels().stream()
+                .anyMatch(label -> label.getName().equals(labelNameToClose))
+            )
+            .toList();
+    }
+
+    // 이슈 close 하는 함수
+    public void closeIssue(int issueNumber) throws IOException {
+        connectGithub();
+
+        repo.getIssue(issueNumber).close();
     }
 }

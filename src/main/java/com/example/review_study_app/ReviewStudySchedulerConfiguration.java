@@ -1,5 +1,6 @@
 package com.example.review_study_app;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.github.GHIssue;
@@ -41,7 +42,7 @@ public class ReviewStudySchedulerConfiguration {
         }
     }
 
-    @Scheduled(initialDelay = 1000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
+//    @Scheduled(initialDelay = 1000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
     public void runCreateNewIssue() {
 
         int currentYear = ReviewStudyDateUtils.getCurrentYear();
@@ -83,5 +84,48 @@ public class ReviewStudySchedulerConfiguration {
                 log.error("새로운 이슈 생성이 실패했습니다. issueTitle = {}, exception = {} ", issueTitle, exception.getMessage());
             }
         });
+    }
+
+    @Scheduled(initialDelay = 1000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
+    public void runCloseIssues() {
+        int currentYear = ReviewStudyDateUtils.getCurrentYear();
+
+        int currentWeekNumber = ReviewStudyDateUtils.getCurrentWeekNumber();
+
+        String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
+
+        List<GHIssue> closedIssues = new ArrayList<>();
+
+        try {
+            closedIssues = githubService.getIssuesToClose(labelNameToClose);
+
+        } catch (Exception exception) {
+            log.error("Close 할 이슈 목록 가져오는 것을 실패했습니다. exception = {}", exception.getMessage());
+        }
+
+        if(closedIssues.isEmpty()) {
+            log.info("Close 할 이슈가 없습니다. ");
+            return;
+        }
+
+        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작");
+
+        closedIssues.stream().forEach(ghIssue -> {
+            int issueNumber = ghIssue.getNumber();
+
+            String issueTitle = ghIssue.getTitle();
+
+            try {
+
+                githubService.closeIssue(issueNumber);
+
+                log.info("이슈가 Close 되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, issueNumber);
+            } catch (Exception exception) {
+                log.error("이슈 Close에 실패했습니다. issueTitle = {}, issueNumber = {}, exception = {} ", issueTitle, issueNumber, exception.getMessage());
+
+            }
+        });
+
+        log.info("("+labelNameToClose+") 주간회고 이슈 Close 완료");
     }
 }

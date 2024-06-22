@@ -2,6 +2,7 @@ package com.example.review_study_app;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.review_study_app.common.utils.MyDateUtils;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import org.junit.jupiter.api.DisplayName;

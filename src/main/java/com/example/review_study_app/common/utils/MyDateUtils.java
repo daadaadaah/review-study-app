@@ -1,4 +1,4 @@
-package com.example.review_study_app;
+package com.example.review_study_app.common.utils;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

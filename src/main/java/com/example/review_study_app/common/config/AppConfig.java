@@ -1,4 +1,4 @@
-package com.example.review_study_app;
+package com.example.review_study_app.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

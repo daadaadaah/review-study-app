@@ -1,6 +1,6 @@
 package com.example.review_study_app.reviewstudy;
 
-import com.example.review_study_app.MyDateUtils;
+import com.example.review_study_app.common.utils.MyDateUtils;
 import java.time.DayOfWeek;
 import java.util.Arrays;
 import java.util.List;

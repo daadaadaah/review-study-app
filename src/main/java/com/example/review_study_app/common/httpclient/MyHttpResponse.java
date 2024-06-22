@@ -1,4 +1,4 @@
-package com.example.review_study_app;
+package com.example.review_study_app.common.httpclient;
 
 import org.springframework.http.HttpHeaders;
 

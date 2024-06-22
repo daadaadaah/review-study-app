@@ -3,9 +3,10 @@ package com.example.review_study_app.notification;
 import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createIssueUrl;
 import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createLabelUrl;
 
+import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
-import com.example.review_study_app.MyHttpClient;
+import com.example.review_study_app.common.httpclient.MyHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

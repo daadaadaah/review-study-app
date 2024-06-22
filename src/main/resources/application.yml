@@ -1,0 +1,3 @@
+github:
+  oauth:
+    accessToken: ${GITHUB_OAUTH_ACCESS_TOKEN}

@@ -1,8 +1,11 @@
-package com.example.review_study_app;
+package com.example.review_study_app.notification;
 
 import static com.example.review_study_app.ReviewStudyInfo.createIssueUrl;
 import static com.example.review_study_app.ReviewStudyInfo.createLabelUrl;
 
+import com.example.review_study_app.GithubApiFailureResult;
+import com.example.review_study_app.GithubApiSuccessResult;
+import com.example.review_study_app.MyHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

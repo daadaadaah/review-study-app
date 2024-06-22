@@ -15,6 +15,10 @@ public class ReviewStudyInfo {
     /** 레포 **/
     public static final String REPOSITORY_NAME = "daadaadaah/reviewStudy-scheduler"; // TODO : 테스트용 레포
 
+    public static String createRepositoryUrl(String path) {
+        return "https://github.com/" + ReviewStudyInfo.REPOSITORY_NAME + "/" + path;
+    }
+
     /** 라벨 **/
     public static final String THIS_WEEK_NUMBER_LABEL_COLOR = "000000"; // Black
 
@@ -24,6 +28,10 @@ public class ReviewStudyInfo {
         String formattedYear = String.valueOf(year).substring(2, 4);
 
         return String.format(nameFormat, formattedYear, weekNumber); // 예 : 24년_25주차
+    }
+
+    public static String createLabelUrl() {
+        return createRepositoryUrl("labels");
     }
 
     public static String getFormattedThisWeekNumberLabelDescription(int year, int weekNumber) {
@@ -59,4 +67,8 @@ public class ReviewStudyInfo {
         + "\n"
         + "# 다음주 목표\n"
         + "1.\n";
+
+    public static String createIssueUrl(int issueNumber) {
+        return createRepositoryUrl("issues/" + issueNumber);
+    }
 }

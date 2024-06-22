@@ -1,5 +1,8 @@
 package com.example.review_study_app;
 
+import static com.example.review_study_app.ReviewStudyInfo.createIssueUrl;
+import static com.example.review_study_app.ReviewStudyInfo.createLabelUrl;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -46,13 +49,13 @@ public class DiscordNotificationService implements NotificationService {
     /** 라벨 생성 **/
     @Override
     public String createNewLabelCreationSuccessMessage(String weekNumberLabelName) {
-        return EMOJI_CONGRATS+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성이 성공했습니다. "+ EMOJI_CONGRATS;
+        return EMOJI_CONGRATS+" 새로운 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+")) 생성이 성공했습니다. "+ EMOJI_CONGRATS;
     }
 
     @Override
     public String createNewLabelCreationFailureMessage(String weekNumberLabelName,
         Exception exception) {
-        return EMOJI_WARING+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성에 실패했습니다. "+ EMOJI_WARING+" \n"
+        return EMOJI_WARING+" 새로운 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+")) 생성에 실패했습니다. "+ EMOJI_WARING+" \n"
             + " 에러 메시지 : "+exception.getMessage();
     }
 
@@ -61,7 +64,7 @@ public class DiscordNotificationService implements NotificationService {
     public String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
         int issueNumber = githubApiSuccessResult.issueNumber();
 
-        return EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle() + " 새로운 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+"))가 생성되었습니다. " + EMOJI_CONGRATS;
+        return EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle() + " 새로운 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+"))가 생성되었습니다. " + EMOJI_CONGRATS;
     }
 
     @Override
@@ -88,14 +91,14 @@ public class DiscordNotificationService implements NotificationService {
     public String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
         int issueNumber = githubApiSuccessResult.issueNumber();
 
-        return EMOJI_CONGRATS+" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle()+" 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+"))가 Closed 되었습니다. "+ EMOJI_CONGRATS;
+        return EMOJI_CONGRATS+" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+"))가 Closed 되었습니다. "+ EMOJI_CONGRATS;
     }
 
     @Override
     public String createIssueCloseFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult) {
         int issueNumber = githubApiFailureResult.issueNumber();
 
-        return EMOJI_WARING+" ("+weekNumberLabelName+") "+githubApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+")) Closed에 실패했습니다. "+ EMOJI_WARING
+        return EMOJI_WARING+" ("+weekNumberLabelName+") "+githubApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+")) Closed에 실패했습니다. "+ EMOJI_WARING
             +"\n"
             + "에러 메시지 : "+githubApiFailureResult.errorMessage();
     }

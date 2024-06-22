@@ -8,12 +8,17 @@ public class ReviewStudyInfo {
 
     /** 멤버 **/
     public static final List<Member> MEMBERS = Arrays.asList(
-        new Member("노경태", "ilgolf"), // TODO : 테스트시, 실패용 데이터
+        new Member("김찬웅", "Dove-kim"),
+        new Member("김준우", "Junuu"),
+        new Member("김도엽", "BrianDYKim"),
+        new Member("노경태", "ilgolf"),
+        new Member("우경준", "Jay-WKJun"),
+        new Member("조현준", "Tianea2160"),
         new Member("곽다희", "daadaadaah")
     );
 
     /** 레포 **/
-    public static final String REPOSITORY_NAME = "daadaadaah/reviewStudy-scheduler"; // TODO : 테스트용 레포
+    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
 
     public static String createRepositoryUrl(String path) {
         return "https://github.com/" + ReviewStudyInfo.REPOSITORY_NAME + "/" + path;

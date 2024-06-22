@@ -1,10 +1,6 @@
 package com.example.review_study_app;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.kohsuke.github.GHIssue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,17 +18,26 @@ public class ReviewStudySchedulerConfiguration {
         this.reviewStudySchedulerFacade = reviewStudySchedulerFacade;
     }
 
-    @Scheduled(initialDelay = 1000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
+    /**
+     * 매주 월요일 AM 00:10 에 이번주차 Label 을 생성하는 스케줄 함수
+     */
+    @Scheduled(cron = "0 10 0 ? * MON", zone = "Asia/Seoul")
     public void runCreateNewLabel() {
         reviewStudySchedulerFacade.createNewWeekNumberLabel();
     }
 
-    @Scheduled(initialDelay = 3000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
+    /**
+     * 매주 월요일 AM 00:30 에 모든 멤버의 이번주차 주간회고 Issues 를 생성하는 스케줄 함수
+     */
+    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
     public void runCreateNewIssue() {
         reviewStudySchedulerFacade.createNewWeeklyReviewIssues();
     }
 
-    @Scheduled(initialDelay = 6000) // TODO : 테스트용, 실제론 cron 활용할 꺼임
+    /**
+     * 매주 일요일 PM 11:30 에 이번주 주간회고 이슈를 Close 시키는 스케줄 함수
+     */
+    @Scheduled(cron = "0 30 23 ? * SUN", zone = "Asia/Seoul")
     public void runCloseIssues() {
         reviewStudySchedulerFacade.closeWeeklyReviewIssues();
     }

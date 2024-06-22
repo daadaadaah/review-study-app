@@ -42,4 +42,61 @@ public class DiscordNotificationService implements NotificationService {
             return false;
         }
     }
+
+    /** 라벨 생성 **/
+    @Override
+    public String createNewLabelCreationSuccessMessage(String weekNumberLabelName) {
+        return EMOJI_CONGRATS+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성이 성공했습니다. "+ EMOJI_CONGRATS;
+    }
+
+    @Override
+    public String createNewLabelCreationFailureMessage(String weekNumberLabelName,
+        Exception exception) {
+        return EMOJI_WARING+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성에 실패했습니다. "+ EMOJI_WARING+" \n"
+            + " 에러 메시지 : "+exception.getMessage();
+    }
+
+    /** 이슈 생성 **/
+    @Override
+    public String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
+        int issueNumber = githubApiSuccessResult.issueNumber();
+
+        return EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle() + " 새로운 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+"))가 생성되었습니다. " + EMOJI_CONGRATS;
+    }
+
+    @Override
+    public String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult) {
+        return EMOJI_WARING +" ("+weekNumberLabelName+") "+ githubApiFailureResult.issueTitle()+" 새로운 이슈 생성이 실패했습니다. "+ EMOJI_WARING
+            +"\n"
+            + "에러 메시지 : "+githubApiFailureResult.errorMessage();
+    }
+
+    /** 이슈 Close **/
+    @Override
+    public String createIssueFetchFailureMessage(String weekNumberLabelName, Exception exception) {
+        return EMOJI_WARING+" ("+weekNumberLabelName+") Close 할 이슈 목록 가져오는 것을 실패했습니다. "+ EMOJI_WARING
+            +"\n"
+            + "에러 메시지 : "+exception.getMessage();
+    }
+
+    @Override
+    public String createEmptyIssuesToCloseMessage(String weekNumberLabelName) {
+        return EMOJI_EXCLAMATION_MARK+" ("+weekNumberLabelName+") Close 할 이슈 목록이 없습니다. "+ EMOJI_EXCLAMATION_MARK;
+    }
+
+    @Override
+    public String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
+        int issueNumber = githubApiSuccessResult.issueNumber();
+
+        return EMOJI_CONGRATS+" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle()+" 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+"))가 Closed 되었습니다. "+ EMOJI_CONGRATS;
+    }
+
+    @Override
+    public String createIssueCloseFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult) {
+        int issueNumber = githubApiFailureResult.issueNumber();
+
+        return EMOJI_WARING+" ("+weekNumberLabelName+") "+githubApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+issueNumber+")) Closed에 실패했습니다. "+ EMOJI_WARING
+            +"\n"
+            + "에러 메시지 : "+githubApiFailureResult.errorMessage();
+    }
 }

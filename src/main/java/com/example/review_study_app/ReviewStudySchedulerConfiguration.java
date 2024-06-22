@@ -1,9 +1,5 @@
 package com.example.review_study_app;
 
-import static com.example.review_study_app.DiscordNotificationService.EMOJI_CONGRATS;
-import static com.example.review_study_app.DiscordNotificationService.EMOJI_EXCLAMATION_MARK;
-import static com.example.review_study_app.DiscordNotificationService.EMOJI_WARING;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,15 +42,15 @@ public class ReviewStudySchedulerConfiguration {
 
             log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
-            notificationService.sendMessage(
-                EMOJI_CONGRATS+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성이 성공했습니다. "+ EMOJI_CONGRATS);
+            String newLabelCreationSuccessMessage = notificationService.createNewLabelCreationSuccessMessage(weekNumberLabelName);
 
+            notificationService.sendMessage(newLabelCreationSuccessMessage);
         } catch (Exception exception) {
             log.error("새로운 라벨 생성이 실패했습니다. exception = {} labelName= {} ", exception.getMessage(), weekNumberLabelName);
 
-            notificationService.sendMessage(
-                EMOJI_WARING+" 새로운 라벨(["+weekNumberLabelName+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/labels)) 생성에 실패했습니다. "+ EMOJI_WARING+" \n"
-                    + " 에러 메시지 : "+exception.getMessage());
+            String newLabelCreationFailureMessage = notificationService.createNewLabelCreationFailureMessage(weekNumberLabelName, exception);
+
+            notificationService.sendMessage(newLabelCreationFailureMessage);
         }
     }
 
@@ -108,9 +104,7 @@ public class ReviewStudySchedulerConfiguration {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result ->
-                    EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ result.issueTitle() + " 새로운 이슈([#"+result.issueNumber()+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+result.issueNumber()+"))가 생성되었습니다. " + EMOJI_CONGRATS
-                )
+                .map(result -> notificationService.createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
 
@@ -118,11 +112,7 @@ public class ReviewStudySchedulerConfiguration {
         String failureResult = githubApiFailureResults.isEmpty()
             ? ""
             : githubApiFailureResults.stream()
-                .map(result ->
-                    EMOJI_WARING +" ("+weekNumberLabelName+") "+ result.issueTitle()+" 새로운 이슈 생성이 실패했습니다. "+ EMOJI_WARING
-                        +"\n"
-                        + "에러 메시지 : "+result.errorMessage()
-                )
+                .map(result -> notificationService.createNewIssueCreationFailureMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // (3) 최종 결과
@@ -156,19 +146,18 @@ public class ReviewStudySchedulerConfiguration {
         } catch (Exception exception) {
             log.error("Close 할 이슈 목록 가져오는 것을 실패했습니다. exception = {}", exception.getMessage());
 
-            notificationService.sendMessage(
-                EMOJI_WARING+"  Close 할 이슈 목록 가져오는 것을 실패했습니다. "+ EMOJI_WARING
-                +"\n"
-                + "에러 메시지 : "+exception.getMessage()
-            );
+            String issueFetchFailureMessage = notificationService.createIssueFetchFailureMessage(labelNameToClose,exception);
 
+            notificationService.sendMessage(issueFetchFailureMessage);
             return;
         }
 
         if(closedIssues.isEmpty()) {
             log.info("Close 할 이슈가 없습니다. ");
 
-            notificationService.sendMessage(EMOJI_EXCLAMATION_MARK+"  Close 할 이슈 목록이 없습니다. "+ EMOJI_EXCLAMATION_MARK);
+            String emptyIssuesToCloseMessage = notificationService.createEmptyIssuesToCloseMessage(labelNameToClose);
+
+            notificationService.sendMessage(emptyIssuesToCloseMessage);
 
             return;
         }
@@ -206,9 +195,7 @@ public class ReviewStudySchedulerConfiguration {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result ->
-                    EMOJI_CONGRATS+" ("+labelNameToClose+") "+result.issueTitle()+" 이슈([#"+result.issueNumber()+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+result.issueNumber()+"))가 Closed 되었습니다. "+ EMOJI_CONGRATS
-                )
+                .map(result -> notificationService.createIssueCloseSuccessMessage(labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
 
@@ -216,11 +203,7 @@ public class ReviewStudySchedulerConfiguration {
         String failureResult = githubApiFailureResults.isEmpty()
             ? ""
             : githubApiFailureResults.stream()
-                .map(result ->
-                    EMOJI_WARING+" ("+labelNameToClose+") "+result.issueTitle()+" 이슈([#"+result.issueNumber()+"](https://github.com/"+ReviewStudyInfo.REPOSITORY_NAME+"/issues/"+result.issueNumber()+")) Closed에 실패했습니다."+ EMOJI_WARING
-                        +"\n"
-                        + "에러 메시지 : "+result.errorMessage()
-                )
+                .map(result -> notificationService.createIssueCloseFailureMessage(labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
         // (3) 최종 결과

@@ -22,6 +22,8 @@ public class DiscordNotificationService implements NotificationService {
 
     public static final String EMOJI_EXCLAMATION_MARK = ":exclamation:";
 
+    public static final String EMOJI_CLOCK = ":alarm_clock:";
+
     @Value("${discord.webhook.url}")
     private String webhookUrl;
 
@@ -105,5 +107,10 @@ public class DiscordNotificationService implements NotificationService {
         return EMOJI_WARING+" ("+weekNumberLabelName+") "+githubApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+")) Closed에 실패했습니다. "+ EMOJI_WARING
             +"\n"
             + "에러 메시지 : "+githubApiFailureResult.errorMessage();
+    }
+
+    @Override
+    public String createExecutionTimeMessage(String methodName, long totalExecutionTime) {
+        return EMOJI_CLOCK + " (" +methodName+") 의 총 소요시간 : "+totalExecutionTime+" ms"+" "+EMOJI_CLOCK;
     }
 }

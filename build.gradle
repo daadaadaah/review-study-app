@@ -27,6 +27,9 @@ dependencies {
 	// GitHub API for Java
 	implementation 'org.kohsuke:github-api:1.301'
 
+	// AOP
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

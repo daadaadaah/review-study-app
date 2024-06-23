@@ -25,4 +25,7 @@ public interface NotificationService {
     String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult);
 
     String createIssueCloseFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult);
+
+    /** 로그 **/
+    String createExecutionTimeMessage(String methodName, long totalExecutionTime);
 }

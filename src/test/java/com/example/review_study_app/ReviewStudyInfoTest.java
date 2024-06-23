@@ -1,9 +1,13 @@
 package com.example.review_study_app;
 
+import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
+import static com.example.review_study_app.common.utils.MyDateUtils.getNow;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,6 +54,27 @@ class ReviewStudyInfoTest {
             String expectedDescription = "2024.01.01~2024.01.07";
 
             assertEquals(expectedDescription, actualDescription);
+        }
+    }
+
+    @Nested
+    @DisplayName("getNow()")
+    class Describe_GetNow {
+        @Test
+        @DisplayName("returns formatted date")
+        void It_returns_formatted_date() throws IOException {
+            // given
+            ZonedDateTime now = ZonedDateTime.now(ZONE_ID_SEOUL);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            String expected = now.format(formatter);
+
+            // when
+            String actual = getNow(now);
+
+            // then
+            assertEquals(expected, actual);
         }
     }
 }

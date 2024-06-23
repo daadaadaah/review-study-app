@@ -10,7 +10,9 @@ import java.time.temporal.WeekFields;
 
 public class MyDateUtils {
 
-    private static final ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")); // 서버가 서울이 아니라 다른 나라에 있을 수도 있어서
+    public static final ZoneId ZONE_ID_SEOUL = ZoneId.of("Asia/Seoul");
+
+    private static final ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL); // 서버가 서울이 아니라 다른 나라에 있을 수도 있어서
 
     // 현재 년도를 구하는 함수
     public static int getCurrentYear() {
@@ -43,5 +45,12 @@ public class MyDateUtils {
             .plusWeeks(weekNumber - 1);
 
         return date.format(DateTimeFormatter.ofPattern(dateFormat));
+    }
+
+    // 현재 날짜와 시간을 구하는 함수
+    public static String getNow(ZonedDateTime zonedDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return zonedDateTime.format(formatter);
     }
 }

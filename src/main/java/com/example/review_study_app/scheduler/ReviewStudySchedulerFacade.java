@@ -40,20 +40,13 @@ public class ReviewStudySchedulerFacade {
      * 나온다. 에러 메시지 : {"message":"Validation
      * Failed","errors":[{"resource":"Label","code":"already_exists","field":"name"}],"documentation_url":"https://docs.github.com/rest/issues/labels#create-a-label"}
      */
-    public void createNewWeekNumberLabel() {
-        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
-
-        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
-
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
-
-        String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(
-            currentYear, currentWeekNumber);
+    public void createNewWeekNumberLabel(int year, int weekNumber) {
+        String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         log.info("새로운 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueService.createNewLabel(currentYear, currentWeekNumber);
+            githubIssueService.createNewLabel(year, weekNumber);
 
             log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
@@ -76,33 +69,26 @@ public class ReviewStudySchedulerFacade {
     /**
      * 이번주 주간회고 여러개 Issue를 생성하는 함수
      */
-    public void createNewWeeklyReviewIssues() {
-        // 1. 날짜 계산
-        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
-
-        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
-
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
-
-        String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
+    public void createNewWeeklyReviewIssues(int year, int weekNumber) {
+        String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         if(!githubIssueService.isWeekNumberLabelPresent(weekNumberLabelName)) {
-            createNewWeekNumberLabel();
+            createNewWeekNumberLabel(year, weekNumber);
         }
 
-        // 2. 이슈 생성
+        // 1. 이슈 생성
         List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
 
         List<GithubApiFailureResult> githubApiFailureResults = new ArrayList<>();
 
         ReviewStudyInfo.MEMBERS.stream().forEach(member -> {
-            String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(currentYear, currentWeekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
+            String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
 
             try {
 
                 GHIssue newGhIssue = githubIssueService.createNewIssue(
-                    currentYear,
-                    currentWeekNumber,
+                    year,
+                    weekNumber,
                     member.fullName(),
                     member.githubName()
                 );
@@ -122,7 +108,7 @@ public class ReviewStudySchedulerFacade {
             }
         });
 
-        // 3. Discord 로 Github 통신 결과 보내기
+        // 2. Discord 로 Github 통신 결과 보내기
         // (1) 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
@@ -148,17 +134,10 @@ public class ReviewStudySchedulerFacade {
     /**
      * 이번주의 모든 주간회고 Issue를 Close 하는 함수
      */
-    public void closeWeeklyReviewIssues() {
-        // 1. 날짜 계산
-        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+    public void closeWeeklyReviewIssues(int year, int weekNumber) {
+        String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
-
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
-
-        String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
-
-        // 2. 이슈 Close
+        // 1. 이슈 Close
         List<GHIssue> closedIssues = new ArrayList<>();
 
         List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
@@ -217,7 +196,7 @@ public class ReviewStudySchedulerFacade {
 
         log.info("("+labelNameToClose+") 주간회고 이슈 Close 완료");
 
-        // 3. Discord 로 Github 통신 결과 보내기
+        // 2. Discord 로 Github 통신 결과 보내기
         // (1) 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""

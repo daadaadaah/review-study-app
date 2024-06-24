@@ -1,5 +1,9 @@
 package com.example.review_study_app.scheduler;
 
+import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
+
+import com.example.review_study_app.common.utils.MyDateUtils;
+import java.time.ZonedDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +27,13 @@ public class ReviewStudySchedulerConfiguration {
      */
     @Scheduled(cron = "0 10 0 ? * MON", zone = "Asia/Seoul")
     public void runCreateNewLabel() {
-        reviewStudySchedulerFacade.createNewWeekNumberLabel();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
+
+        reviewStudySchedulerFacade.createNewWeekNumberLabel(currentYear, currentWeekNumber);
     }
 
     /**
@@ -31,7 +41,13 @@ public class ReviewStudySchedulerConfiguration {
      */
     @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
     public void runCreateNewIssue() {
-        reviewStudySchedulerFacade.createNewWeeklyReviewIssues();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
+
+        reviewStudySchedulerFacade.createNewWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 
     /**
@@ -39,6 +55,12 @@ public class ReviewStudySchedulerConfiguration {
      */
     @Scheduled(cron = "0 30 23 ? * SUN", zone = "Asia/Seoul")
     public void runCloseIssues() {
-        reviewStudySchedulerFacade.closeWeeklyReviewIssues();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
+
+        reviewStudySchedulerFacade.closeWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 }

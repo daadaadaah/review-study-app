@@ -12,11 +12,9 @@ public class MyDateUtils {
 
     public static final ZoneId ZONE_ID_SEOUL = ZoneId.of("Asia/Seoul");
 
-    private static final ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL); // 서버가 서울이 아니라 다른 나라에 있을 수도 있어서
-
     // 현재 년도를 구하는 함수
-    public static int getCurrentYear() {
-        int currentYear = seoulDateTime.getYear();
+    public static int getCurrentYear(ZonedDateTime zonedDateTime) {
+        int currentYear = zonedDateTime.getYear();
 
         return currentYear;
     }
@@ -28,8 +26,8 @@ public class MyDateUtils {
      * - 아래 코드로 한국 기준으로 하면, 다르게 나옴.
      * WeekFields weekFields = WeekFields.of(Locale.KOREA)
      */
-    public static int getCurrentWeekNumber() {
-        LocalDate todayInSeoul = seoulDateTime.toLocalDate();
+    public static int getCurrentWeekNumber(ZonedDateTime zonedDateTime) {
+        LocalDate todayInSeoul = zonedDateTime.toLocalDate();
 
         WeekFields weekFields = WeekFields.ISO; // TODO : ReviewStudyInfo로 뺄까?
 

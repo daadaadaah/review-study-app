@@ -1,16 +1,62 @@
 package com.example.review_study_app;
 
+import static com.example.review_study_app.common.utils.MyDateUtils.getCurrentWeekNumber;
+import static com.example.review_study_app.common.utils.MyDateUtils.getCurrentYear;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.review_study_app.common.utils.MyDateUtils;
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.WeekFields;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("ReviewStudyDateUtilsTest")
 class MyDateUtilsTest {
+
+    @Nested
+    @DisplayName("getCurrentYear()")
+    class Describe_GetCurrentYear {
+
+        @Test
+        @DisplayName("returns currentYear")
+        void It_returns_currentYear() throws IOException {
+            // given
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(2024, 6, 24, 0, 10, 0, 0, ZoneId.of("Asia/Seoul"));
+
+            // when
+            int currentYear = getCurrentYear(zonedDateTime);
+
+            // then
+            assertEquals(2024, currentYear);
+        }
+    }
+
+    @Nested
+    @DisplayName("getCurrentWeekNumber()")
+    class Describe_getCurrentWeekNumber {
+
+        @Test
+        @DisplayName("returns currentWeekNumber")
+        void It_returns_currentWeekNumber() throws IOException {
+            // given
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(2024, 6, 24, 0, 10, 0, 0, ZoneId.of("Asia/Seoul"));
+
+            LocalDate todayInSeoul = zonedDateTime.toLocalDate();
+            WeekFields weekFields = WeekFields.ISO;
+            int expectedWeekNumber = todayInSeoul.get(weekFields.weekOfYear());
+
+            // when
+            int weekNumber = getCurrentWeekNumber(zonedDateTime);
+
+            // then
+            assertEquals(expectedWeekNumber, weekNumber);
+        }
+    }
 
     @Nested
     @DisplayName("getDateOfDayOfCurrentWeekNumberInYear()")

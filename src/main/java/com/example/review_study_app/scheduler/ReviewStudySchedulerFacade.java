@@ -1,12 +1,15 @@
 package com.example.review_study_app.scheduler;
 
 
+import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
+
 import com.example.review_study_app.common.utils.MyDateUtils;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.github.GithubIssueService;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,9 +41,11 @@ public class ReviewStudySchedulerFacade {
      * Failed","errors":[{"resource":"Label","code":"already_exists","field":"name"}],"documentation_url":"https://docs.github.com/rest/issues/labels#create-a-label"}
      */
     public void createNewWeekNumberLabel() {
-        int currentYear = MyDateUtils.getCurrentYear();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(
             currentYear, currentWeekNumber);
@@ -73,9 +78,11 @@ public class ReviewStudySchedulerFacade {
      */
     public void createNewWeeklyReviewIssues() {
         // 1. 날짜 계산
-        int currentYear = MyDateUtils.getCurrentYear();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
 
@@ -143,9 +150,11 @@ public class ReviewStudySchedulerFacade {
      */
     public void closeWeeklyReviewIssues() {
         // 1. 날짜 계산
-        int currentYear = MyDateUtils.getCurrentYear();
+        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
-        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber();
+        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+
+        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
 

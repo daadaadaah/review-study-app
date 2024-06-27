@@ -3,6 +3,7 @@ package com.example.review_study_app.notification;
 import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createIssueUrl;
 import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createLabelUrl;
 
+import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
@@ -36,7 +37,10 @@ public class DiscordNotificationService implements NotificationService {
     @Override
     public boolean sendMessage(String message) {
         try {
-            MyHttpResponse response = httpClient.sendRequest(message);
+
+            MyHttpRequest request = new MyHttpRequest(webhookUrl, message);
+
+            MyHttpResponse response = httpClient.post(request);
 
             if (response.statusCode() != HttpStatus.NO_CONTENT.value()) {
                 log.error("Discord 와의 통신 결과, 다음과 같은 에러가 발생했습니다. HTTPStateCode = {}", response.statusCode());

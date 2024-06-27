@@ -15,9 +15,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class RestTemplateHttpClient implements MyHttpClient  {
 
-    @Value("${discord.webhook.url}")
-    private String webhookUrl;
-
     private final RestTemplate restTemplate;
 
     @Autowired
@@ -26,14 +23,14 @@ public class RestTemplateHttpClient implements MyHttpClient  {
     }
 
     @Override
-    public MyHttpResponse sendRequest(String message) throws Exception {
+    public MyHttpResponse post(MyHttpRequest request) throws Exception {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json; utf-8");
 
-        HttpEntity<NotificationMessage> messageEntity = new HttpEntity<>(new NotificationMessage(message), httpHeaders);
+        HttpEntity<NotificationMessage> messageEntity = new HttpEntity<>(new NotificationMessage(request.message()), httpHeaders);
 
         ResponseEntity<String> response = restTemplate.exchange(
-            webhookUrl,
+            request.url(),
             HttpMethod.POST,
             messageEntity,
             String.class

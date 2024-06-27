@@ -24,10 +24,8 @@ public class RestTemplateHttpClient implements MyHttpClient  {
 
     @Override
     public MyHttpResponse post(MyHttpRequest request) throws Exception {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type", "application/json; utf-8");
 
-        HttpEntity<NotificationMessage> messageEntity = new HttpEntity<>(new NotificationMessage(request.message()), httpHeaders);
+        HttpEntity<Object> messageEntity = new HttpEntity<>(request.body(), request.headers());
 
         ResponseEntity<String> response = restTemplate.exchange(
             request.url(),

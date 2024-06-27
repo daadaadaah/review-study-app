@@ -1,9 +1,11 @@
 package com.example.review_study_app.common.httpclient;
 
-// 일단 당장의 필요한 필드만!
-public record MyHttpRequest(
+import org.springframework.http.HttpHeaders;
+
+public record MyHttpRequest<T>(
     String url,
-    String message
+    HttpHeaders headers,
+    T body
 ) {
 
 }

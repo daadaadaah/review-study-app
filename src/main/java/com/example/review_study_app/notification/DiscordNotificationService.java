@@ -10,6 +10,7 @@ import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.common.httpclient.MyHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,10 @@ public class DiscordNotificationService implements NotificationService {
     @Override
     public boolean sendMessage(String message) {
         try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Type", "application/json; utf-8");
 
-            MyHttpRequest request = new MyHttpRequest(webhookUrl, message);
+            MyHttpRequest request = new MyHttpRequest(webhookUrl, httpHeaders, new NotificationMessage(message));
 
             MyHttpResponse response = httpClient.post(request);
 

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+// 디스코드 통신 때 아직 사용하고 있어서 아직 삭제하면 안됨
+
 @Slf4j
 @Service
 public class RestTemplateHttpClient implements MyHttpClient  {

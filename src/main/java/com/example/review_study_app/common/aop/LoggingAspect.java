@@ -13,7 +13,7 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Aspect
+//@Aspect // 비동기 통신으로 의미가 없어짐
 @Component
 @Slf4j
 public class LoggingAspect {

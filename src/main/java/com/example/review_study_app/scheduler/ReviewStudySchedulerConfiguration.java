@@ -25,7 +25,8 @@ public class ReviewStudySchedulerConfiguration {
     /**
      * 매주 월요일 AM 00:10 에 이번주차 Label 을 생성하는 스케줄 함수
      */
-    @Scheduled(cron = "0 10 0 ? * MON", zone = "Asia/Seoul")
+//    @Scheduled(cron = "0 10 0 ? * MON", zone = "Asia/Seoul")
+    @Scheduled(fixedDelay = 10000)
     public void runCreateNewLabel() {
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
@@ -36,10 +37,7 @@ public class ReviewStudySchedulerConfiguration {
         reviewStudySchedulerFacade.createNewWeekNumberLabel(currentYear, currentWeekNumber);
     }
 
-    /**
-     * 매주 월요일 AM 00:30 에 모든 멤버의 이번주차 주간회고 Issues 를 생성하는 스케줄 함수
-     */
-    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
+    @Deprecated
     public void runCreateNewIssue() {
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
@@ -63,4 +61,33 @@ public class ReviewStudySchedulerConfiguration {
 
         reviewStudySchedulerFacade.closeWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
+
+    /**
+     * 모든 멤버의 이번주차 주간회고 Issues 를 생성하는 스케줄 함수로, 매주 월요일 AM 00:30 에 동작한다.
+     */
+//    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
+//    @Scheduled(fixedDelay = 100000)
+//    public void runCreateIssueAsync() {
+//        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+//
+//        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+//
+//        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
+//
+//        reviewStudySchedulerFacade.createNewWeeklyReviewIssuesAsync(currentYear, currentWeekNumber);
+//    }
+
+//    /**
+//     * 이번주 주간회고 이슈를 Close 시키는 스케줄 함수로,매주 일요일 PM 11:50 에 동작한다.
+//     */
+////    @Scheduled(cron = "0 50 23 ? * SUN", zone = "Asia/Seoul")
+//    public void runCloseIssuesAsync() {
+//        ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
+//
+//        int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);
+//
+//        int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
+//
+//        reviewStudySchedulerFacade.closeWeeklyReviewIssuesAsync(currentYear, currentWeekNumber);
+//    }
 }

@@ -51,9 +51,9 @@ public class ReviewStudySchedulerConfiguration {
     }
 
     /**
-     * 매주 일요일 PM 11:30 에 이번주 주간회고 이슈를 Close 시키는 스케줄 함수
+     * 매주 일요일 PM 11:50 에 이번주 주간회고 이슈를 Close 시키는 스케줄 함수
      */
-    @Scheduled(cron = "0 30 23 ? * SUN", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 50 23 ? * SUN", zone = "Asia/Seoul")
     public void runCloseIssues() {
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 

@@ -19,7 +19,9 @@ public class ReviewStudyInfo {
     );
 
     /** 레포 **/
-    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
+//    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
+
+    public static final String REPOSITORY_NAME = "daadaadaah/reviewStudy-scheduler";
 
     public static String createRepositoryUrl(String path) {
         return "https://github.com/" + ReviewStudyInfo.REPOSITORY_NAME + "/" + path;

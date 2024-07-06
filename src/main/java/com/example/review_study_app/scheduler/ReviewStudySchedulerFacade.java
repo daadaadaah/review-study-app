@@ -7,6 +7,7 @@ import com.example.review_study_app.common.utils.MyDateUtils;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.github.GithubIssueService;
+import com.example.review_study_app.github.GithubIssueWebclientService;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.time.ZonedDateTime;
@@ -24,14 +25,18 @@ public class ReviewStudySchedulerFacade {
 
     private final GithubIssueService githubIssueService;
 
+    private final GithubIssueWebclientService githubIssueWebclientService;
+
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
         GithubIssueService githubIssueService,
+        GithubIssueWebclientService githubIssueWebclientService,
         NotificationService notificationService
     ) {
         this.githubIssueService = githubIssueService;
+        this.githubIssueWebclientService = githubIssueWebclientService;
         this.notificationService = notificationService;
     }
 
@@ -46,7 +51,7 @@ public class ReviewStudySchedulerFacade {
         log.info("새로운 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueService.createNewLabel(year, weekNumber);
+            githubIssueWebclientService.createNewLabel(year, weekNumber);
 
             log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 

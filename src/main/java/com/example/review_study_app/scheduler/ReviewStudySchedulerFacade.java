@@ -1,15 +1,13 @@
 package com.example.review_study_app.scheduler;
 
 
-import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 
-import com.example.review_study_app.common.utils.MyDateUtils;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubIssueRestClientService;
 import com.example.review_study_app.github.GithubIssueService;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,14 +22,18 @@ public class ReviewStudySchedulerFacade {
 
     private final GithubIssueService githubIssueService;
 
+    private final GithubIssueRestClientService githubIssueRestClientService;
+
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
         GithubIssueService githubIssueService,
+        GithubIssueRestClientService githubIssueRestClientService,
         NotificationService notificationService
     ) {
         this.githubIssueService = githubIssueService;
+        this.githubIssueRestClientService = githubIssueRestClientService;
         this.notificationService = notificationService;
     }
 
@@ -46,7 +48,7 @@ public class ReviewStudySchedulerFacade {
         log.info("새로운 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueService.createNewLabel(year, weekNumber);
+            githubIssueRestClientService.createNewLabel(year, weekNumber);
 
             log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 

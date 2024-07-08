@@ -6,6 +6,7 @@ import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.github.GithubIssueRestClientService;
 import com.example.review_study_app.github.GithubIssueService;
+import com.example.review_study_app.github.NewGithubIssue;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.util.ArrayList;
@@ -74,7 +75,19 @@ public class ReviewStudySchedulerFacade {
     public void createNewWeeklyReviewIssues(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        if(!githubIssueService.isWeekNumberLabelPresent(weekNumberLabelName)) {
+        boolean isWeekNumberLabelPresent; // TODO : 초기값을 어떻게 설정하는게 좋을까?
+
+        try {
+            isWeekNumberLabelPresent = githubIssueRestClientService.isWeekNumberLabelPresent(weekNumberLabelName);
+
+        } catch (Exception exception) {
+            log.error("라벨 존재 확인 여부를 실패했습니다. exception = {}, labelName = {}", exception.getMessage(), weekNumberLabelName);
+
+            notificationService.sendMessage("라벨 존재 여부 확인 실패했습니다."); // TODO : 디스코드로 보낼 메시지 만들기
+            return;
+        }
+
+        if(!isWeekNumberLabelPresent) {
             createNewWeekNumberLabel(year, weekNumber);
         }
 
@@ -87,17 +100,17 @@ public class ReviewStudySchedulerFacade {
             String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
 
             try {
-
-                GHIssue newGhIssue = githubIssueService.createNewIssue(
+                // TODO : 이슈 생성 전 중복 체크 필요할까?
+                NewGithubIssue newGithubIssue = githubIssueRestClientService.createNewIssue(
                     year,
                     weekNumber,
                     member.fullName(),
                     member.githubName()
                 );
 
-                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, newGhIssue.getNumber());
+                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, newGithubIssue.number());
 
-                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGhIssue.getNumber(), newGhIssue.getTitle());
+                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGithubIssue.number(), newGithubIssue.title());
 
                 githubApiSuccessResults.add(githubApiSuccessResult);
 

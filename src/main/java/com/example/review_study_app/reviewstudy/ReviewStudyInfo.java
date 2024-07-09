@@ -12,7 +12,6 @@ public class ReviewStudyInfo {
         new Member("김찬웅", "Dove-kim"),
         new Member("김준우", "Junuu"),
         new Member("김도엽", "BrianDYKim"),
-        new Member("노경태", "ilgolf"),
         new Member("우경준", "Jay-WKJun"),
         new Member("조현준", "Tianea2160"),
         new Member("곽다희", "daadaadaah")

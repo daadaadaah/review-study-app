@@ -4,18 +4,28 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.example.review_study_app.common.httpclient.RetryableException;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+/**
+ *
+ * # 참고
+ * https://www.baeldung.com/spring-boot-restclient
+ * https://docs.github.com/ko/rest/issues/issues?apiVersion=2022-11-28
+ */
 @Slf4j
 @Service
 public class GithubIssueRestClientService {
@@ -159,5 +169,90 @@ public class GithubIssueRestClientService {
             .body(NewGithubIssue.class);
 
         return newGithubIssue;
+    }
+
+    // Close 할 이슈 목록 가져오는 함수
+    @Retryable(
+        retryFor = RetryableException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 2000)
+    )
+    public List<NewGithubIssue> getIssuesToClose(String labelNameToClose) throws Exception {
+        return restClient.get()
+            .uri(createGithubApiUrl("issues?state=open&labels="+labelNameToClose)) // TODO : 페이징 처리해야 됨.
+            .header(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", GITHUB_OAUTH_ACCESS_TOKEN))
+            .retrieve()
+            .onStatus(HttpStatusCode::is2xxSuccessful, (request, response) -> { // TODO : 다른 상태 코드도 handle 해줘야 하나? 예 : 100번대 또는 300번대
+                logHttpRequestAndResponse(request, response);
+            })
+            .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
+                HttpStatusCode httpStatusCode = response.getStatusCode();
+
+                logHttpRequestAndResponse(request, response);
+
+                /**
+                 * 404 에러는 "issues1?state=open&labels=24년_27주차" 이렇게 잘못된 API 주소일 때 발생한다.
+                 * 만약, 현재 open되어 있고, 특정 라벨이 달린 이슈에 해당하는 이슈가 없을 때에는 404가 아닌 정상 응답 200 으로 처리됨
+                 */
+                if(httpStatusCode.value() == 404) {
+                    throw new NotFoundException(httpStatusCode.toString());
+                }
+
+                if(httpStatusCode.value() == 429) {
+                    throw new RetryableException(httpStatusCode.toString());
+                }
+            })
+            .onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {
+                HttpStatusCode httpStatusCode = response.getStatusCode();
+
+                logHttpRequestAndResponse(request, response);
+
+                throw new RetryableException(httpStatusCode.toString());
+            })
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
+    // 이슈 close 하는 함수
+    @Retryable(
+        retryFor = RetryableException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 2000)
+    )
+    public void closeIssue(int issueNumber) {
+        restClient.patch()
+            .uri(createGithubApiUrl("issues/"+issueNumber)) // 숫자 다르게 해서
+            .header(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", GITHUB_OAUTH_ACCESS_TOKEN))
+            .body(new GithubIssueToClosed("close", "completed"))
+            .retrieve()
+            .onStatus(HttpStatusCode::is2xxSuccessful, (request, response) -> {
+                logHttpRequestAndResponse(request, response);
+            })
+            .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
+                HttpStatusCode httpStatusCode = response.getStatusCode();
+
+                logHttpRequestAndResponse(request, response);
+
+                if(httpStatusCode.value() == 404) { // 예 : 존재하지 않는 이슈 번호로 요청했을 때, 404 에러 발생함.
+                    throw new NotFoundException(httpStatusCode.toString());
+                }
+
+                if(httpStatusCode.value() == 429) {
+                    throw new RetryableException(httpStatusCode.toString());
+                }
+            })
+            .onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {
+                HttpStatusCode httpStatusCode = response.getStatusCode();
+
+                logHttpRequestAndResponse(request, response);
+
+                throw new RetryableException(httpStatusCode.toString());
+            })
+            .toBodilessEntity();
+    }
+
+    private void logHttpRequestAndResponse(HttpRequest request, ClientHttpResponse response) throws IOException {
+        HttpStatusCode httpStatusCode = response.getStatusCode();
+
+        log.info("requestUri={}, requestHeaders={}, statusCode={}, responseHeaders={}", request.getURI(), request.getHeaders(), httpStatusCode, response.getHeaders());
     }
 }

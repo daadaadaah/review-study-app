@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.kohsuke.github.GHIssue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -152,15 +151,15 @@ public class ReviewStudySchedulerFacade {
     public void closeWeeklyReviewIssues(int year, int weekNumber) {
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        // 1. 이슈 Close
-        List<GHIssue> closedIssues = new ArrayList<>();
+        // 1. Close할 Issue 목록 가져오기
+        List<NewGithubIssue> closedIssues = new ArrayList<>();
 
         List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
 
         List<GithubApiFailureResult> githubApiFailureResults = new ArrayList<>();
 
         try {
-            closedIssues = githubIssueService.getIssuesToClose(labelNameToClose);
+            closedIssues = githubIssueRestClientService.getIssuesToClose(labelNameToClose);
 
             log.info("Close 할 이슈 목록 가져오기 성공했습니다. labelNameToClose = {} ", labelNameToClose);
 
@@ -183,16 +182,18 @@ public class ReviewStudySchedulerFacade {
             return;
         }
 
-        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작");
+        // 2. Issue들 Close 하기
+        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작 : 총 {} 개", closedIssues.size() ); // TODO : 이슈가 너무 많으면, 디스코드 보낼 때 용량 초과로 에러난다. 따라서, 분할 처리 필요!
 
-        closedIssues.stream().forEach(ghIssue -> {
-            int issueNumber = ghIssue.getNumber();
+        closedIssues.stream().forEach(githubIssue -> {
 
-            String issueTitle = ghIssue.getTitle();
+            int issueNumber = githubIssue.number();
+
+            String issueTitle = githubIssue.title();
 
             try {
 
-                githubIssueService.closeIssue(issueNumber);
+                githubIssueRestClientService.closeIssue(issueNumber);
 
                 log.info("이슈가 Close 되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, issueNumber);
 
@@ -211,7 +212,7 @@ public class ReviewStudySchedulerFacade {
 
         log.info("("+labelNameToClose+") 주간회고 이슈 Close 완료");
 
-        // 2. Discord 로 Github 통신 결과 보내기
+        // 3. Discord 로 Github 통신 결과 보내기
         // (1) 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""

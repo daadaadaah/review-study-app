@@ -28,7 +28,7 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Service
-public class GithubIssueRestClientService {
+public class GithubIssueRestClientService implements GithubIssueService {
 
     @Value("${github.oauth.accessToken}")
     private String GITHUB_OAUTH_ACCESS_TOKEN;
@@ -51,7 +51,7 @@ public class GithubIssueRestClientService {
         backoff = @Backoff(delay = 2000),
         retryFor = RetryableException.class
     )
-    public String createNewLabel(int year, int weekNumber) throws Exception {
+    public String createNewLabel(int year, int weekNumber) {
 
         String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
@@ -177,7 +177,7 @@ public class GithubIssueRestClientService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000)
     )
-    public List<NewGithubIssue> getIssuesToClose(String labelNameToClose) throws Exception {
+    public List<NewGithubIssue> getIssuesToClose(String labelNameToClose) {
         return restClient.get()
             .uri(createGithubApiUrl("issues?state=open&labels="+labelNameToClose)) // TODO : 페이징 처리해야 됨.
             .header(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", GITHUB_OAUTH_ACCESS_TOKEN))

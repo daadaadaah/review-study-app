@@ -21,25 +21,26 @@ import org.springframework.stereotype.Component;
 public class MyRetryListener implements RetryListener {
 
     @Override
-    public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
-        log.info("before retry. : {} attempts, now = {}", context.getRetryCount(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
-        // 새로운 재시도 시도 전에 호출됨
-        return true;
-    }
-
-    @Override
     public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+
+        String className = (String) context.getAttribute("className");
+        String methodName = (String) context.getAttribute("methodName");
+
         // 재시도 시도 후 호출됨 (성공 또는 실패)
         if (throwable == null) {
-            log.info("Retry successful after {} attempts, now = {}", context.getRetryCount(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
+            log.info("className={}, methodName={} : Retry successful after {} attempts, now = {}", className, methodName, context.getRetryCount(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
         } else {
-            log.error("Retry failed after {} attempts, now = {}", context.getRetryCount(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
+            log.error("className={}, methodName={} : Retry failed after {} attempts, now = {}", className, methodName, context.getRetryCount(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
         }
     }
 
     @Override
     public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+
+        String className = (String) context.getAttribute("className");
+        String methodName = (String) context.getAttribute("methodName");
+
         // 재시도 중 오류 발생 시 호출됨
-        log.warn("Retry attempt {} failed due to {}. Retrying..., now = {}", context.getRetryCount(), throwable.getMessage(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
+        log.warn("className={}, methodName={} : Retry attempt {} failed due to {}. Retrying..., now = {}", className, methodName, context.getRetryCount(), throwable.getMessage(), MyDateUtils.getNow(ZonedDateTime.now(ZONE_ID_SEOUL)));
     }
 }

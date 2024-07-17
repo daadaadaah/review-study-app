@@ -1,20 +1,18 @@
 package com.example.review_study_app.scheduler;
 
 
-import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 
-import com.example.review_study_app.common.utils.MyDateUtils;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
 import com.example.review_study_app.github.GithubIssueService;
+import com.example.review_study_app.github.IssueToClose;
+import com.example.review_study_app.github.NewIssue;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.kohsuke.github.GHIssue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -86,16 +84,16 @@ public class ReviewStudySchedulerFacade {
 
             try {
 
-                GHIssue newGhIssue = githubIssueService.createNewIssue(
+                NewIssue newGhIssue = githubIssueService.createNewIssue(
                     year,
                     weekNumber,
                     member.fullName(),
                     member.githubName()
                 );
 
-                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, newGhIssue.getNumber());
+                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", newGhIssue.title(), newGhIssue.number());
 
-                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGhIssue.getNumber(), newGhIssue.getTitle());
+                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGhIssue.number(), newGhIssue.title());
 
                 githubApiSuccessResults.add(githubApiSuccessResult);
 
@@ -138,7 +136,7 @@ public class ReviewStudySchedulerFacade {
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         // 1. 이슈 Close
-        List<GHIssue> closedIssues = new ArrayList<>();
+        List<IssueToClose> closedIssues = new ArrayList<>();
 
         List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
 
@@ -171,9 +169,9 @@ public class ReviewStudySchedulerFacade {
         log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작");
 
         closedIssues.stream().forEach(ghIssue -> {
-            int issueNumber = ghIssue.getNumber();
+            int issueNumber = ghIssue.number();
 
-            String issueTitle = ghIssue.getTitle();
+            String issueTitle = ghIssue.title();
 
             try {
 

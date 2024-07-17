@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -141,6 +142,7 @@ public class GithubIssueRestClientService implements GithubIssueService {
     }
 
     // 새로운 주간회고 Issue 생성하는 함수
+    @Async // TODO : 에러 메시지 : Invalid return type for async method (only Future and void supported): class com.example.review_study_app.github.NewGithubIssue
     public NewGithubIssue createNewIssue(
         int currentYear,
         int currentWeekNumber,
@@ -179,7 +181,7 @@ public class GithubIssueRestClientService implements GithubIssueService {
     )
     public List<NewGithubIssue> getIssuesToClose(String labelNameToClose) {
         return restClient.get()
-            .uri(createGithubApiUrl("issues?state=open&labels="+labelNameToClose)) // TODO : 페이징 처리해야 됨.
+            .uri(createGithubApiUrl("issues?per_page=10&state=open&labels="+labelNameToClose)) // TODO : 페이징 처리해야 됨.
             .header(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", GITHUB_OAUTH_ACCESS_TOKEN))
             .retrieve()
             .onStatus(HttpStatusCode::is2xxSuccessful, (request, response) -> { // TODO : 다른 상태 코드도 handle 해줘야 하나? 예 : 100번대 또는 300번대
@@ -218,11 +220,12 @@ public class GithubIssueRestClientService implements GithubIssueService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000)
     )
+    @Async
     public void closeIssue(int issueNumber) {
         restClient.patch()
             .uri(createGithubApiUrl("issues/"+issueNumber)) // 숫자 다르게 해서
             .header(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", GITHUB_OAUTH_ACCESS_TOKEN))
-            .body(new GithubIssueToClosed("close", "completed"))
+            .body(new GithubIssueToClosed("open", "completed"))
             .retrieve()
             .onStatus(HttpStatusCode::is2xxSuccessful, (request, response) -> {
                 logHttpRequestAndResponse(request, response);

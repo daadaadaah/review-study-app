@@ -24,11 +24,11 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	// GitHub API for Java
-	implementation 'org.kohsuke:github-api:1.301'
-
 	// AOP
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	// retry
+	implementation 'org.springframework.retry:spring-retry'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

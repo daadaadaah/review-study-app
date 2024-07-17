@@ -1,20 +1,18 @@
 package com.example.review_study_app.scheduler;
 
 
-import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 
-import com.example.review_study_app.common.utils.MyDateUtils;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubIssueRestClientService;
 import com.example.review_study_app.github.GithubIssueService;
+import com.example.review_study_app.github.NewGithubIssue;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.kohsuke.github.GHIssue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +22,18 @@ public class ReviewStudySchedulerFacade {
 
     private final GithubIssueService githubIssueService;
 
+    private final GithubIssueRestClientService githubIssueRestClientService;
+
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
         GithubIssueService githubIssueService,
+        GithubIssueRestClientService githubIssueRestClientService,
         NotificationService notificationService
     ) {
         this.githubIssueService = githubIssueService;
+        this.githubIssueRestClientService = githubIssueRestClientService;
         this.notificationService = notificationService;
     }
 
@@ -46,7 +48,7 @@ public class ReviewStudySchedulerFacade {
         log.info("새로운 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueService.createNewLabel(year, weekNumber);
+            githubIssueRestClientService.createNewLabel(year, weekNumber);
 
             log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
@@ -72,7 +74,19 @@ public class ReviewStudySchedulerFacade {
     public void createNewWeeklyReviewIssues(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        if(!githubIssueService.isWeekNumberLabelPresent(weekNumberLabelName)) {
+        boolean isWeekNumberLabelPresent; // TODO : 초기값을 어떻게 설정하는게 좋을까?
+
+        try {
+            isWeekNumberLabelPresent = githubIssueRestClientService.isWeekNumberLabelPresent(weekNumberLabelName);
+
+        } catch (Exception exception) {
+            log.error("라벨 존재 확인 여부를 실패했습니다. exception = {}, labelName = {}", exception.getMessage(), weekNumberLabelName);
+
+            notificationService.sendMessage("라벨 존재 여부 확인 실패했습니다."); // TODO : 디스코드로 보낼 메시지 만들기
+            return;
+        }
+
+        if(!isWeekNumberLabelPresent) {
             createNewWeekNumberLabel(year, weekNumber);
         }
 
@@ -85,17 +99,17 @@ public class ReviewStudySchedulerFacade {
             String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
 
             try {
-
-                GHIssue newGhIssue = githubIssueService.createNewIssue(
+                // TODO : 이슈 생성 전 중복 체크 필요할까?
+                NewGithubIssue newGithubIssue = githubIssueRestClientService.createNewIssue(
                     year,
                     weekNumber,
                     member.fullName(),
                     member.githubName()
                 );
 
-                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, newGhIssue.getNumber());
+                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, newGithubIssue.number());
 
-                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGhIssue.getNumber(), newGhIssue.getTitle());
+                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGithubIssue.number(), newGithubIssue.title());
 
                 githubApiSuccessResults.add(githubApiSuccessResult);
 
@@ -137,15 +151,15 @@ public class ReviewStudySchedulerFacade {
     public void closeWeeklyReviewIssues(int year, int weekNumber) {
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        // 1. 이슈 Close
-        List<GHIssue> closedIssues = new ArrayList<>();
+        // 1. Close할 Issue 목록 가져오기
+        List<NewGithubIssue> closedIssues = new ArrayList<>();
 
         List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
 
         List<GithubApiFailureResult> githubApiFailureResults = new ArrayList<>();
 
         try {
-            closedIssues = githubIssueService.getIssuesToClose(labelNameToClose);
+            closedIssues = githubIssueRestClientService.getIssuesToClose(labelNameToClose);
 
             log.info("Close 할 이슈 목록 가져오기 성공했습니다. labelNameToClose = {} ", labelNameToClose);
 
@@ -168,16 +182,18 @@ public class ReviewStudySchedulerFacade {
             return;
         }
 
-        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작");
+        // 2. Issue들 Close 하기
+        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작 : 총 {} 개", closedIssues.size() ); // TODO : 이슈가 너무 많으면, 디스코드 보낼 때 용량 초과로 에러난다. 따라서, 분할 처리 필요!
 
-        closedIssues.stream().forEach(ghIssue -> {
-            int issueNumber = ghIssue.getNumber();
+        closedIssues.stream().forEach(githubIssue -> {
 
-            String issueTitle = ghIssue.getTitle();
+            int issueNumber = githubIssue.number();
+
+            String issueTitle = githubIssue.title();
 
             try {
 
-                githubIssueService.closeIssue(issueNumber);
+                githubIssueRestClientService.closeIssue(issueNumber);
 
                 log.info("이슈가 Close 되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, issueNumber);
 
@@ -196,7 +212,7 @@ public class ReviewStudySchedulerFacade {
 
         log.info("("+labelNameToClose+") 주간회고 이슈 Close 완료");
 
-        // 2. Discord 로 Github 통신 결과 보내기
+        // 3. Discord 로 Github 통신 결과 보내기
         // (1) 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""

@@ -5,9 +5,9 @@ import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createLab
 
 import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
+import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;
 import com.example.review_study_app.github.GithubApiFailureResult;
 import com.example.review_study_app.github.GithubApiSuccessResult;
-import com.example.review_study_app.common.httpclient.MyHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,10 +29,10 @@ public class DiscordNotificationService implements NotificationService {
     @Value("${discord.webhook.url}")
     private String webhookUrl;
 
-    private final MyHttpClient httpClient;
+    private final RestTemplateHttpClient restTemplateHttpClient;
 
-    public DiscordNotificationService(MyHttpClient httpClient) {
-        this.httpClient = httpClient;
+    public DiscordNotificationService(RestTemplateHttpClient restTemplateHttpClient) {
+        this.restTemplateHttpClient = restTemplateHttpClient;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DiscordNotificationService implements NotificationService {
 
             MyHttpRequest request = new MyHttpRequest(webhookUrl, httpHeaders, new NotificationMessage(message));
 
-            MyHttpResponse response = httpClient.post(request);
+            MyHttpResponse response = restTemplateHttpClient.post(request);
 
             if (response.statusCode() != HttpStatus.NO_CONTENT.value()) {
                 log.error("Discord 와의 통신 결과, 다음과 같은 에러가 발생했습니다. HTTPStateCode = {}", response.statusCode());

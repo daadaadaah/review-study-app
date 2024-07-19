@@ -1,5 +1,6 @@
 package com.example.review_study_app.github;
 
+import com.example.review_study_app.common.exception.MyJsonParseFailException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class GithubApiMapper {
     }
 
     private JsonNode extractFieldFromJsonString(String jsonString, String fieldName) throws Exception {
-        log.info("JSON 문자열에서 객체를 추출합니다. fieldName={}, jsonString={}", fieldName, jsonString);
+        log.info("JSON 문자열에서 필드 추출을 시작합니다. fieldName={}, jsonString={}", fieldName, jsonString);
 
         try {
 
@@ -67,14 +68,29 @@ public class GithubApiMapper {
             JsonNode jsonNode = jsonNodeString.get(fieldName); // TODO : Null 처림
 
             if(jsonNode == null) {
-                log.info("JSON 문자열에 해당 필드가 없습니다. fieldName={}, jsonString={}", fieldName, jsonString);
-                throw new RuntimeException("Not Found Field");
+                log.warn("JSON 문자열에서 해당 필드가 없습니다. fieldName={}, jsonString={}", fieldName, jsonString);
+
+                throw new FieldNotFoundException("JSON 문자열에서 해당 필드가 없습니다. fieldName : "+fieldName);
+            } else {
+                log.info("JSON 문자열에서 필드 추출을 성공했습니다. fieldName={}, extractedValue={}", fieldName, jsonNode.toString());
             }
 
             return jsonNode;
         } catch (Exception exception) {
-            log.error("JSON 문자열에서 객체 추출을 실패했습니다. exception={}, class={}, jsonString={}", exception, fieldName, jsonString);
-            throw exception;
+            log.error("JSON 문자열에서 필드를 추출을 실패했습니다. fieldName={}, exception={}, jsonString={}", fieldName, exception, jsonString);
+
+            throw new MyJsonParseFailException(exception);
+        }
+    }
+
+    /**
+     * FieldNotFoundException는 Json 문자열에서 추출해내려는 필드가 없을 때, 발생하는 예외 클래스이다.
+     * 일단, extractFieldFromJsonString에서만 사용하기 떄문에, inner 클래스로 만들었다.
+     * 만약, extractFieldFromJsonString를 따로 JsonUtil 클래스에 구현할 경우에는 외부 클래스로 고려해보는 것이 좋다.
+     */
+    class FieldNotFoundException extends RuntimeException {
+        public FieldNotFoundException(String message) {
+            super(message);
         }
     }
 }

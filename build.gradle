@@ -30,6 +30,9 @@ dependencies {
 	// AOP
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+	// retry
+	implementation 'org.springframework.retry:spring-retry'
+
 	// RestTemplate PATCH method 사용 위해 추가
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
 

@@ -50,7 +50,7 @@ public class DiscordNotificationService implements NotificationService {
                 return false;
             }
 
-            log.info("Discord 로 메시지 전송이 성공했습니다.");
+            log.info("Discord 로 메시지 전송이 성공했습니다. message = {}", message);
 
             return true;
         } catch (Exception exception) {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class MyRetryListener implements RetryListener {
-    // 맨처음 한번 호출됨
+    // 맨처음 한번 호출됨 -> Retry를 시작하는 설정이다. true여야만 retry가 실행된다.
     @Override
     public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
         String className = (String) context.getAttribute("className");
@@ -24,7 +24,7 @@ public class MyRetryListener implements RetryListener {
         return true;
     }
 
-    // 중간에 재시도했지만 실패했을 경우에 호출됨
+    // 중간에 재시도했지만 실패했을 경우에 호출됨 -> Retry Template에 정의한 exception이 발생하면 실행된다.
     @Override
     public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
         // 재시도 중 오류 발생 시 호출됨
@@ -35,7 +35,7 @@ public class MyRetryListener implements RetryListener {
     }
 
 
-    // 최대 재시도 횟수 전에 성공하거나 최대 재시도 횟수가 끝난 다음에 호출됨
+    // 최대 재시도 횟수 전에 성공하거나 최대 재시도 횟수가 끝난 다음에 호출됨 -> Retry 종료 후에 실행된다.
     @Override
     public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 

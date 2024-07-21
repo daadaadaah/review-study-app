@@ -274,7 +274,6 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
      */
     @Retryable(
         retryFor = HttpServerErrorException.class,
-//        retryFor = HttpClientErrorException.class,
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000)
     )

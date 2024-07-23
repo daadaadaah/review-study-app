@@ -62,24 +62,31 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
             .build();
     }
 
-    public <T> void save(T logData) throws Exception { // TODO : 추후에 비동기로 보내도 괜찮을 것 같음
-        String logDataClassName = logData.getClass().getSimpleName();
+    public <T> void save(T logData) throws SaveLogFailException { // TODO : 추후에 비동기로 보내도 괜찮을 것 같음 +
+        try {
+            String logDataClassName = logData.getClass().getSimpleName();
 
-        String range = logDataClassName+"!A5"; // 예: sheet1!A1:C4 -> Sheet1의 A1부터 C3까지
+            String range = logDataClassName+"!A5"; // 예: sheet1!A1:C4 -> Sheet1의 A1부터 C3까지
 
-        String[] objects = toArray(logData);
+            String[] objects = toArray(logData);
 
-        ValueRange data = new ValueRange().setValues(Arrays.asList(
-            Arrays.asList(objects)
-        ));
+            ValueRange data = new ValueRange().setValues(Arrays.asList(
+                Arrays.asList(objects)
+            ));
 
-        Sheets sheets = createSheets();
+            Sheets sheets = createSheets();
 
-        sheets.spreadsheets().values()
-            .append(SPREAD_SHEET_ID, range, data)
-            .setValueInputOption("USER_ENTERED") // 참고 : https://developers.google.com/sheets/api/reference/rest/v4/ValueInputOption?hl=ko
-            .setIncludeValuesInResponse(true)
-            .execute();
+            sheets.spreadsheets().values()
+                .append(SPREAD_SHEET_ID, range, data)
+                .setValueInputOption("USER_ENTERED") // 참고 : https://developers.google.com/sheets/api/reference/rest/v4/ValueInputOption?hl=ko
+                .setIncludeValuesInResponse(true)
+                .execute();
+
+        } catch (Exception exception) {
+            log.error("google sheets 에 로그 저장 실패했습니다. log={}", logData);
+
+            throw new SaveLogFailException(exception, logData.toString());
+        }
     }
 
     private <T> String[] toArray(T obj) throws Exception {

@@ -1,6 +1,6 @@
 package com.example.review_study_app.github;
 
-import com.example.review_study_app.common.exception.MyJsonParseFailException;
+import com.example.review_study_app.github.exception.MyJsonParseFailException;
 import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;

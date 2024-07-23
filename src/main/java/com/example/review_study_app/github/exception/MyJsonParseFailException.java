@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.exception;
+package com.example.review_study_app.github.exception;
 
 public class MyJsonParseFailException extends RuntimeException {
 

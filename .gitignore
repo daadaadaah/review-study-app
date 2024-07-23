@@ -38,3 +38,4 @@ out/
 
 ### local ###
 src/main/resources/application-local.yml
+src/main/resources/googlesheet/local-review-study-app-429913-1ec7b3c57791.json

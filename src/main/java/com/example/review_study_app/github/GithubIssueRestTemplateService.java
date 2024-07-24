@@ -127,6 +127,8 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
 
             NewLabelName newLabelName = githubApiMapper.extractNewLabelNameFromResponseBody(response.body());
 
+            log.info("라벨 생성 성공했습니다. labelName={}", newLabelName.name());
+
             return newLabelName;
         } catch (RestClientResponseException restClientResponseException) {
             log.error("라벨 생성 실패했습니다. labelName={}, exception={}, StatusCode={}", labelName, restClientResponseException.getMessage(), restClientResponseException.getStatusCode());
@@ -244,6 +246,8 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
 
             NewIssue newIssue = githubApiMapper.extractNewIssueFromResponseBody(response.body());
 
+            log.info("이슈 생성 성공했습니다. issueNumber={}, issueTitle={}", newIssue.number(), newIssue.title());
+
             return newIssue;
         } catch (RestClientResponseException restClientResponseException) {
             log.error("이슈 생성 실패했습니다. issueTitle={}, StatusCode={}, exception={}", issueTitle, restClientResponseException.getStatusCode(),  restClientResponseException.getMessage());
@@ -290,17 +294,19 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
 
             List<IssueToClose> issuesToClose = githubApiMapper.extractIssueToClosListFromResponseBody(response.body());
 
+            log.info("이슈 조회를 성공했습니다. labelNameToClose={}", labelNameToClose);
+
             return issuesToClose;
         } catch (RestClientResponseException restClientResponseException) {
-            log.error("라벨 조회를 실패했습니다. labelNameToClose={} exception={}, StatusCode={}", labelNameToClose, restClientResponseException.getMessage(), restClientResponseException.getStatusCode());
+            log.error("Github API 통신 실패 : labelNameToClose={} exception={}, StatusCode={}", labelNameToClose, restClientResponseException.getMessage(), restClientResponseException.getStatusCode());
 
             throw restClientResponseException;
         } catch (MyJsonParseFailException jsonParseFailException) {
-            log.error("라벨 목록 parse 실패했습니다. labelNameToClose={}, exception={}", labelNameToClose, jsonParseFailException.getMessage());
+            log.error("이슈 목록 parse 실패했습니다. labelNameToClose={}, exception={}", labelNameToClose, jsonParseFailException.getMessage());
 
             throw jsonParseFailException;
         } catch (Exception exception) {
-            log.error("예상치 못한 예외 발생으로, 라벨 조회를 실패했습니다. labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
+            log.error("예상치 못한 예외 발생으로, 이슈 조회를 실패했습니다. labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
 
             throw exception;
         }
@@ -330,6 +336,14 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
 
         MyHttpRequest request = new MyHttpRequest(url, headers, issueCloseForm);
 
-        restTemplateHttpClient.patch(request);
+        try {
+            restTemplateHttpClient.patch(request);
+
+            log.info("Github API 통신 성공 issueNumber={}", issueNumber);
+        } catch (Exception exception) {
+            log.error("예상치 못한 예외 발생으로, patch 통신 실패했습니다. issueNumber={}, exception={}", issueNumber, exception.getMessage()); // TODO : 예외 로직 추가
+
+            throw exception;
+        }
     }
 }

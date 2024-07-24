@@ -53,8 +53,9 @@ public class GithubApiMapper {
             }
             return numbers;
         } catch (Exception exception) {
-            log.error(" exception={}, body={}", exception.getMessage(), body);
-            throw exception;
+            log.error("JSON 문자열에서 IssueToClosList 추출을 실패했습니다. exception={}, body={}", exception.getMessage(), body);
+
+            throw new MyJsonParseFailException(exception);
         }
     }
 
@@ -68,7 +69,7 @@ public class GithubApiMapper {
             JsonNode jsonNode = jsonNodeString.get(fieldName); // TODO : Null 처림
 
             if(jsonNode == null) {
-                log.warn("JSON 문자열에서 해당 필드가 없습니다. fieldName={}, jsonString={}", fieldName, jsonString);
+                log.error("JSON 문자열에서 해당 필드가 없습니다. fieldName={}, jsonString={}", fieldName, jsonString);
 
                 throw new FieldNotFoundException("JSON 문자열에서 해당 필드가 없습니다. fieldName : "+fieldName);
             } else {
@@ -77,7 +78,7 @@ public class GithubApiMapper {
 
             return jsonNode;
         } catch (Exception exception) {
-            log.error("JSON 문자열에서 필드를 추출을 실패했습니다. fieldName={}, exception={}, jsonString={}", fieldName, exception, jsonString);
+            log.error("JSON 문자열에서 필드를 추출을 실패했습니다. fieldName={}, exception={}, jsonString={}", fieldName, exception.getMessage(), jsonString);
 
             throw new MyJsonParseFailException(exception);
         }

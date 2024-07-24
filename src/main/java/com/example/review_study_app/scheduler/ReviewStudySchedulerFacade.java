@@ -2,34 +2,39 @@ package com.example.review_study_app.scheduler;
 
 
 
-import com.example.review_study_app.github.GithubApiFailureResult;
-import com.example.review_study_app.github.GithubApiSuccessResult;
-import com.example.review_study_app.github.GithubIssueService;
-import com.example.review_study_app.github.IssueToClose;
-import com.example.review_study_app.github.NewIssue;
+import com.example.review_study_app.github.JobResult;
+import com.example.review_study_app.github.exception.GetIssuesToCloseFailException;
+import com.example.review_study_app.github.exception.IsWeekNumberLabelPresentFailException;
+import com.example.review_study_app.github.exception.IssuesToCloseIsEmptyException;
+import com.example.review_study_app.github.GithubIssueApiFailureResult;
+import com.example.review_study_app.github.GithubIssueApiSuccessResult;
+import com.example.review_study_app.github.GithubJobFacade;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * ReviewStudySchedulerFacade 는 Github 작업을 관리하고, 그 결과를 대해 Notification 하는 책임이 있는 클래스이다.
+ */
 @Slf4j
 @Component
 public class ReviewStudySchedulerFacade {
 
-    private final GithubIssueService githubIssueService;
+    private final GithubJobFacade githubJobFacade;
 
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
-        GithubIssueService githubIssueService,
+        GithubJobFacade githubJobFacade,
         NotificationService notificationService
     ) {
-        this.githubIssueService = githubIssueService;
+        this.githubJobFacade = githubJobFacade;
         this.notificationService = notificationService;
     }
 
@@ -41,28 +46,34 @@ public class ReviewStudySchedulerFacade {
     public void createNewWeekNumberLabel(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        log.info("새로운 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
+        log.info("주차 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueService.createNewLabel(year, weekNumber);
+            githubJobFacade.createNewLabel(year, weekNumber);
 
-            log.info("새로운 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
+            log.info("주차 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
-            String newLabelCreationSuccessMessage = notificationService.createNewLabelCreationSuccessMessage(
-                weekNumberLabelName);
-
-            notificationService.sendMessage(newLabelCreationSuccessMessage);
+            notifyCreateNewWeekNumberLabelSuccessResult(weekNumberLabelName);
         } catch (Exception exception) {
-            log.error("새로운 라벨 생성이 실패했습니다. exception = {} labelName= {} ", exception.getMessage(),
-                weekNumberLabelName);
+            log.error("주차 라벨 생성이 실패했습니다. labelName= {}, exception = {} ", weekNumberLabelName, exception.getMessage());
 
-            String newLabelCreationFailureMessage = notificationService.createNewLabelCreationFailureMessage(
-                weekNumberLabelName, exception);
-
-            notificationService.sendMessage(newLabelCreationFailureMessage);
+            notifyCreateNewWeekNumberLabelFailResult(weekNumberLabelName, exception);
         }
     }
 
+    private void notifyCreateNewWeekNumberLabelSuccessResult(String weekNumberLabelName) {
+        String newLabelCreationSuccessMessage = notificationService.createNewLabelCreationSuccessMessage(
+            weekNumberLabelName);
+
+        notificationService.sendMessage(newLabelCreationSuccessMessage);
+    }
+
+    private void notifyCreateNewWeekNumberLabelFailResult(String weekNumberLabelName, Exception exception) {
+        String newLabelCreationFailureMessage = notificationService.createNewLabelCreationFailureMessage(
+            weekNumberLabelName, exception);
+
+        notificationService.sendMessage(newLabelCreationFailureMessage);
+    }
 
     /**
      * 이번주 주간회고 여러개 Issue를 생성하는 함수
@@ -70,62 +81,52 @@ public class ReviewStudySchedulerFacade {
     public void createNewWeeklyReviewIssues(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        if(!githubIssueService.isWeekNumberLabelPresent(weekNumberLabelName)) {
-            createNewWeekNumberLabel(year, weekNumber);
+        log.info("주간 회고 Issue 생성 Job 을 시작합니다. weekNumberLabelName = {} ", weekNumberLabelName);
+
+        try {
+            JobResult jobResult = githubJobFacade.batchCreateNewWeeklyReviewIssues(ReviewStudyInfo.MEMBERS, year, weekNumber);
+
+            log.info("주간 회고 Issue 생성 Job 이 성공했습니다. weekNumberLabelName={}", weekNumberLabelName);
+
+            notifyCreateNewWeeklyReviewIssuesResult(weekNumberLabelName, jobResult);
+        } catch (IsWeekNumberLabelPresentFailException isWeekNumberLabelPresentFailException) {
+            log.error("주간 회고 Issue 생성 Job 실패(원인 : 라벨 존재 여부 파악 실패) : weekNumberLabelName={}, exception={}", weekNumberLabelName, isWeekNumberLabelPresentFailException.getMessage());
+
+            String isWeekNumberLabelPresentFailMessage = notificationService.createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
+
+            notificationService.sendMessage(isWeekNumberLabelPresentFailMessage);
+        } catch (Exception exception) {
+            log.error("주간 회고 Issue 생성 Job 실패(원인 : 예상치 못한 예외 발생) : weekNumberLabelName={}, exception={}", weekNumberLabelName, exception.getMessage());
+
+            String unexpectedIssueCreationFailureMessage = notificationService.createUnexpectedIssueCreationFailureMessage(weekNumberLabelName, exception);
+
+            notificationService.sendMessage(unexpectedIssueCreationFailureMessage);
         }
+    }
 
-        // 1. 이슈 생성
-        List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
+    private void notifyCreateNewWeeklyReviewIssuesResult(String weekNumberLabelName, JobResult jobResult) {
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successTaskIds().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-        List<GithubApiFailureResult> githubApiFailureResults = new ArrayList<>();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failTaskIds().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
-        ReviewStudyInfo.MEMBERS.stream().forEach(member -> {
-            String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
-
-            try {
-
-                NewIssue newGhIssue = githubIssueService.createNewIssue(
-                    year,
-                    weekNumber,
-                    member.fullName(),
-                    member.githubName()
-                );
-
-                log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", newGhIssue.title(), newGhIssue.number());
-
-                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(newGhIssue.number(), newGhIssue.title());
-
-                githubApiSuccessResults.add(githubApiSuccessResult);
-
-            } catch (Exception exception) {
-                log.error("새로운 이슈 생성이 실패했습니다. issueTitle = {}, exception = {} ", issueTitle, exception.getMessage());
-
-                GithubApiFailureResult githubApiFailureResult = new GithubApiFailureResult(null, issueTitle, exception.getMessage());
-
-                githubApiFailureResults.add(githubApiFailureResult);
-            }
-        });
-
-        // 2. Discord 로 Github 통신 결과 보내기
-        // (1) 성공 결과 모음
+        // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
                 .map(result -> notificationService.createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
-
-        // (2) 실패 결과 모음
-        String failureResult = githubApiFailureResults.isEmpty()
+        // 실패 결과 모음
+        String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
-            : githubApiFailureResults.stream()
+            : githubIssueApiFailureResults.stream()
                 .map(result -> notificationService.createNewIssueCreationFailureMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
-        // (3) 최종 결과
+        // 최종 결과
         String finalResult = successResult+"\n\n"+failureResult;
 
-        // (4) Discord 로 보내기
+        // Discord 로 보내기
         notificationService.sendMessage(finalResult);
     }
 
@@ -135,85 +136,63 @@ public class ReviewStudySchedulerFacade {
     public void closeWeeklyReviewIssues(int year, int weekNumber) {
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
-        // 1. 이슈 Close
-        List<IssueToClose> closedIssues = new ArrayList<>();
-
-        List<GithubApiSuccessResult> githubApiSuccessResults = new ArrayList<>();
-
-        List<GithubApiFailureResult> githubApiFailureResults = new ArrayList<>();
+        log.info("주간 회고 Issue Close Job 을 시작합니다. weekNumberLabelName = {} ", labelNameToClose);
 
         try {
-            closedIssues = githubIssueService.getIssuesToClose(labelNameToClose);
 
-            log.info("Close 할 이슈 목록 가져오기 성공했습니다. labelNameToClose = {} ", labelNameToClose);
+            JobResult jobResult = githubJobFacade.batchCloseWeeklyReviewIssues(labelNameToClose);
 
-        } catch (Exception exception) {
-            log.error("Close 할 이슈 목록 가져오는 것을 실패했습니다. exception = {}", exception.getMessage());
+            log.info("주간 회고 Issue Close Job 성공했습니다. weekNumberLabelName = {} ", labelNameToClose);
 
-            String issueFetchFailureMessage = notificationService.createIssueFetchFailureMessage(labelNameToClose,exception);
+            notifyCloseWeeklyReviewIssueResult(labelNameToClose, jobResult);
+
+        } catch (GetIssuesToCloseFailException getIssuesToCloseFailException) {
+            log.error("주간 회고 Issue Close Job 실패(원인 : Close할 Issue 목록 가져오기 실패) : labelNameToClose={}, exception={}", labelNameToClose, getIssuesToCloseFailException.getMessage());
+
+            String issueFetchFailureMessage = notificationService.createIssueFetchFailureMessage(labelNameToClose, getIssuesToCloseFailException);
 
             notificationService.sendMessage(issueFetchFailureMessage);
-            return;
-        }
 
-        if(closedIssues.isEmpty()) {
-            log.info("Close 할 이슈가 없습니다. ");
+        } catch (IssuesToCloseIsEmptyException issuesToCloseIsEmptyException) {
+            log.error("주간 회고 Issue Close Job 실패(원인 : Close 할 Issue 없음) : labelNameToClose={}, exception={}", labelNameToClose, issuesToCloseIsEmptyException.getMessage());
 
             String emptyIssuesToCloseMessage = notificationService.createEmptyIssuesToCloseMessage(labelNameToClose);
 
             notificationService.sendMessage(emptyIssuesToCloseMessage);
 
-            return;
+        } catch (Exception exception) { // TODO : 예외 처리 로직 어떻게 할까?
+            log.error("주간 회고 Issue Close Job 실패(원인 : 예상치 못한 예외 발생) : labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
+
+            notificationService.sendMessage("예상치 못한 예외가 발생했습니다. exception="+exception.getMessage());
         }
+    }
 
-        log.info("("+labelNameToClose+") 주간회고 이슈 Close 시작");
+    private void notifyCloseWeeklyReviewIssueResult(String labelNameToClose, JobResult jobResult) {
 
-        closedIssues.stream().forEach(ghIssue -> {
-            int issueNumber = ghIssue.number();
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successTaskIds().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-            String issueTitle = ghIssue.title();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failTaskIds().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
-            try {
-
-                githubIssueService.closeIssue(issueNumber);
-
-                log.info("이슈가 Close 되었습니다. issueTitle = {}, issueNumber = {} ", issueTitle, issueNumber);
-
-                GithubApiSuccessResult githubApiSuccessResult = new GithubApiSuccessResult(issueNumber, issueTitle);
-
-                githubApiSuccessResults.add(githubApiSuccessResult);
-
-            } catch (Exception exception) {
-                log.error("이슈 Close에 실패했습니다. issueTitle = {}, issueNumber = {}, exception = {} ", issueTitle, issueNumber, exception.getMessage());
-
-                GithubApiFailureResult githubApiFailureResult = new GithubApiFailureResult(issueNumber, issueTitle, exception.getMessage());
-
-                githubApiFailureResults.add(githubApiFailureResult);
-            }
-        });
-
-        log.info("("+labelNameToClose+") 주간회고 이슈 Close 완료");
-
-        // 2. Discord 로 Github 통신 결과 보내기
-        // (1) 성공 결과 모음
+        // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> notificationService.createIssueCloseSuccessMessage(labelNameToClose, result))
+                .map(result -> notificationService.createIssueCloseSuccessMessage(
+                    labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
-
-        // (2) 실패 결과 모음
-        String failureResult = githubApiFailureResults.isEmpty()
+        // 실패 결과 모음
+        String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
-            : githubApiFailureResults.stream()
-                .map(result -> notificationService.createIssueCloseFailureMessage(labelNameToClose, result))
+            : githubIssueApiFailureResults.stream()
+                .map(result -> notificationService.createIssueCloseFailureMessage(
+                    labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
-        // (3) 최종 결과
-        String finalResult = successResult+"\n\n"+failureResult;
+        // 최종 결과
+        String finalResult = successResult + "\n\n" + failureResult;
 
-        // (4) Discord 로 보내기
+        // Discord 로 보내기
         notificationService.sendMessage(finalResult);
     }
 }

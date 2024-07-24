@@ -1,7 +1,7 @@
 package com.example.review_study_app.notification;
 
-import com.example.review_study_app.github.GithubApiFailureResult;
-import com.example.review_study_app.github.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubIssueApiFailureResult;
+import com.example.review_study_app.github.GithubIssueApiSuccessResult;
 
 public interface NotificationService {
 
@@ -13,18 +13,22 @@ public interface NotificationService {
     String createNewLabelCreationFailureMessage(String weekNumberLabelName, Exception exception);
 
     /** 이슈 생성 **/
-    String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult);
+    String createIsWeekNumberLabelPresentFailMessage(String weekNumberLabelName, Exception exception);
 
-    String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult);
+    String createUnexpectedIssueCreationFailureMessage(String weekNumberLabelName, Exception exception);
+
+    String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult);
+
+    String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
 
     /** 이슈 Close **/
     String createIssueFetchFailureMessage(String weekNumberLabelName, Exception exception);
 
     String createEmptyIssuesToCloseMessage(String weekNumberLabelName);
 
-    String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult);
+    String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult);
 
-    String createIssueCloseFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult);
+    String createIssueCloseFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
 
     /** 로그 **/
     String createExecutionTimeMessage(String methodName, long totalExecutionTime);

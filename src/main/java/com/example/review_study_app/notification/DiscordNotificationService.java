@@ -6,8 +6,8 @@ import static com.example.review_study_app.reviewstudy.ReviewStudyInfo.createLab
 import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;
-import com.example.review_study_app.github.GithubApiFailureResult;
-import com.example.review_study_app.github.GithubApiSuccessResult;
+import com.example.review_study_app.github.GithubIssueApiFailureResult;
+import com.example.review_study_app.github.GithubIssueApiSuccessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -74,17 +74,29 @@ public class DiscordNotificationService implements NotificationService {
 
     /** 이슈 생성 **/
     @Override
-    public String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
+    public String createIsWeekNumberLabelPresentFailMessage(String weekNumberLabelName, Exception exception) {
+        return EMOJI_WARING+" ("+weekNumberLabelName+") Issue 생성 Job 실패 (원인 : 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+"))  존재 여부 파악 실패) "+ EMOJI_WARING+" \n"
+            + " 에러 메시지 : "+exception.getMessage();
+    }
+
+    @Override
+    public String createUnexpectedIssueCreationFailureMessage(String weekNumberLabelName, Exception exception) {
+        return EMOJI_WARING+" ("+weekNumberLabelName+") Issue 생성 Job 실패 (원인 : 예상치 못한 예외 발생)"+ EMOJI_WARING+" \n"
+            + " 에러 메시지 : "+exception.getMessage();
+    }
+
+    @Override
+    public String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult) {
         int issueNumber = githubApiSuccessResult.issueNumber();
 
         return EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle() + " 새로운 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+"))가 생성되었습니다. " + EMOJI_CONGRATS;
     }
 
     @Override
-    public String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult) {
-        return EMOJI_WARING +" ("+weekNumberLabelName+") "+ githubApiFailureResult.issueTitle()+" 새로운 이슈 생성이 실패했습니다. "+ EMOJI_WARING
+    public String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult) {
+        return EMOJI_WARING +" ("+weekNumberLabelName+") "+ githubIssueApiFailureResult.issueTitle()+" 새로운 이슈 생성이 실패했습니다. "+ EMOJI_WARING
             +"\n"
-            + "에러 메시지 : "+githubApiFailureResult.errorMessage();
+            + "에러 메시지 : "+ githubIssueApiFailureResult.errorMessage();
     }
 
     /** 이슈 Close **/
@@ -101,19 +113,19 @@ public class DiscordNotificationService implements NotificationService {
     }
 
     @Override
-    public String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubApiSuccessResult githubApiSuccessResult) {
+    public String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult) {
         int issueNumber = githubApiSuccessResult.issueNumber();
 
         return EMOJI_CONGRATS+" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+"))가 Closed 되었습니다. "+ EMOJI_CONGRATS;
     }
 
     @Override
-    public String createIssueCloseFailureMessage(String weekNumberLabelName, GithubApiFailureResult githubApiFailureResult) {
-        int issueNumber = githubApiFailureResult.issueNumber();
+    public String createIssueCloseFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult) {
+        int issueNumber = githubIssueApiFailureResult.issueNumber();
 
-        return EMOJI_WARING+" ("+weekNumberLabelName+") "+githubApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+")) Closed에 실패했습니다. "+ EMOJI_WARING
+        return EMOJI_WARING+" ("+weekNumberLabelName+") "+ githubIssueApiFailureResult.issueTitle()+" 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+")) Closed에 실패했습니다. "+ EMOJI_WARING
             +"\n"
-            + "에러 메시지 : "+githubApiFailureResult.errorMessage();
+            + "에러 메시지 : "+ githubIssueApiFailureResult.errorMessage();
     }
 
     @Override

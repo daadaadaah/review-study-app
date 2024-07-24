@@ -10,10 +10,9 @@ import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
+@Deprecated // GithubIssueRestTemplateService 사용으로 인해 이제 사용하지 않음
 public class GithubIssueKohsukeService implements GithubIssueService {
 
     @Value("${github.oauth.accessToken}")

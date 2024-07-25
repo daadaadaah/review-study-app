@@ -44,9 +44,17 @@ public class GithubJobFacade {
     public JobResult createNewLabel(int year, int weekNumber) throws Exception {
         long taskId = System.currentTimeMillis();
 
-        String methodName = getMethodName(Thread.currentThread());;
+        String methodName = getMethodName(Thread.currentThread());
 
-        NewLabelName newLabelName = githubIssueService.createNewLabel(year, weekNumber); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
+        String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
+
+        String labelColor = ReviewStudyInfo.THIS_WEEK_NUMBER_LABEL_COLOR;
+
+        String labelDescription = ReviewStudyInfo.getFormattedThisWeekNumberLabelDescription(year, weekNumber);
+
+        LabelCreateForm labelCreateForm = new LabelCreateForm(labelName, labelDescription, labelColor);
+
+        NewLabelName newLabelName = githubIssueService.createNewLabel(labelCreateForm); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
 
         GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
 
@@ -98,12 +106,21 @@ public class GithubJobFacade {
             String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
 
             try {
-                NewIssue newGhIssue = githubIssueService.createNewIssue(
-                    year,
-                    weekNumber,
-                    member.fullName(),
-                    member.githubName()
+
+                String issueBody = ReviewStudyInfo.WEEKLY_REVIEW_ISSUE_BODY_TEMPLATE;
+
+                List<String> assignees = Arrays.asList(member.githubName());
+
+                List<String> labels =  Arrays.asList(weekNumberLabelName);
+
+                IssueCreateForm issueCreateForm = new IssueCreateForm(
+                    issueTitle,
+                    issueBody,
+                    assignees,
+                    labels
                 );
+
+                NewIssue newGhIssue = githubIssueService.createNewIssue(issueCreateForm);
 
                 log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", newGhIssue.title(), newGhIssue.number());
 

@@ -9,14 +9,11 @@ import java.util.List;
  * @param jobStatusReason : Job 상태의 이유
  * @param totalTaskCount : 총 Task 갯수
  * @param successTaskCount : 성공 Task 갯수
- * @param successTaskIds : 성공 TaskId(GithubApiLog의 식별자) 리스트
+ * @param successTasks : 성공 TaskId(GithubApiLog의 식별자) 리스트
  * @param failTaskCount : 실패 Task 갯수
- * @param failTaskIds : 실패 TaskId(GithubApiLog의 식별자) 리스트
- * @param executionTime : Job 총 실행 시간
+ * @param failTasks : 실패 TaskId(GithubApiLog의 식별자) 리스트
  */
 public record JobResult(
-    long jobId,
-
     String jobType,
 
     JobStatus jobStatus,
@@ -27,13 +24,11 @@ public record JobResult(
 
     int successTaskCount,
 
-    List<GithubApiTaskResult> successTaskIds,
+    List<GithubApiTaskResult> successTasks,
 
     int failTaskCount,
 
-    List<GithubApiTaskResult> failTaskIds,
-
-    long executionTime
+    List<GithubApiTaskResult> failTasks
 ) {
 
 }

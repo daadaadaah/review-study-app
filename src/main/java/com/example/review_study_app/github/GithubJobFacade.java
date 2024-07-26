@@ -19,6 +19,10 @@ import org.springframework.stereotype.Component;
  * < 용어 정리 >
  * 여러 개의 이슈를 만드는 전체 작업: Job
  * 1개의 이슈를 만드는 개별 작업: Task
+ *
+ * < 참고 사항 >
+ * GithubJobFacade 는 Job 수행 시간 로깅을 위해 무조건 JobResult 객체를 return 하도록 한다.
+ *
  */
 @Slf4j
 @Component
@@ -38,15 +42,13 @@ public class GithubJobFacade {
     }
 
     public JobResult createNewLabel(int year, int weekNumber) throws Exception {
-        long jodId = System.currentTimeMillis();
+        long taskId = System.currentTimeMillis();
 
         String methodName = getMethodName(Thread.currentThread());;
 
         NewLabelName newLabelName = githubIssueService.createNewLabel(year, weekNumber); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
 
-        GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(jodId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
-
-        long end = System.currentTimeMillis();
+        GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
 
         List<GithubApiTaskResult> successTaskIds = Arrays.asList(githubApiTaskResult);
 
@@ -55,7 +57,6 @@ public class GithubJobFacade {
         int totalTaskCount = successTaskIds.size() + failTaskIds.size();
 
         return new JobResult(
-            jodId, // job 자체가 task 1개 이므로, jobId를 taskId로 함.
             methodName,
             JobStatus.COMPLETED,
             "Job 수행 성공",
@@ -63,14 +64,11 @@ public class GithubJobFacade {
             successTaskIds.size(),
             successTaskIds,
             failTaskIds.size(),
-            failTaskIds,
-            end - jodId // TODO : 비즈니스 로직이 아닌 Log Aspect에서 하도록!
+            failTaskIds
         );
     }
 
     public JobResult batchCreateNewWeeklyReviewIssues(List<Member> members, int year, int weekNumber) throws Exception {
-        long jodId = System.currentTimeMillis();
-
         String methodName = getMethodName(Thread.currentThread());;
 
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
@@ -126,8 +124,6 @@ public class GithubJobFacade {
             }
         });
 
-        long end = System.currentTimeMillis();
-
         List<GithubApiTaskResult> successTaskIds = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
 
         List<GithubApiTaskResult> failTaskIds = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
@@ -135,7 +131,6 @@ public class GithubJobFacade {
         int totalTaskCount = successTaskIds.size() + failTaskIds.size();
 
         return new JobResult(
-            jodId,
             methodName,
             JobStatus.COMPLETED,
             "Job 수행 성공",
@@ -143,14 +138,11 @@ public class GithubJobFacade {
             successTaskIds.size(),
             successTaskIds,
             failTaskIds.size(),
-            failTaskIds,
-            end-jodId
+            failTaskIds
         );
     }
 
     public JobResult batchCloseWeeklyReviewIssues(String labelNameToClose) throws Exception {
-        long jodId = System.currentTimeMillis();
-
         String methodName = getMethodName(Thread.currentThread());;
 
         // 1. 이슈 Close
@@ -205,8 +197,6 @@ public class GithubJobFacade {
             }
         });
 
-        long end = System.currentTimeMillis();
-
         List<GithubApiTaskResult> successTaskIds = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
 
         List<GithubApiTaskResult> failTaskIds = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
@@ -214,7 +204,6 @@ public class GithubJobFacade {
         int totalTaskCount = successTaskIds.size() + failTaskIds.size();
 
         return new JobResult(
-            jodId,
             methodName,
             JobStatus.COMPLETED,
             "Job 수행 성공",
@@ -222,8 +211,7 @@ public class GithubJobFacade {
             successTaskIds.size(),
             successTaskIds,
             failTaskIds.size(),
-            failTaskIds,
-            end-jodId
+            failTaskIds
         );
     }
 }

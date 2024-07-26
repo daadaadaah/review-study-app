@@ -5,7 +5,6 @@ import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +175,8 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
             if(restClientResponseException.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.error("라벨이 존재하지 않습니다. labelName = {}, exception = {}", labelName, restClientResponseException.getMessage());
 
-                return false; // throw restClientResponseException; // 실패 테스트용
+                return false;
+//                 throw restClientResponseException; // 실패 테스트용
             }
 
             log.error("라벨 존재 여부 파악에 실패했습니다. labelName = {}, exception = {}", labelName, restClientResponseException.getMessage());

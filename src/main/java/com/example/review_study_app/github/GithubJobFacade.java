@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component;
  *
  * < 용어 정리 >
  * 여러 개의 이슈를 만드는 전체 작업: Job
- * 1개의 이슈를 만드는 개별 작업: Task
+ * 여러 개의 이슈 만드는 단계 : Step
+ * 각 단계 별로 Github API 통신 작업 : Task
  *
  * < 참고 사항 >
  * GithubJobFacade 는 Job 수행 시간 로깅을 위해 무조건 JobResult 객체를 return 하도록 한다.
@@ -38,7 +39,7 @@ public class GithubJobFacade {
     }
 
     private String getMethodName(Thread thread) {
-        return thread.getStackTrace()[1].getMethodName();
+        return thread.getStackTrace()[2].getMethodName(); // 1인 경우, getMethodName 이 찍힘!
     }
 
     public JobResult createNewLabel(int year, int weekNumber) throws Exception {
@@ -66,7 +67,7 @@ public class GithubJobFacade {
 
         return new JobResult(
             methodName,
-            JobStatus.COMPLETED,
+            BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
             totalTaskCount,
             successTaskIds.size(),
@@ -90,7 +91,7 @@ public class GithubJobFacade {
         } catch (Exception exception) {
             log.error("라벨 존재 여부 파악에 실패했습니다. labelName = {}, exception = {}", weekNumberLabelName, exception.getMessage());
 
-            throw new IsWeekNumberLabelPresentFailException(exception);
+            throw new IsWeekNumberLabelPresentFailException(exception); // 예외 상황 별로 다른 Notification 메시지를 전달하기 위해 커스텀 예외로 만듬
         }
 
         if(!isWeekNumberLabelPresent) {
@@ -149,7 +150,7 @@ public class GithubJobFacade {
 
         return new JobResult(
             methodName,
-            JobStatus.COMPLETED,
+            BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
             totalTaskCount,
             successTaskIds.size(),
@@ -174,13 +175,13 @@ public class GithubJobFacade {
         } catch (Exception exception) {
             log.error("Close 할 이슈 목록 가져오는 것을 실패했습니다. labelNameToClose = {}, exception = {}", labelNameToClose, exception.getMessage());
 
-            throw new GetIssuesToCloseFailException(exception);
+            throw new GetIssuesToCloseFailException(exception); // 예외 상황 별로 다른 Notification 메시지를 전달하기 위해
         }
 
         if (closedIssues.isEmpty()) {
             log.info("Close 할 이슈가 없습니다. labelNameToClose = {} ", labelNameToClose);
 
-            throw new IssuesToCloseIsEmptyException();
+            throw new IssuesToCloseIsEmptyException(); // 예외 상황 별로 다른 Notification 메시지를 전달하기 위해
         }
 
         log.info("(" + labelNameToClose + ") 주간회고 이슈들 Close 시작합니다.");
@@ -222,7 +223,7 @@ public class GithubJobFacade {
 
         return new JobResult(
             methodName,
-            JobStatus.COMPLETED,
+            BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
             totalTaskCount,
             successTaskIds.size(),

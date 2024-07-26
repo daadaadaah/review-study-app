@@ -59,21 +59,16 @@ public class GithubJobFacade {
 
         GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
 
-        List<GithubApiTaskResult> successTaskIds = Arrays.asList(githubApiTaskResult);
+        List<GithubApiTaskResult> successItems = Arrays.asList(githubApiTaskResult);
 
-        List<GithubApiTaskResult> failTaskIds = new ArrayList<>();
-
-        int totalTaskCount = successTaskIds.size() + failTaskIds.size();
+        List<GithubApiTaskResult> failItems = new ArrayList<>();
 
         return new JobResult(
             methodName,
             BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
-            totalTaskCount,
-            successTaskIds.size(),
-            successTaskIds,
-            failTaskIds.size(),
-            failTaskIds
+            successItems,
+            failItems
         );
     }
 
@@ -142,21 +137,16 @@ public class GithubJobFacade {
             }
         });
 
-        List<GithubApiTaskResult> successTaskIds = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
+        List<GithubApiTaskResult> successItems = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
 
-        List<GithubApiTaskResult> failTaskIds = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
-
-        int totalTaskCount = successTaskIds.size() + failTaskIds.size();
+        List<GithubApiTaskResult> failItems = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
 
         return new JobResult(
             methodName,
             BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
-            totalTaskCount,
-            successTaskIds.size(),
-            successTaskIds,
-            failTaskIds.size(),
-            failTaskIds
+            successItems,
+            failItems
         );
     }
 
@@ -215,21 +205,16 @@ public class GithubJobFacade {
             }
         });
 
-        List<GithubApiTaskResult> successTaskIds = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
+        List<GithubApiTaskResult> successItems = githubApiTaskResults.stream().filter(githubApiSuccessResult -> githubApiSuccessResult.isSuccess()).toList();
 
-        List<GithubApiTaskResult> failTaskIds = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
-
-        int totalTaskCount = successTaskIds.size() + failTaskIds.size();
+        List<GithubApiTaskResult> failItems = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
 
         return new JobResult(
             methodName,
             BatchProcessStatus.COMPLETED,
             "Job 수행 성공",
-            totalTaskCount,
-            successTaskIds.size(),
-            successTaskIds,
-            failTaskIds.size(),
-            failTaskIds
+            successItems,
+            failItems
         );
     }
 }

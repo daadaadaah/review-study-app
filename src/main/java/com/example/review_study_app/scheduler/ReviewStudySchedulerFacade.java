@@ -105,9 +105,9 @@ public class ReviewStudySchedulerFacade {
     }
 
     private void notifyCreateNewWeeklyReviewIssuesResult(String weekNumberLabelName, JobResult jobResult) {
-        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successTasks().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failTasks().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
         // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
@@ -169,9 +169,9 @@ public class ReviewStudySchedulerFacade {
 
     private void notifyCloseWeeklyReviewIssueResult(String labelNameToClose, JobResult jobResult) {
 
-        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successTasks().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failTasks().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
         // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()

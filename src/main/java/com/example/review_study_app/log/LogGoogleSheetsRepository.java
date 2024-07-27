@@ -90,7 +90,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
                 .execute();
 
         } catch (Exception exception) {
-            log.error("google sheets 에 로그 저장 실패했습니다. log={}", logData);
+            log.error("google sheets 에 로그 저장 실패했습니다. exception={}, log={}", exception.getMessage(), logData);
 
             throw new SaveLogFailException(exception, logData.toString());
         }

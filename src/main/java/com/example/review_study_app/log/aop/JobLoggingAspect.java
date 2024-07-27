@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.aop;
+package com.example.review_study_app.log.aop;
 
 
 import com.example.review_study_app.common.utils.BatchProcessIdContext;

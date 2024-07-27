@@ -12,11 +12,11 @@ import java.util.List;
  */
 public interface GithubIssueService {
 
-    NewLabelName createNewLabel(int year, int weekNumber) throws Exception;
+    NewLabelName createNewLabel(LabelCreateForm labelCreateForm) throws Exception;
 
     boolean isWeekNumberLabelPresent(String labelName) throws Exception;
 
-    NewIssue createNewIssue(int currentYear, int currentWeekNumber, String memberFullName, String memberGithubName) throws Exception;
+    NewIssue createNewIssue(IssueCreateForm issueCreateForm) throws Exception;
 
     List<IssueToClose> getIssuesToClose(String labelNameToClose) throws Exception;
 

@@ -4,31 +4,22 @@ import java.util.List;
 
 /**
  * JobResult 은 Job 수행 결과를 저장하는 클래스이다.
- * @param jobType : GithubJobFacade 의 각 메서드들(예 : batchCreateNewWeeklyReviewIssues)
- * @param jobStatus : Job 상태
- * @param jobStatusReason : Job 상태의 이유
- * @param totalTaskCount : 총 Task 갯수
- * @param successTaskCount : 성공 Task 갯수
- * @param successTasks : 성공 TaskId(GithubApiLog의 식별자) 리스트
- * @param failTaskCount : 실패 Task 갯수
- * @param failTasks : 실패 TaskId(GithubApiLog의 식별자) 리스트
+ * @param batchProcessName : GithubJobFacade 의 각 메서드들(예 : batchCreateNewWeeklyReviewIssues)
+ * @param batchProcessStatus : Job 상태
+ * @param batchProcessStatusReason : Job 상태 이유
+ * @param successItems : 성공 Item 목록 (예 : GithubApiTaskResult 목록)
+ * @param failItems : 실패 Item 목록 (예 : GithubApiTaskResult 목록)
  */
-public record JobResult(
-    String jobType,
+public record JobResult( // TODO : 용어 수정 필요!
+    String batchProcessName,
 
-    JobStatus jobStatus,
+    BatchProcessStatus batchProcessStatus,
 
-    String jobStatusReason,
+    String batchProcessStatusReason,
 
-    int totalTaskCount,
+    List<GithubApiTaskResult> successItems,
 
-    int successTaskCount,
-
-    List<GithubApiTaskResult> successTasks,
-
-    int failTaskCount,
-
-    List<GithubApiTaskResult> failTasks
+    List<GithubApiTaskResult> failItems
 ) {
 
 }

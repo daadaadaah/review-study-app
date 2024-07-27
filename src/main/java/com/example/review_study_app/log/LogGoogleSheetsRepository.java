@@ -62,13 +62,20 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
             .build();
     }
 
+    /**
+     *
+     *
+     * < 주의 사항 >
+     * 1. logData 내부에 필드로 커스텀 객체가 없도록 해야 한다. 객체가 있으면, 추가로 평탄화 작업이 필요하므로, 로직이 복잡해진다.
+     * 2. logData의 타입이 곧 구글 시트 탭 이름이 될 수 있도록 하고, 필드의 선언 순서도 저장되는 순서임을 기억해야 한다. 또한,, XXXLog 형태로 클래스를 만들것!
+     */
     public <T> void save(T logData) throws SaveLogFailException { // TODO : 추후에 비동기로 보내도 괜찮을 것 같음 +
         try {
             String logDataClassName = logData.getClass().getSimpleName();
 
             String range = logDataClassName+"!A5"; // 예: sheet1!A1:C4 -> Sheet1의 A1부터 C3까지
 
-            String[] objects = toArray(logData);
+            String[] objects = convertObjectToArray(logData);
 
             ValueRange data = new ValueRange().setValues(Arrays.asList(
                 Arrays.asList(objects)
@@ -83,13 +90,13 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
                 .execute();
 
         } catch (Exception exception) {
-            log.error("google sheets 에 로그 저장 실패했습니다. log={}", logData);
+            log.error("google sheets 에 로그 저장 실패했습니다. exception={}, log={}", exception.getMessage(), logData);
 
             throw new SaveLogFailException(exception, logData.toString());
         }
     }
 
-    private <T> String[] toArray(T obj) throws Exception {
+    private <T> String[] convertObjectToArray(T obj) throws Exception {
         try {
             Class<?> clazz = obj.getClass(); // 객체의 클래스 정보를 얻음
 

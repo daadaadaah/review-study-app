@@ -5,7 +5,6 @@ import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
 import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,18 +106,12 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000)
     )
-    public NewLabelName createNewLabel(int year, int weekNumber) throws Exception {
-        String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
-
-        String labelColor = ReviewStudyInfo.THIS_WEEK_NUMBER_LABEL_COLOR;
-
-        String labelDescription = ReviewStudyInfo.getFormattedThisWeekNumberLabelDescription(year, weekNumber);
+    public NewLabelName createNewLabel(LabelCreateForm labelCreateForm) throws Exception {
+        String labelName = labelCreateForm.name();
 
         String url = createGithubApiUrl("labels");
 
         HttpHeaders httpHeaders = createCommonHttpHeaders();
-
-        LabelCreateForm labelCreateForm = new LabelCreateForm(labelName, labelDescription, labelColor);
 
         MyHttpRequest request = new MyHttpRequest(url, httpHeaders, labelCreateForm);
 
@@ -183,13 +176,14 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
                 log.error("라벨이 존재하지 않습니다. labelName = {}, exception = {}", labelName, restClientResponseException.getMessage());
 
                 return false;
+//                 throw restClientResponseException; // 실패 테스트용
             }
 
-            log.error("라벨 조회를 실패했습니다. labelName = {}, exception = {}", labelName, restClientResponseException.getMessage());
+            log.error("라벨 존재 여부 파악에 실패했습니다. labelName = {}, exception = {}", labelName, restClientResponseException.getMessage());
 
             throw restClientResponseException;
         } catch (Exception exception) {
-            log.error("예상치 못한 예외 발생으로, 라벨 조회를 실패했습니다. labelName = {}, exception = {}", labelName, exception.getMessage());
+            log.error("예상치 못한 예외 발생으로, 라벨 존재 여부 파악에 실패했습니다. labelName = {}, exception = {}", labelName, exception.getMessage());
 
             throw exception;
         }
@@ -211,32 +205,12 @@ public class GithubIssueRestTemplateService implements GithubIssueService {
      * - 반면, 실패시, 이슈 생성하기 위해서는 템플릿을 활용하면 되니까 좀더 낫다. 날짜 계산은 에러 메시지에서 참고해서 하면 된다!
      *
      */
-    public NewIssue createNewIssue(
-        int currentYear,
-        int currentWeekNumber,
-        String memberFullName,
-        String memberGithubName
-    ) throws Exception {
+    public NewIssue createNewIssue(IssueCreateForm issueCreateForm) throws Exception {
+        String issueTitle = issueCreateForm.title();
+
         String url = createGithubApiUrl("issues");
 
         HttpHeaders httpHeaders = createCommonHttpHeaders();
-
-        String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(currentYear, currentWeekNumber, memberFullName);
-
-        String issueBody = ReviewStudyInfo.WEEKLY_REVIEW_ISSUE_BODY_TEMPLATE;
-
-        String thisWeekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(currentYear, currentWeekNumber);
-
-        List<String> assignees = Arrays.asList(memberGithubName);
-
-        List<String> labels =  Arrays.asList(thisWeekNumberLabelName);
-
-        IssueCreateForm issueCreateForm = new IssueCreateForm(
-            issueTitle,
-            issueBody,
-            assignees,
-            labels
-        );
 
         MyHttpRequest request = new MyHttpRequest(url, httpHeaders, issueCreateForm);
 

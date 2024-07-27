@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-public class JobLogAspect {
+public class JobLoggingAspect {
 
     private final LogHelper logHelper;
 
@@ -30,7 +30,7 @@ public class JobLogAspect {
     private final LogGoogleSheetsRepository logGoogleSheetsRepository;
 
     @Autowired
-    public JobLogAspect(
+    public JobLoggingAspect(
         LogHelper logHelper,
         NotificationService notificationService,
         LogGoogleSheetsRepository logGoogleSheetsRepository

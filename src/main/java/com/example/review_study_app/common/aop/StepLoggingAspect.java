@@ -83,7 +83,7 @@ public class StepLoggingAspect {
 
             logGoogleSheetsRepository.save(stepDetailLog);
 
-            ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 stepId,
                 parentId,
                 environment,
@@ -128,7 +128,7 @@ public class StepLoggingAspect {
 
             logGoogleSheetsRepository.save(stepDetailLog);
 
-            ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 stepId,
                 parentId,
                 environment,

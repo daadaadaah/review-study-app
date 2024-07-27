@@ -103,7 +103,7 @@ public class TaskRestTemplateLoggingAspect {
 
                 logGoogleSheetsRepository.save(githubApiLog);
 
-                ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                     batchProcessId,
                     parentId,
                     logHelper.getEnvironment(),
@@ -146,7 +146,7 @@ public class TaskRestTemplateLoggingAspect {
 
                 logGoogleSheetsRepository.save(githubApiLog);
 
-                ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                     batchProcessId,
                     parentId,
                     logHelper.getEnvironment(),

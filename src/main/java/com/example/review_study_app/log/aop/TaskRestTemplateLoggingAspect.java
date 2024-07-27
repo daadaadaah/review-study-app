@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.aop;
+package com.example.review_study_app.log.aop;
 
 import com.example.review_study_app.common.httpclient.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.MyHttpResponse;
@@ -39,11 +39,10 @@ public class TaskRestTemplateLoggingAspect {
     }
 
     /**
-     *
-     * < Task의 경우, Job과 Step 처럼 Logging 어노테이션을 만들지 않고, 구체적인 클레스를 지정한 이유 >
-     * 보다 범용적인 수준의 단계인 Job과 Step와 달리, Task는 특정 작업의 세부 단계를 의미하기 때문이다.
-     * 어떤 Task 냐에 따라 정말 다양한 데이터 구조를 가지므로, 이를 범용성 있는 이름을 가진 클래스를 만드는 것보다, 세부 사항별로 Task Logging을 하는게 좀더 단순하게 구현할 수 있을 것이라 생각하기 때문이다.
-     * 따라서, 현재는 RestTemplate Task만 있지만, 추가적인 Task가 생긴다면, 그 Task의 이름을 가진 Aspect를 하나 더 만드는 방식으로 하는게 관심사 분리 관점에서 좋을 것 같다.
+     * < Task의 경우, 구체적인 클레스를 지정한 이유 >
+     * - Task는 특정 작업의 세부 단계를 의미하기 때문에 어떤 Task 냐에 따라 정말 다양한 데이터 구조를 가진다고 생각한다.
+     * - 따라서, 재사용성 있게 범용성 있는 이름을 가진 클래스를 만드는 것보다, 세부 사항별로 Task Logging을 하는게, 좀더 단순하게 구현할 수 있을 것이라 생각했기 때문에, 구체적인 클래스를 지정했다.
+     * - 만약, 추가적인 Task가 생긴다면, 그 Task의 이름을 가진 Aspect를 하나 더 만드는 방식으로 하는게 관심사 분리 관점에서 좋을 것 같다.
      */
     @Around("execution(* com.example.review_study_app.common.httpclient.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {

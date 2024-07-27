@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.aop;
+package com.example.review_study_app.log.aop;
 
 
 import com.example.review_study_app.common.utils.BatchProcessIdContext;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-public class StepLoggingAspect {
+public class GithubIssueServiceStepLoggingAspect {
 
     private final LogHelper logHelper;
 
@@ -30,7 +30,7 @@ public class StepLoggingAspect {
     private final LogGoogleSheetsRepository logGoogleSheetsRepository;
 
     @Autowired
-    public StepLoggingAspect(
+    public GithubIssueServiceStepLoggingAspect(
         LogHelper logHelper,
         NotificationService notificationService,
         LogGoogleSheetsRepository logGoogleSheetsRepository
@@ -43,7 +43,10 @@ public class StepLoggingAspect {
     @Pointcut("target(com.example.review_study_app.github.GithubIssueService)")
     public void targetImplementingInterface() {}
 
-    @Around("targetImplementingInterface()") // TODO : StepLogging 어노테이션 붙은 클래스의 모든 메서드에서 동작되도록 수정하기
+    /**
+     * 이렇게 구현한 이유는 `GithubJobFacadeLoggingAspect`와 비슷한 이유이므로, `GithubJobFacadeLoggingAspect` 참고!
+     */
+    @Around("targetImplementingInterface()")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 

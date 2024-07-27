@@ -98,10 +98,6 @@ public class StepLoggingAspect {
 
             logGoogleSheetsRepository.save(executionTimeLog);
 
-            String executionTimeMessage = notificationService.createExecutionTimeMessage(methodName, timeTaken);
-
-            notificationService.sendMessage(executionTimeMessage);
-
             return result;
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
@@ -142,10 +138,6 @@ public class StepLoggingAspect {
             );
 
             logGoogleSheetsRepository.save(executionTimeLog);
-
-            String executionTimeMessage = notificationService.createExecutionTimeMessage(methodName, timeTaken);
-
-            notificationService.sendMessage(executionTimeMessage); // TODO : 예외도 같이 던져줘야 하나? 아니면 JobId 를 던져줘서 구글 시트로 확인할 수 있게 할까?
 
             throw exception;
         } finally {

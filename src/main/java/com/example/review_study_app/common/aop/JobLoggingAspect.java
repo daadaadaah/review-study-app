@@ -40,7 +40,7 @@ public class JobLoggingAspect {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
     }
 
-    @Around("execution(* com.example.review_study_app.github.GithubJobFacade.*(..))")
+    @Around("execution(* com.example.review_study_app.github.GithubJobFacade.*(..))") // TODO : JobLogging 어노테이션 붙은 클래스의 모든 메서드에서 동작되도록 수정하기
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
@@ -76,7 +76,7 @@ public class JobLoggingAspect {
 
             logGoogleSheetsRepository.save(jobDetailLog);
 
-            ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 BatchProcessIdContext.getJobId(),
                 null,
                 logHelper.getEnvironment(),
@@ -121,7 +121,7 @@ public class JobLoggingAspect {
 
             logGoogleSheetsRepository.save(jobDetailLog);
 
-            ExecutionTimeLog executionTimeLog = new ExecutionTimeLog(
+            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 BatchProcessIdContext.getJobId(),
                 null,
                 logHelper.getEnvironment(),

@@ -18,8 +18,8 @@ import com.example.review_study_app.github.BatchProcessStatus;
  * @param createdAt : log 생성 시간 (예 : 2024-07-21 15:43:10)
  */
 public record ExecutionTimeLog<T>(
-    long id,
-    Long parentId,
+    String id,
+    String parentId,
     String environment,
     BatchProcessType batchProcessType,
     String batchProcessName,

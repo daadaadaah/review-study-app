@@ -10,6 +10,7 @@ import com.example.review_study_app.log.JobDetailLog;
 import com.example.review_study_app.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.log.LogHelper;
 import com.example.review_study_app.notification.NotificationService;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -43,7 +44,9 @@ public class JobLogAspect {
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        BatchProcessIdContext.setJobId(startTime);
+        UUID uuid = UUID.randomUUID();
+
+        BatchProcessIdContext.setJobId(uuid);
 
         String environment = logHelper.getEnvironment();
 
@@ -133,7 +136,7 @@ public class JobLogAspect {
 
             logGoogleSheetsRepository.save(executionTimeLog);
 
-            String executionTimeMessage = notificationService.createExecutionTimeMessage(methodName, timeTaken);
+            String executionTimeMessage = notificationService.createExecutionTimeMessage(methodName, timeTaken); //
 
             notificationService.sendMessage(executionTimeMessage); // TODO : 예외도 같이 던져줘야 하나? 아니면 JobId 를 던져줘서 구글 시트로 확인할 수 있게 할까?
 

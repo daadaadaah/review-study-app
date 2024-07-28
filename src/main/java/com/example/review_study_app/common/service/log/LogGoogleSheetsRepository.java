@@ -11,7 +11,9 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -46,11 +49,16 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     private final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
 
     private Credential getCredentials() throws IOException {
-        ClassLoader loader = LogGoogleSheetsRepository.class.getClassLoader();
 
-        FileInputStream fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile());
+        ClassPathResource resource = new ClassPathResource(CREDENTIALS_FILE_PATH);
 
-        GoogleCredential credential = GoogleCredential.fromStream(fileInputStream).createScoped(SCOPES);
+        InputStream inputStream = resource.getInputStream();
+
+        if (inputStream == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+
+        GoogleCredential credential = GoogleCredential.fromStream(inputStream).createScoped(SCOPES);
 
         return credential;
     }

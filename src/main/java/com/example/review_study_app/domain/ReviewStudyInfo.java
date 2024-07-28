@@ -9,10 +9,10 @@ public class ReviewStudyInfo {
 
     /** 멤버 **/
     public static final List<Member> MEMBERS = Arrays.asList(
-        new Member("김찬웅", "Dove-kim"),
-        new Member("김준우", "Junuu"),
-        new Member("김도엽", "BrianDYKim"),
-        new Member("우경준", "Jay-WKJun"),
+//        new Member("김찬웅", "Dove-kim"), // TODO : 테스트 용으로 몇개 만 해보려구
+//        new Member("김준우", "Junuu"),
+//        new Member("김도엽", "BrianDYKim"),
+//        new Member("우경준", "Jay-WKJun"),
         new Member("조현준", "Tianea2160"),
         new Member("곽다희", "daadaadaah")
     );

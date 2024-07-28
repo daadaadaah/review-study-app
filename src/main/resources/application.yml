@@ -7,3 +7,6 @@ discord:
 google:
   spreadsheet:
     id: ${GOOGLE_SPREADSHEET_ID}
+spring:
+  profiles:
+    active: prod

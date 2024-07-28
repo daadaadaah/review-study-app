@@ -1,10 +1,14 @@
 package com.example.review_study_app.common.aop;
 
+import com.example.review_study_app.common.aop.LocalMethodExecutionTimeLoggingAspect.LocalEnvironmentCondition;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -24,5 +28,17 @@ public class LocalMethodExecutionTimeLoggingAspect {
         log.info("[local] "+joinPoint.getSignature().getName() + " executed in " + executionTime + "ms");
 
         return proceed;
+    }
+
+    class LocalEnvironmentCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            String env = context.getEnvironment().getProperty("spring.profiles.active");
+
+            log.info("현재 환경 : active={}", env);
+
+            return "local".equalsIgnoreCase(env);
+        }
     }
 }

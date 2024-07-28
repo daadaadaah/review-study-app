@@ -1,7 +1,7 @@
 package com.example.review_study_app.common.config;
 
-import com.example.review_study_app.log.LogGoogleSheetsRepository;
-import com.example.review_study_app.log.LogHelper;
+import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
+import com.example.review_study_app.common.service.log.LogHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

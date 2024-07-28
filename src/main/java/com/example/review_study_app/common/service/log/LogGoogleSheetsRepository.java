@@ -10,15 +10,18 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -53,6 +56,12 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         ClassPathResource resource = new ClassPathResource(CREDENTIALS_FILE_PATH);
 
         InputStream inputStream = resource.getInputStream();
+
+        // 파일 내용을 로그에 출력
+        String fileContent = new BufferedReader(new InputStreamReader(inputStream))
+            .lines().collect(Collectors.joining("\n"));
+        log.info("Loaded credentials file content: \n{}", fileContent);
+
 
         if (inputStream == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);

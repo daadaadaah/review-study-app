@@ -11,12 +11,14 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,21 +55,40 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
     private Credential getCredentials() throws IOException {
 
-        ClassPathResource resource = new ClassPathResource(CREDENTIALS_FILE_PATH);
+        String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
+        String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
+        String privateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY");
+        String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
+        String clientId = System.getenv("GOOGLE_SPREADSHEET_CLIENT_ID");
 
-        InputStream inputStream = resource.getInputStream();
+        // JSON 문자열 생성
+        String credentialsJson = String.format(
+            "{ \"type\": \"service_account\", " +
+                "\"project_id\": \"%s\", " +
+                "\"private_key_id\": \"%s\", " +
+                "\"private_key\": \"%s\", " +
+                "\"client_email\": \"%s\", " +
+                "\"client_id\": \"%s\", " +
+                "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\", " +
+                "\"token_uri\": \"https://oauth2.googleapis.com/token\", " +
+                "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\", " +
+                "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/google-spread-sheet%%40%s.iam.gserviceaccount.com\", " +
+                "\"universe_domain\": \"googleapis.com\" }",
+            projectId, privateKeyId, privateKey, clientEmail, clientId, projectId);
+
+        InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
 
         // 파일 내용을 로그에 출력
-        String fileContent = new BufferedReader(new InputStreamReader(inputStream))
+        String fileContent = new BufferedReader(new InputStreamReader(credentialsStream))
             .lines().collect(Collectors.joining("\n"));
         log.info("Loaded credentials file content: \n{}", fileContent);
 
 
-        if (inputStream == null) {
+        if (credentialsStream == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
 
-        GoogleCredential credential = GoogleCredential.fromStream(inputStream).createScoped(SCOPES);
+        GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
 
         return credential;
     }

@@ -1,16 +1,13 @@
 package com.example.review_study_app.common.aop;
 
-import com.example.review_study_app.common.aop.LocalMethodExecutionTimeLoggingAspect.LocalEnvironmentCondition;
+import com.example.review_study_app.common.config.LocalEnvironmentCondition;
 import com.example.review_study_app.common.service.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -43,20 +40,5 @@ public class LocalMethodExecutionTimeLoggingAspect {
         }
 
         return proceed;
-    }
-
-    /**
-     * 현재 여기서만 쓰이므로, 일단 여기에 넣어둔다.
-     */
-    class LocalEnvironmentCondition implements Condition {
-
-        @Override
-        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            String env = context.getEnvironment().getProperty("spring.profiles.active");
-
-            log.info("현재 환경 : active={}", env);
-
-            return "local".equalsIgnoreCase(env);
-        }
     }
 }

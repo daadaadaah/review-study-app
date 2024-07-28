@@ -63,32 +63,38 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
         // JSON 문자열 생성
         String credentialsJson = String.format(
-            "{ \"type\": \"service_account\", " +
-                "\"project_id\": \"%s\", " +
-                "\"private_key_id\": \"%s\", " +
-                "\"private_key\": \"%s\", " +
-                "\"client_email\": \"%s\", " +
-                "\"client_id\": \"%s\", " +
-                "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\", " +
-                "\"token_uri\": \"https://oauth2.googleapis.com/token\", " +
-                "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\", " +
-                "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/google-spread-sheet%%40%s.iam.gserviceaccount.com\", " +
-                "\"universe_domain\": \"googleapis.com\" }",
+            "{ \"type\": \"service_account\", \n" +
+                "\"project_id\": \"%s\", \n" +
+                "\"private_key_id\": \"%s\", \n" +
+                "\"private_key\": \"%s\", \n" +
+                "\"client_email\": \"%s\", \n" +
+                "\"client_id\": \"%s\", \n" +
+                "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\", \n" +
+                "\"token_uri\": \"https://oauth2.googleapis.com/token\", \n" +
+                "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\", \n" +
+                "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/google-spread-sheet%%40%s.iam.gserviceaccount.com\", \n" +
+                "\"universe_domain\": \"googleapis.com\" \n"
+                + " }",
             projectId, privateKeyId, privateKey, clientEmail, clientId, projectId);
+
 
         InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
 
         // 파일 내용을 로그에 출력
         String fileContent = new BufferedReader(new InputStreamReader(credentialsStream))
             .lines().collect(Collectors.joining("\n"));
+
         log.info("Loaded credentials file content: \n{}", fileContent);
 
+        // 로그를 출력한 후, 다시 InputStream 생성
+        credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
 
         if (credentialsStream == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
 
         GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
+
 
         return credential;
     }

@@ -42,6 +42,12 @@ public class ReviewStudyScheduler {
 //    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
     @Scheduled(fixedDelay = 1200000) // TODO : 테스트용
     public void runCreateNewIssue() {
+        // 환경 변수 값 가져오기
+        String myVariable = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
+
+        // 환경 변수 값 출력하기
+        log.info("Environment variable GOOGLE_SPREADSHEET_CLIENT_EMAIL: " + myVariable);
+
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
         int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);

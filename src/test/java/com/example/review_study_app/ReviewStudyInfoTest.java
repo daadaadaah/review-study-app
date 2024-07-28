@@ -4,7 +4,7 @@ import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOU
 import static com.example.review_study_app.common.utils.MyDateUtils.getNow;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
+import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

@@ -2,15 +2,15 @@ package com.example.review_study_app.scheduler;
 
 
 
-import com.example.review_study_app.job.JobResult;
-import com.example.review_study_app.github.exception.GetIssuesToCloseFailException;
-import com.example.review_study_app.github.exception.IsWeekNumberLabelPresentFailException;
-import com.example.review_study_app.github.exception.IssuesToCloseIsEmptyException;
-import com.example.review_study_app.github.GithubIssueApiFailureResult;
-import com.example.review_study_app.github.GithubIssueApiSuccessResult;
-import com.example.review_study_app.job.GithubJobFacade;
-import com.example.review_study_app.notification.NotificationService;
-import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
+import com.example.review_study_app.job.dto.JobResult;
+import com.example.review_study_app.step.exception.GetIssuesToCloseFailException;
+import com.example.review_study_app.step.exception.IsWeekNumberLabelPresentFailException;
+import com.example.review_study_app.step.exception.IssuesToCloseIsEmptyException;
+import com.example.review_study_app.job.dto.GithubIssueApiFailureResult;
+import com.example.review_study_app.job.dto.GithubIssueApiSuccessResult;
+import com.example.review_study_app.job.GithubJob;
+import com.example.review_study_app.common.service.notification.NotificationService;
+import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +25,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewStudySchedulerFacade {
 
-    private final GithubJobFacade githubJobFacade;
+    private final GithubJob githubJob;
 
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
-        GithubJobFacade githubJobFacade,
+        GithubJob githubJob,
         NotificationService notificationService
     ) {
-        this.githubJobFacade = githubJobFacade;
+        this.githubJob = githubJob;
         this.notificationService = notificationService;
     }
 
@@ -49,7 +49,7 @@ public class ReviewStudySchedulerFacade {
         log.info("주차 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubJobFacade.createNewLabel(year, weekNumber);
+            githubJob.createNewLabelJob(year, weekNumber);
 
             log.info("주차 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
@@ -84,7 +84,7 @@ public class ReviewStudySchedulerFacade {
         log.info("주간 회고 Issue 생성 Job 을 시작합니다. weekNumberLabelName = {} ", weekNumberLabelName);
 
         try {
-            JobResult jobResult = githubJobFacade.batchCreateNewWeeklyReviewIssues(ReviewStudyInfo.MEMBERS, year, weekNumber);
+            JobResult jobResult = githubJob.batchCreateNewWeeklyReviewIssuesJob(ReviewStudyInfo.MEMBERS, year, weekNumber);
 
             log.info("주간 회고 Issue 생성 Job 이 성공했습니다. weekNumberLabelName={}", weekNumberLabelName);
 
@@ -140,7 +140,7 @@ public class ReviewStudySchedulerFacade {
 
         try {
 
-            JobResult jobResult = githubJobFacade.batchCloseWeeklyReviewIssues(labelNameToClose);
+            JobResult jobResult = githubJob.batchCloseWeeklyReviewIssuesJob(labelNameToClose);
 
             log.info("주간 회고 Issue Close Job 성공했습니다. weekNumberLabelName = {} ", labelNameToClose);
 

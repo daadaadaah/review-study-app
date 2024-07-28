@@ -2,13 +2,13 @@ package com.example.review_study_app.scheduler;
 
 
 
-import com.example.review_study_app.github.JobResult;
+import com.example.review_study_app.job.JobResult;
 import com.example.review_study_app.github.exception.GetIssuesToCloseFailException;
 import com.example.review_study_app.github.exception.IsWeekNumberLabelPresentFailException;
 import com.example.review_study_app.github.exception.IssuesToCloseIsEmptyException;
 import com.example.review_study_app.github.GithubIssueApiFailureResult;
 import com.example.review_study_app.github.GithubIssueApiSuccessResult;
-import com.example.review_study_app.github.GithubJobFacade;
+import com.example.review_study_app.job.GithubJobFacade;
 import com.example.review_study_app.notification.NotificationService;
 import com.example.review_study_app.reviewstudy.ReviewStudyInfo;
 import java.util.List;

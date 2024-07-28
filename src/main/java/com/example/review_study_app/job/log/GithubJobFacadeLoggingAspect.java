@@ -1,8 +1,8 @@
-package com.example.review_study_app.log.aop;
+package com.example.review_study_app.job.log;
 
 
 import com.example.review_study_app.common.utils.BatchProcessIdContext;
-import com.example.review_study_app.github.JobResult;
+import com.example.review_study_app.job.JobResult;
 import com.example.review_study_app.github.BatchProcessStatus;
 import com.example.review_study_app.log.BatchProcessType;
 import com.example.review_study_app.log.ExecutionTimeLog;
@@ -62,7 +62,7 @@ public class GithubJobFacadeLoggingAspect {
      *      방법 3. job 이라는 패키지에 Job들을 모아놓고, job이라는 패키지들에게 AOP를 적용하는 방법
      *
      */
-    @Around("execution(* com.example.review_study_app.github.GithubJobFacade.*(..))")
+    @Around("execution(* com.example.review_study_app.job.GithubJobFacade.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 

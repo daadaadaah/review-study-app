@@ -2,7 +2,7 @@ package com.example.review_study_app.log;
 
 import com.example.review_study_app.github.BatchProcessStatus;
 import com.example.review_study_app.github.GithubApiTaskResult;
-import com.example.review_study_app.github.JobResult;
+import com.example.review_study_app.job.JobResult;
 import java.util.List;
 
 /**

@@ -1,5 +1,7 @@
-package com.example.review_study_app.github;
+package com.example.review_study_app.job;
 
+import com.example.review_study_app.github.BatchProcessStatus;
+import com.example.review_study_app.github.GithubApiTaskResult;
 import java.util.List;
 
 /**

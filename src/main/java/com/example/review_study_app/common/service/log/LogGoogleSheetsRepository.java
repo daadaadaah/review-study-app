@@ -25,8 +25,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -45,7 +46,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     @Value("${google.spreadsheet.id}")
     private String SPREAD_SHEET_ID;
 
-    private final String CREDENTIALS_FILE_PATH = "googlesheet/review-study-app-429913-1ec7b3c57791.json";
+    private final String CREDENTIALS_FILE_PATH = "googlesheet/local-review-study-app-429913-1ec7b3c57791.json";
 
     private final String APPLICATION_NAME = "google-sheet-project";
 
@@ -53,58 +54,11 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
     private final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
 
-    private Credential getCredentials() throws IOException {
+    private final Environment env;
 
-        String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
-        String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
-        String privateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY");
-        String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
-        String clientId = System.getenv("GOOGLE_SPREADSHEET_CLIENT_ID");
-
-        // JSON 문자열 생성
-        String credentialsJson = String.format(
-            "{ \"type\": \"service_account\", \n" +
-                "\"project_id\": \"%s\", \n" +
-                "\"private_key_id\": \"%s\", \n" +
-                "\"private_key\": \"%s\", \n" +
-                "\"client_email\": \"%s\", \n" +
-                "\"client_id\": \"%s\", \n" +
-                "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\", \n" +
-                "\"token_uri\": \"https://oauth2.googleapis.com/token\", \n" +
-                "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\", \n" +
-                "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/google-spread-sheet%%40%s.iam.gserviceaccount.com\", \n" +
-                "\"universe_domain\": \"googleapis.com\" \n"
-                + " }",
-            projectId, privateKeyId, privateKey, clientEmail, clientId, projectId);
-
-
-        InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
-
-        // 파일 내용을 로그에 출력
-        String fileContent = new BufferedReader(new InputStreamReader(credentialsStream))
-            .lines().collect(Collectors.joining("\n"));
-
-        log.info("Loaded credentials file content: \n{}", fileContent);
-
-        // 로그를 출력한 후, 다시 InputStream 생성
-        credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
-
-        if (credentialsStream == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
-
-        GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
-
-
-        return credential;
-    }
-
-    private Sheets createSheets() throws IOException, GeneralSecurityException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-
-        return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
-            .setApplicationName(APPLICATION_NAME)
-            .build();
+    @Autowired
+    public LogGoogleSheetsRepository(Environment env) {
+        this.env = env;
     }
 
     /**
@@ -164,5 +118,76 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
             throw exception;
         }
+    }
+
+    private Credential getCredentials() throws IOException {
+        if(env.acceptsProfiles("local")) {
+            return getCredentialsFromJsonFile();
+        } else if(env.acceptsProfiles("prod")) {
+            return getCredentialsFromEnvironmentVariable();
+        } else {
+            String activeProfiles = String.join(",", env.getActiveProfiles());
+
+            throw new RuntimeException("지원 하는 환경 프로파일(예 : local, prod)이 아닙니다. env="+activeProfiles); // TODO : 꼭 커스텀 예외 클래스로 만들어야 하나?
+        }
+    }
+
+    private Credential getCredentialsFromJsonFile() throws IOException {
+        ClassLoader loader = LogGoogleSheetsRepository.class.getClassLoader();
+
+        FileInputStream fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile());
+
+        if (fileInputStream == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH); // TODO
+        }
+
+        return GoogleCredential.fromStream(fileInputStream).createScoped(SCOPES);
+    }
+
+    private Credential getCredentialsFromEnvironmentVariable() throws IOException {
+        String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
+        String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
+        String privateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY"); // TODO : 파싱 문제
+        log.info("--------------------------privateKey={}", privateKey);
+
+        String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
+        String clientId = System.getenv("GOOGLE_SPREADSHEET_CLIENT_ID");
+
+        String credentialsJson = String.format(
+            "{ \"type\": \"service_account\", \n" +
+                "\"project_id\": \"%s\", \n" +
+                "\"private_key_id\": \"%s\", \n" +
+                "\"private_key\": \"%s\", \n" +
+                "\"client_email\": \"%s\", \n" +
+                "\"client_id\": \"%s\", \n" +
+                "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\", \n" +
+                "\"token_uri\": \"https://oauth2.googleapis.com/token\", \n" +
+                "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\", \n" +
+                "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/google-spread-sheet%%40%s.iam.gserviceaccount.com\", \n" +
+                "\"universe_domain\": \"googleapis.com\" \n"
+                + " }",
+            projectId, privateKeyId, privateKey, clientEmail, clientId, projectId);
+
+        log.info("--------------------------credentialsJson={}", credentialsJson);
+
+        InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
+
+        String fileContent = new BufferedReader(new InputStreamReader(credentialsStream)).lines().collect(Collectors.joining("\n"));
+
+        log.info("-------------------------- Loaded credentials file content: \n{}", fileContent);
+
+        credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8)); // 로그 확인용으로 스트림 한번 소비 했으니, 다시 생성
+
+        GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
+
+        return credential;
+    }
+
+    private Sheets createSheets() throws IOException, GeneralSecurityException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+
+        return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
+            .setApplicationName(APPLICATION_NAME)
+            .build();
     }
 }

@@ -8,17 +8,23 @@ import java.util.List;
 public class ReviewStudyInfo {
 
     /** 멤버 **/
-    public static final List<Member> MEMBERS = Arrays.asList(
-//        new Member("김찬웅", "Dove-kim"), // TODO : 테스트 용으로 몇개 만 해보려구
-//        new Member("김준우", "Junuu"),
-//        new Member("김도엽", "BrianDYKim"),
-//        new Member("우경준", "Jay-WKJun"),
-        new Member("조현준", "Tianea2160"),
-        new Member("곽다희", "daadaadaah")
-    );
+//    public static final List<Member> MEMBERS = Arrays.asList(
+////        new Member("김찬웅", "Dove-kim"), // TODO : 테스트 용으로 몇개 만 해보려구
+////        new Member("김준우", "Junuu"),
+////        new Member("김도엽", "BrianDYKim"),
+////        new Member("우경준", "Jay-WKJun"),
+//        new Member("조현준", "Tianea2160"),
+//        new Member("곽다희", "daadaadaah")
+//    );
 
+    public static final List<Member> MEMBERS = Arrays.asList(
+        new Member("곽다희2", "daadaadaah"),
+        new Member("곽다희1", "daadaadaah")
+    );
     /** 레포 **/
-    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
+//    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
+
+    public static final String REPOSITORY_NAME = "daadaadaah/reviewStudy-scheduler";
 
     public static String createRepositoryUrl(String path) {
         return "https://github.com/" + ReviewStudyInfo.REPOSITORY_NAME + "/" + path;

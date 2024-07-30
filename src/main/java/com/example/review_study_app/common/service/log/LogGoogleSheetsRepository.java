@@ -201,10 +201,10 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         String keyBody = privateKey.replace(begin, "").replace(end, "").trim();
 
         // Add new lines to the key body
-        keyBody = keyBody.replace(" ", "\n");
+        keyBody = keyBody.replace(" ", "\\n");
 
         // Reconstruct the private key with new lines
-        return begin + "\n" + keyBody + "\n" + end + "\n";
+        return begin + "\\n" + keyBody + "\\n" + end + "\\n";
     }
 
     private Sheets createSheets() throws IOException, GeneralSecurityException {

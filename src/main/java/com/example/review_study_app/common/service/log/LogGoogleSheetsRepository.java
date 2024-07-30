@@ -1,6 +1,7 @@
 package com.example.review_study_app.common.service.log;
 
 import com.example.review_study_app.common.service.log.exception.SaveLogFailException;
+import com.example.review_study_app.common.service.log.exception.UnsupportedProfileException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -10,20 +11,17 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,7 +118,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         }
     }
 
-    private Credential getCredentials() throws IOException {
+    private Credential getCredentials() throws Exception {
         if(env.acceptsProfiles("local")) {
             return getCredentialsFromJsonFile();
         } else if(env.acceptsProfiles("prod")) {
@@ -128,7 +126,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         } else {
             String activeProfiles = String.join(",", env.getActiveProfiles());
 
-            throw new RuntimeException("지원 하는 환경 프로파일(예 : local, prod)이 아닙니다. env="+activeProfiles); // TODO : 꼭 커스텀 예외 클래스로 만들어야 하나?
+            throw new UnsupportedProfileException("지원 하는 환경 프로파일(예 : local, prod)이 아닙니다. env="+activeProfiles); // TODO : 꼭 커스텀 예외 클래스로 만들어야 하나?
         }
     }
 
@@ -137,14 +135,8 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
         FileInputStream fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile());
 
-        String fileContent = new BufferedReader(new InputStreamReader(fileInputStream)).lines().collect(Collectors.joining("\n"));
-
-        log.info("-------------------------- Loaded credentials file content: \n{}", fileContent);
-
-        fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile()); // 로그 확인용으로 스트림 한번 소비 했으니, 다시 생성
-
         if (fileInputStream == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH); // TODO
+            throw new FileNotFoundException("google credential 파일 경로를 확인해주세요. path=" + CREDENTIALS_FILE_PATH); // TODO
         }
 
         return GoogleCredential.fromStream(fileInputStream).createScoped(SCOPES);
@@ -153,12 +145,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     private Credential getCredentialsFromEnvironmentVariable() throws IOException {
         String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
         String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
-        String beforePrivateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY"); // TODO : 파싱 문제
-        log.info("--------------------------beforePrivateKey={}", beforePrivateKey);
-
-        String privateKey = formatPrivateKey(beforePrivateKey); // TODO : 파싱 문제
-        log.info("--------------------------privateKey={}", privateKey);
-
+        String privateKey = formatPrivateKey(System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY"));
         String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
         String clientId = System.getenv("GOOGLE_SPREADSHEET_CLIENT_ID");
 
@@ -177,37 +164,35 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
                 + " }",
             projectId, privateKeyId, privateKey, clientEmail, clientId, projectId);
 
-        log.info("--------------------------credentialsJson={}", credentialsJson);
-
-        InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
-
-        String fileContent = new BufferedReader(new InputStreamReader(credentialsStream)).lines().collect(Collectors.joining("\n"));
-
-        log.info("-------------------------- Loaded credentials file content: \n{}", fileContent);
-
-        credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8)); // 로그 확인용으로 스트림 한번 소비 했으니, 다시 생성
+        InputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8)); // 참고 : 로그로 확인할 때, 스트림 한번 더 만들어줘야함!
 
         GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
 
         return credential;
     }
 
+    /**
+     * formatPrivateKey 는 의 privateKey를 google credential 형식에 맞게 포매팅해주는 함수이다.
+     *
+     * < "\\n"로 해주는 이유 >
+     * - JSON 문자열 내에서 제어 문자(예: 줄바꿈 문자 \n 등)은 직접 사용할 수 없고, 백슬래시를 사용하여 이스케이프 처리해야 하므로,
+     */
     private String formatPrivateKey(String privateKey) {
         // Split the private key into parts
         String begin = "-----BEGIN PRIVATE KEY-----";
         String end = "-----END PRIVATE KEY-----";
 
-        // Remove the begin and end parts
+        // body만 뽑아내기
         String keyBody = privateKey.replace(begin, "").replace(end, "").trim();
 
-        // Add new lines to the key body
+        // private key body에서 공백을 이스케이프된 줄바꿈으로 변경하기
         keyBody = keyBody.replace(" ", "\\n");
 
         // Reconstruct the private key with new lines
         return begin + "\\n" + keyBody + "\\n" + end + "\\n";
     }
 
-    private Sheets createSheets() throws IOException, GeneralSecurityException {
+    private Sheets createSheets() throws Exception {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
         return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())

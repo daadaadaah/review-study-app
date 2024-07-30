@@ -137,6 +137,12 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
         FileInputStream fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile());
 
+        String fileContent = new BufferedReader(new InputStreamReader(fileInputStream)).lines().collect(Collectors.joining("\n"));
+
+        log.info("-------------------------- Loaded credentials file content: \n{}", fileContent);
+
+        fileInputStream = new FileInputStream(loader.getResource(CREDENTIALS_FILE_PATH).getFile()); // 로그 확인용으로 스트림 한번 소비 했으니, 다시 생성
+
         if (fileInputStream == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH); // TODO
         }
@@ -147,7 +153,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     private Credential getCredentialsFromEnvironmentVariable() throws IOException {
         String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
         String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
-        String privateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY"); // TODO : 파싱 문제
+        String privateKey = formatPrivateKey(System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY")); // TODO : 파싱 문제
         log.info("--------------------------privateKey={}", privateKey);
 
         String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
@@ -181,6 +187,13 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         GoogleCredential credential = GoogleCredential.fromStream(credentialsStream).createScoped(SCOPES);
 
         return credential;
+    }
+
+    private static String formatPrivateKey(String privateKey) {
+        privateKey = privateKey.replace("-----END PRIVATE KEY-----", "-----END PRIVATE KEY-----\n");
+        privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n");
+
+        return privateKey.replace(" ", "\n");
     }
 
     private Sheets createSheets() throws IOException, GeneralSecurityException {

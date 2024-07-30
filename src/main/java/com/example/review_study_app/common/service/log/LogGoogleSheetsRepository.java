@@ -46,7 +46,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     @Value("${google.spreadsheet.id}")
     private String SPREAD_SHEET_ID;
 
-    private final String CREDENTIALS_FILE_PATH = "googlesheet/local-review-study-app-429913-1ec7b3c57791.json";
+    private final String CREDENTIALS_FILE_PATH = "googlesheet/local-review-study-app-429913-1ec7b3c57791.json"; // local에서만 사용하는 파일이라 Github에 없음!
 
     private final String APPLICATION_NAME = "google-sheet-project";
 
@@ -153,7 +153,10 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     private Credential getCredentialsFromEnvironmentVariable() throws IOException {
         String projectId = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
         String privateKeyId = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
-        String privateKey = formatPrivateKey(System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY")); // TODO : 파싱 문제
+        String beforePrivateKey = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY"); // TODO : 파싱 문제
+        log.info("--------------------------beforePrivateKey={}", beforePrivateKey);
+
+        String privateKey = formatPrivateKey(beforePrivateKey); // TODO : 파싱 문제
         log.info("--------------------------privateKey={}", privateKey);
 
         String clientEmail = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
@@ -189,11 +192,19 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         return credential;
     }
 
-    private static String formatPrivateKey(String privateKey) {
-        privateKey = privateKey.replace("-----END PRIVATE KEY-----", "-----END PRIVATE KEY-----\n");
-        privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n");
+    private String formatPrivateKey(String privateKey) {
+        // Split the private key into parts
+        String begin = "-----BEGIN PRIVATE KEY-----";
+        String end = "-----END PRIVATE KEY-----";
 
-        return privateKey.replace(" ", "\n");
+        // Remove the begin and end parts
+        String keyBody = privateKey.replace(begin, "").replace(end, "").trim();
+
+        // Add new lines to the key body
+        keyBody = keyBody.replace(" ", "\n");
+
+        // Reconstruct the private key with new lines
+        return begin + "\n" + keyBody + "\n" + end + "\n";
     }
 
     private Sheets createSheets() throws IOException, GeneralSecurityException {

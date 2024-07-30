@@ -40,43 +40,8 @@ public class ReviewStudyScheduler {
      * 매주 월요일 AM 00:30 에 모든 멤버의 이번주차 주간회고 Issues 를 생성하는 스케줄 함수
      */
 //    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
-    @Scheduled(fixedDelay = 1200000) // TODO : 테스트용
+    @Scheduled(fixedRate = 1200000) // TODO : 테스트용
     public void runCreateNewIssue() {
-        // 환경 변수 값 가져오기
-        String GOOGLE_SPREADSHEET_PROJECT_ID = System.getenv("GOOGLE_SPREADSHEET_PROJECT_ID");
-
-        // 환경 변수 값 출력하기
-        log.info("Environment variable GOOGLE_SPREADSHEET_PROJECT_ID: " + GOOGLE_SPREADSHEET_PROJECT_ID);
-
-
-        String GOOGLE_SPREADSHEET_PRIVATE_KEY_ID = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY_ID");
-
-        // 환경 변수 값 출력하기
-        log.info("Environment variable GOOGLE_SPREADSHEET_PRIVATE_KEY_ID: " + GOOGLE_SPREADSHEET_PRIVATE_KEY_ID);
-
-
-        String GOOGLE_SPREADSHEET_PRIVATE_KEY = System.getenv("GOOGLE_SPREADSHEET_PRIVATE_KEY");
-
-        // 환경 변수 값 출력하기
-        log.info("Environment variable GOOGLE_SPREADSHEET_PRIVATE_KEY: " + GOOGLE_SPREADSHEET_PRIVATE_KEY);
-
-        String GOOGLE_SPREADSHEET_CLIENT_EMAIL = System.getenv("GOOGLE_SPREADSHEET_CLIENT_EMAIL");
-
-        // 환경 변수 값 출력하기
-        log.info("Environment variable GOOGLE_SPREADSHEET_CLIENT_EMAIL: " + GOOGLE_SPREADSHEET_CLIENT_EMAIL);
-
-
-        String GOOGLE_SPREADSHEET_CLIENT_ID = System.getenv("GOOGLE_SPREADSHEET_CLIENT_ID");
-
-        // 환경 변수 값 출력하기
-        log.info("Environment variable GOOGLE_SPREADSHEET_CLIENT_ID: " + GOOGLE_SPREADSHEET_CLIENT_ID);
-
-
-
-
-
-
-
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 
         int currentYear = MyDateUtils.getCurrentYear(seoulDateTime);

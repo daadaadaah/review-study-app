@@ -36,13 +36,13 @@ public record JobDetailLog(
     long executionTime,
     String createdAt
 ) {
-    public static JobDetailLog of(long id, String environment, JobResult jobResult, long executionTime, String createdAt) {
+    public static JobDetailLog of(long id, String environment, String methodName, BatchProcessStatus status, String statusReason, JobResult jobResult, long executionTime, String createdAt) {
         return new JobDetailLog(
             id,
             environment,
-            jobResult.batchProcessName(),
-            jobResult.batchProcessStatus(),
-            jobResult.batchProcessStatusReason(),
+            methodName,
+            status,
+            statusReason,
             jobResult.successItems().size() + jobResult.failItems().size(),
             jobResult.successItems().size(),
             jobResult.successItems(),

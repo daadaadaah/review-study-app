@@ -83,7 +83,7 @@ public class LogHelper {
         threadLocalJobId.remove();
     }
 
-    public JobDetailLog createJobDetailLog(JobResult jobResult, long startTime, long endTime) {
+    public JobDetailLog createJobDetailLog(String methodName, BatchProcessStatus status, String statusReason, JobResult jobResult, long startTime, long endTime) {
         long timeTaken = endTime - startTime;
 
         long jobDetailLogId = endTime;
@@ -91,6 +91,9 @@ public class LogHelper {
         return JobDetailLog.of(
             jobDetailLogId,
             getEnvironment(),
+            methodName,
+            status,
+            statusReason,
             jobResult,
             timeTaken,
             getCreatedAt(startTime)
@@ -111,16 +114,6 @@ public class LogHelper {
             jobDetailLogId,
             timeTaken,
             getCreatedAt(endTime)
-        );
-    }
-
-    public JobResult createExceptionJobResult(String methodName, Exception exception) {
-        return new JobResult(
-            methodName,
-            BatchProcessStatus.STOPPED,
-            "예외 발생 : "+exception.getMessage(), // TODO : 현재 구조는 어떤 요청에 의해 예외가 발생했는지 모름! -> 개선 필요!
-            null,
-            null
         );
     }
 

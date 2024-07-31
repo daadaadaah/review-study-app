@@ -73,6 +73,9 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
                 long endTime = System.currentTimeMillis();
 
                 JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
+                    methodName,
+                    BatchProcessStatus.COMPLETED,
+                    "Job 수행 성공",
                     jobResult,
                     startTime,
                     endTime
@@ -98,10 +101,11 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            JobResult jobResult = logHelper.createExceptionJobResult(methodName, exception);
-
             JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
-                jobResult,
+                methodName,
+                BatchProcessStatus.STOPPED,
+                "예외 발생 : "+exception.getMessage(),
+                null,
                 startTime,
                 endTime
             );

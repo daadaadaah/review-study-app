@@ -1,9 +1,6 @@
 package com.example.review_study_app.common.config;
 
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
-import com.example.review_study_app.common.service.log.LogHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -11,19 +8,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
-
-    private final LogHelper logHelper;
-
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
-
-    @Autowired
-    public AppConfig(
-        LogHelper logHelper,
-        LogGoogleSheetsRepository logGoogleSheetsRepository
-    ) {
-        this.logHelper = logHelper;
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
-    }
 
     /**
      *

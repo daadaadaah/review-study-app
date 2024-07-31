@@ -1,12 +1,12 @@
 package com.example.review_study_app.job.aop;
 
 
+import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.job.dto.JobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
 import com.example.review_study_app.common.service.notification.NotificationService;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
@@ -26,23 +26,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-public class GithubJobFacadeLoggingAspect {
+public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
 
     private final LogHelper logHelper;
 
-    private final NotificationService notificationService;
-
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
+    private final LogService logService;
 
     @Autowired
     public GithubJobFacadeLoggingAspect(
         LogHelper logHelper,
-        NotificationService notificationService,
-        LogGoogleSheetsRepository logGoogleSheetsRepository
+        LogService logService
     ) {
         this.logHelper = logHelper;
-        this.notificationService = notificationService;
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
+        this.logService = logService;
     }
 
     /**
@@ -80,23 +76,6 @@ public class GithubJobFacadeLoggingAspect {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-
-
-
-
-//            new JobResult(
-//                methodName,
-//                BatchProcessStatus.COMPLETED,
-//                "Job 수행 성공",
-//                successItems,
-//                failItems
-//            );
-
-
-
-
-
-
             if(result instanceof JobResult) {
                 JobResult jobResult = (JobResult) result;
 
@@ -115,8 +94,6 @@ public class GithubJobFacadeLoggingAspect {
                     createdAt
                 );
 
-                logGoogleSheetsRepository.save(jobDetailLog);
-
                 ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                     BatchProcessIdContext.getJobId(),
                     null,
@@ -130,8 +107,7 @@ public class GithubJobFacadeLoggingAspect {
                     logHelper.getCreatedAt(endTime)
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
-
+                logService.saveJobLog(jobDetailLog, executionTimeLog);
                 return result;
             } else {
                 // TODO : 임시로 예외 던져주기
@@ -161,8 +137,6 @@ public class GithubJobFacadeLoggingAspect {
                 createdAt
             );
 
-            logGoogleSheetsRepository.save(jobDetailLog);
-
             ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 BatchProcessIdContext.getJobId(),
                 null,
@@ -176,7 +150,7 @@ public class GithubJobFacadeLoggingAspect {
                 logHelper.getCreatedAt(endTime)
             );
 
-            logGoogleSheetsRepository.save(executionTimeLog);
+            logService.saveJobLog(jobDetailLog, executionTimeLog);
             throw exception;
         } finally {
             BatchProcessIdContext.clearJobId();

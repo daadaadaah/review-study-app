@@ -1,5 +1,6 @@
 package com.example.review_study_app.task.httpclient.aop;
 
+import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.common.utils.BatchProcessIdContext;
@@ -25,17 +26,17 @@ import org.springframework.web.client.RestClientResponseException;
 @Component
 public class TaskRestTemplateLoggingAspect {
 
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
-
     private final LogHelper logHelper;
+
+    private final LogService logService;
 
     @Autowired
     public TaskRestTemplateLoggingAspect(
-        LogGoogleSheetsRepository logGoogleSheetsRepository,
-        LogHelper logHelper
+        LogHelper logHelper,
+        LogService logService
     ) {
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
-        this.logHelper =logHelper;
+        this.logHelper = logHelper;
+        this.logService = logService;
     }
 
     /**
@@ -100,8 +101,6 @@ public class TaskRestTemplateLoggingAspect {
                     logHelper.getCreatedAt(end)
                 );
 
-                logGoogleSheetsRepository.save(githubApiLog);
-
                 ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                     batchProcessId,
                     parentId,
@@ -115,7 +114,7 @@ public class TaskRestTemplateLoggingAspect {
                     logHelper.getCreatedAt(end)
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
+                logService.saveTaskLog(githubApiLog, executionTimeLog);
 
                 return result;
             }
@@ -143,8 +142,6 @@ public class TaskRestTemplateLoggingAspect {
                     logHelper.getCreatedAt(end)
                 );
 
-                logGoogleSheetsRepository.save(githubApiLog);
-
                 ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                     batchProcessId,
                     parentId,
@@ -158,7 +155,7 @@ public class TaskRestTemplateLoggingAspect {
                     logHelper.getCreatedAt(end)
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
+                logService.saveTaskLog(githubApiLog, executionTimeLog);
             }
 
             throw restClientResponseException;
@@ -170,7 +167,6 @@ public class TaskRestTemplateLoggingAspect {
         } finally {
             BatchProcessIdContext.clearTaskId();
         }
-
     }
 
     /**
@@ -180,17 +176,13 @@ public class TaskRestTemplateLoggingAspect {
     private String findCallerMethodNameForRestTemplate() {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
 
-        int index = 0;
-
         for (StackTraceElement element : stackTraceElements) {
             if (element.getClassName().startsWith("com.example.review_study_app.task.httpclient.RestTemplateHttpClient")) { // Adjust the package name to match your application's package
-                return stackTraceElements[index+1].getMethodName(); // RestTemplateHttpClient을 호출한 메서드명
+                return element.getMethodName(); // RestTemplateHttpClient을 호출한 메서드명
             }
-
-            index++;
         }
 
-        return "";
+        return ""; // TODO : 예외를 던져주는 것도 좋을 것 같음
     }
 
     private MyHttpResponse getMyHttpResponse(Object object) {

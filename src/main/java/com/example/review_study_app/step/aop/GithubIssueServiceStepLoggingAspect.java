@@ -1,14 +1,13 @@
 package com.example.review_study_app.step.aop;
 
 
+import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.service.log.entity.StepDetailLog;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
-import com.example.review_study_app.common.service.notification.NotificationService;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,19 +24,15 @@ public class GithubIssueServiceStepLoggingAspect {
 
     private final LogHelper logHelper;
 
-    private final NotificationService notificationService;
-
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
+    private final LogService logService;
 
     @Autowired
     public GithubIssueServiceStepLoggingAspect(
         LogHelper logHelper,
-        NotificationService notificationService,
-        LogGoogleSheetsRepository logGoogleSheetsRepository
+        LogService logService
     ) {
         this.logHelper = logHelper;
-        this.notificationService = notificationService;
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
+        this.logService = logService;
     }
 
     @Pointcut("target(com.example.review_study_app.step.GithubIssueServiceStep)")
@@ -84,8 +79,6 @@ public class GithubIssueServiceStepLoggingAspect {
                 createdAt
             );
 
-            logGoogleSheetsRepository.save(stepDetailLog);
-
             ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 stepId,
                 parentId,
@@ -99,7 +92,7 @@ public class GithubIssueServiceStepLoggingAspect {
                 createdAt
             );
 
-            logGoogleSheetsRepository.save(executionTimeLog);
+            logService.saveStepLog(stepDetailLog, executionTimeLog);
 
             return result;
         } catch (Exception exception) {
@@ -125,8 +118,6 @@ public class GithubIssueServiceStepLoggingAspect {
                 createdAt
             );
 
-            logGoogleSheetsRepository.save(stepDetailLog);
-
             ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
                 stepId,
                 parentId,
@@ -140,7 +131,7 @@ public class GithubIssueServiceStepLoggingAspect {
                 createdAt
             );
 
-            logGoogleSheetsRepository.save(executionTimeLog);
+            logService.saveStepLog(stepDetailLog, executionTimeLog);
 
             throw exception;
         } finally {

@@ -2,6 +2,11 @@ package com.example.review_study_app.common.service.log;
 
 import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 
+import com.example.review_study_app.common.enums.BatchProcessStatus;
+import com.example.review_study_app.common.enums.BatchProcessType;
+import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
+import com.example.review_study_app.common.service.log.entity.JobDetailLog;
+import com.example.review_study_app.job.dto.JobResult;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,48 +46,7 @@ public class LogHelper {
         this.environment =environment;
     }
 
-    public void setJobId() {
-        UUID uuid = UUID.randomUUID();
-
-        threadLocalJobId.set(uuid);
-    }
-
-    public UUID getJobId() {
-        return threadLocalJobId.get();
-    }
-
-    public void clearJobId() {
-        threadLocalJobId.remove();
-    }
-
-    public void setStepId() {
-        UUID uuid = UUID.randomUUID();
-
-        threadLocalStepId.set(uuid);
-    }
-
-    public UUID getStepId() {
-        return threadLocalStepId.get();
-    }
-
-    public void clearStepId() {
-        threadLocalStepId.remove();
-    }
-
-    public void setTaskId() {
-        UUID uuid = UUID.randomUUID();
-
-        threadLocalTaskId.set(uuid);
-    }
-
-    public UUID getTaskId() {
-        return threadLocalTaskId.get();
-    }
-
-    public void clearTaskId() {
-        threadLocalTaskId.remove();
-    }
-
+    /** 공통 **/
     public String getEnvironment() {
         String[] activeProfiles = environment.getActiveProfiles();
 
@@ -98,4 +62,92 @@ public class LogHelper {
     private ZonedDateTime getNowInSeoul(long currentTimeMillis) {
         return Instant.ofEpochMilli(currentTimeMillis).atZone(ZONE_ID_SEOUL);
     }
+
+    /** Job **/
+    public void setJobId() {
+        UUID uuid = UUID.randomUUID();
+
+        threadLocalJobId.set(uuid);
+    }
+
+    public UUID getJobId() {
+        return threadLocalJobId.get();
+    }
+
+    public void clearJobId() {
+        threadLocalJobId.remove();
+    }
+
+    public JobDetailLog createJobDetailLog(JobResult jobResult, long startTime, long endTime) {
+        long timeTaken = endTime - startTime;
+
+        long jobDetailLogId = endTime;
+
+        return JobDetailLog.of(
+            jobDetailLogId,
+            getEnvironment(),
+            jobResult,
+            timeTaken,
+            getCreatedAt(startTime)
+        );
+    }
+
+    public ExecutionTimeLog createJobExecutionTimeLog(String methodName, BatchProcessStatus status, String message, long jobDetailLogId, long startTime, long endTime) {
+        long timeTaken = endTime - startTime;
+
+        return ExecutionTimeLog.of(
+            getJobId(),
+            null,
+            getEnvironment(),
+            BatchProcessType.JOB,
+            methodName,
+            status,
+            message,
+            jobDetailLogId,
+            timeTaken,
+            getCreatedAt(endTime)
+        );
+    }
+
+    public JobResult createExceptionJobResult(String methodName, Exception exception) {
+        return new JobResult(
+            methodName,
+            BatchProcessStatus.STOPPED,
+            "예외 발생 : "+exception.getMessage(), // TODO : 현재 구조는 어떤 요청에 의해 예외가 발생했는지 모름! -> 개선 필요!
+            null,
+            null
+        );
+    }
+
+    /** Step **/
+    public void setStepId() {
+        UUID uuid = UUID.randomUUID();
+
+        threadLocalStepId.set(uuid);
+    }
+
+    public UUID getStepId() {
+        return threadLocalStepId.get();
+    }
+
+    public void clearStepId() {
+        threadLocalStepId.remove();
+    }
+
+
+    /** Task **/
+    public void setTaskId() {
+        UUID uuid = UUID.randomUUID();
+
+        threadLocalTaskId.set(uuid);
+    }
+
+    public UUID getTaskId() {
+        return threadLocalTaskId.get();
+    }
+
+    public void clearTaskId() {
+        threadLocalTaskId.remove();
+    }
+
 }

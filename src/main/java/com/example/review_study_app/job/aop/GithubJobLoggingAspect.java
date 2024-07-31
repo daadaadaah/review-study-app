@@ -61,10 +61,6 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        String environment = logHelper.getEnvironment();
-
-        String createdAt = logHelper.getCreatedAt(startTime);
-
         String methodName = joinPoint.getSignature().getName();
 
         try {
@@ -76,33 +72,23 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
 
                 long endTime = System.currentTimeMillis();
 
-                long jodDetailLogId = endTime; // 그냥, endTime으로 넣어줄 수 있는데, jodDetailLogId 이 구체적으로 어떤 값이 명시하기 위해 이렇게 함
-
-                long timeTaken = endTime - startTime;
-
-                JobDetailLog jobDetailLog = JobDetailLog.of(
-                    jodDetailLogId,
-                    environment,
+                JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
                     jobResult,
-
-                    timeTaken,
-                    createdAt
+                    startTime,
+                    endTime
                 );
 
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    logHelper.getJobId(),
-                    null,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.JOB,
+                ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
                     methodName,
                     BatchProcessStatus.COMPLETED,
                     "Job 수행 완료",
                     jobDetailLog.id(),
-                    timeTaken,
-                    logHelper.getCreatedAt(endTime)
+                    startTime,
+                    endTime
                 );
 
-                logService.saveJobLog(jobDetailLog, executionTimeLog);
+                saveJobLog(jobDetailLog, executionTimeLog);
+
                 return result;
             } else {
                 // TODO : 임시로 예외 던져주기
@@ -112,42 +98,31 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            long jodDetailLogId = endTime; // 그냥, endTime으로 넣어줄 수 있는데, jodDetailLogId 이 구체적으로 어떤 값이 명시하기 위해 이렇게 함
+            JobResult jobResult = logHelper.createExceptionJobResult(methodName, exception);
 
-            long timeTaken = endTime - startTime;
-
-            JobResult jobResult = new JobResult(
-                methodName,
-                BatchProcessStatus.STOPPED,
-                "예외 발생 : "+exception.getMessage(), // TODO : 현재 구조는 어떤 요청에 의해 예외가 발생했는지 모름! -> 개선 필요!
-                null,
-                null
-            );
-
-            JobDetailLog jobDetailLog = JobDetailLog.of(
-                jodDetailLogId,
-                environment,
+            JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
                 jobResult,
-                timeTaken,
-                createdAt
+                startTime,
+                endTime
             );
 
-            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                logHelper.getJobId(),
-                null,
-                logHelper.getEnvironment(),
-                BatchProcessType.JOB,
+            ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
                 jobDetailLog.id(),
-                timeTaken,
-                logHelper.getCreatedAt(endTime)
+                startTime,
+                endTime
             );
 
-            logService.saveJobLog(jobDetailLog, executionTimeLog);
+            saveJobLog(jobDetailLog, executionTimeLog);
+
             throw exception;
         }
+    }
+
+    private void saveJobLog(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
+        logService.saveJobLog(jobDetailLog, executionTimeLog);
     }
 }
 

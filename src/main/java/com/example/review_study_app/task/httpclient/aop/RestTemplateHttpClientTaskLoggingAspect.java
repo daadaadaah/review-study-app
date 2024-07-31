@@ -3,12 +3,10 @@ package com.example.review_study_app.task.httpclient.aop;
 import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
-import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.GithubApiLog;
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +14,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
@@ -24,14 +23,15 @@ import org.springframework.web.client.RestClientResponseException;
 @Slf4j
 @Aspect
 @Component
-public class TaskRestTemplateLoggingAspect {
+@Order(value = 2)
+public class RestTemplateHttpClientTaskLoggingAspect {
 
     private final LogHelper logHelper;
 
     private final LogService logService;
 
     @Autowired
-    public TaskRestTemplateLoggingAspect(
+    public RestTemplateHttpClientTaskLoggingAspect(
         LogHelper logHelper,
         LogService logService
     ) {
@@ -49,19 +49,15 @@ public class TaskRestTemplateLoggingAspect {
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
 
-        UUID uuid = UUID.randomUUID();
-
-        BatchProcessIdContext.setTaskId(uuid);
-
         Object[] args = joinPoint.getArgs();
 
         MyHttpRequest myHttpRequest = getMyHttpRequest(args);
 
         String url = myHttpRequest.url();
 
-        String batchProcessId = BatchProcessIdContext.getTaskId();
+        UUID batchProcessId = logHelper.getTaskId();
 
-        String parentId = BatchProcessIdContext.getStepId();
+        UUID parentId = logHelper.getStepId();
 
         String environment = logHelper.getEnvironment();
 
@@ -164,8 +160,6 @@ public class TaskRestTemplateLoggingAspect {
 
 
             throw exception;
-        } finally {
-            BatchProcessIdContext.clearTaskId();
         }
     }
 

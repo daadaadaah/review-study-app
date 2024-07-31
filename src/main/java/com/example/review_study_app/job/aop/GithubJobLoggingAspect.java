@@ -2,20 +2,18 @@ package com.example.review_study_app.job.aop;
 
 
 import com.example.review_study_app.common.service.log.LogService;
-import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.job.dto.JobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.LogHelper;
-import com.example.review_study_app.common.service.notification.NotificationService;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 
@@ -26,14 +24,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
+@Order(value = 2)
+public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
 
     private final LogHelper logHelper;
 
     private final LogService logService;
 
     @Autowired
-    public GithubJobFacadeLoggingAspect(
+    public GithubJobLoggingAspect(
         LogHelper logHelper,
         LogService logService
     ) {
@@ -61,10 +60,6 @@ public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAsp
     @Around("execution(* com.example.review_study_app.job.GithubJob.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-
-        UUID uuid = UUID.randomUUID();
-
-        BatchProcessIdContext.setJobId(uuid);
 
         String environment = logHelper.getEnvironment();
 
@@ -95,7 +90,7 @@ public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAsp
                 );
 
                 ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    BatchProcessIdContext.getJobId(),
+                    logHelper.getJobId(),
                     null,
                     logHelper.getEnvironment(),
                     BatchProcessType.JOB,
@@ -138,7 +133,7 @@ public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAsp
             );
 
             ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                BatchProcessIdContext.getJobId(),
+                logHelper.getJobId(),
                 null,
                 logHelper.getEnvironment(),
                 BatchProcessType.JOB,
@@ -152,8 +147,6 @@ public class GithubJobFacadeLoggingAspect { // TODO : 이름 GithubJobLoggingAsp
 
             logService.saveJobLog(jobDetailLog, executionTimeLog);
             throw exception;
-        } finally {
-            BatchProcessIdContext.clearJobId();
         }
     }
 }

@@ -2,7 +2,6 @@ package com.example.review_study_app.step.aop;
 
 
 import com.example.review_study_app.common.service.log.LogService;
-import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.service.log.entity.StepDetailLog;
 import com.example.review_study_app.common.enums.BatchProcessType;
@@ -15,11 +14,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
 @Component
+@Order(value = 2)
 public class GithubIssueServiceStepLoggingAspect {
 
     private final LogHelper logHelper;
@@ -45,10 +46,6 @@ public class GithubIssueServiceStepLoggingAspect {
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        UUID uuid = UUID.randomUUID();
-
-        BatchProcessIdContext.setStepId(uuid);
-
         String environment = logHelper.getEnvironment();
 
         String methodName = joinPoint.getSignature().getName();
@@ -57,9 +54,9 @@ public class GithubIssueServiceStepLoggingAspect {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-            String stepId = BatchProcessIdContext.getStepId();
+            UUID stepId = logHelper.getStepId();
 
-            String parentId = BatchProcessIdContext.getJobId();
+            UUID parentId = logHelper.getJobId();
 
             long endTime = System.currentTimeMillis();
 
@@ -98,9 +95,9 @@ public class GithubIssueServiceStepLoggingAspect {
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            String stepId = BatchProcessIdContext.getStepId();
+            UUID stepId = logHelper.getStepId();
 
-            String parentId = BatchProcessIdContext.getJobId();
+            UUID parentId = logHelper.getJobId();
 
             String createdAt = logHelper.getCreatedAt(endTime);
 
@@ -134,8 +131,6 @@ public class GithubIssueServiceStepLoggingAspect {
             logService.saveStepLog(stepDetailLog, executionTimeLog);
 
             throw exception;
-        } finally {
-            BatchProcessIdContext.clearStepId();
         }
     }
 }

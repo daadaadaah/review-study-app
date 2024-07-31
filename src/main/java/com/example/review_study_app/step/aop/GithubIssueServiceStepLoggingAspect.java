@@ -40,7 +40,7 @@ public class GithubIssueServiceStepLoggingAspect {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
     }
 
-    @Pointcut("target(com.example.review_study_app.step.github.service.GithubIssueService)")
+    @Pointcut("target(com.example.review_study_app.step.GithubIssueServiceStep)")
     public void targetImplementingInterface() {}
 
     /**

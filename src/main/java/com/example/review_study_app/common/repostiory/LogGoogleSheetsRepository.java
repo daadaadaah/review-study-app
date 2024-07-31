@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.log;
+package com.example.review_study_app.common.repostiory;
 
 import com.example.review_study_app.common.service.log.exception.SaveLogFailException;
 import com.example.review_study_app.common.service.log.exception.UnsupportedProfileException;
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

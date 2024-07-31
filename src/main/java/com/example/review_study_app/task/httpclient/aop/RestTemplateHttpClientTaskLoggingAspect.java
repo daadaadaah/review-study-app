@@ -1,13 +1,12 @@
 package com.example.review_study_app.task.httpclient.aop;
 
+import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
-import com.example.review_study_app.common.utils.BatchProcessIdContext;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.GithubApiLog;
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
@@ -23,19 +23,20 @@ import org.springframework.web.client.RestClientResponseException;
 @Slf4j
 @Aspect
 @Component
-public class TaskRestTemplateLoggingAspect {
-
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
+@Order(value = 2)
+public class RestTemplateHttpClientTaskLoggingAspect {
 
     private final LogHelper logHelper;
 
+    private final LogService logService;
+
     @Autowired
-    public TaskRestTemplateLoggingAspect(
-        LogGoogleSheetsRepository logGoogleSheetsRepository,
-        LogHelper logHelper
+    public RestTemplateHttpClientTaskLoggingAspect(
+        LogHelper logHelper,
+        LogService logService
     ) {
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
-        this.logHelper =logHelper;
+        this.logHelper = logHelper;
+        this.logService = logService;
     }
 
     /**
@@ -46,11 +47,7 @@ public class TaskRestTemplateLoggingAspect {
      */
     @Around("execution(* com.example.review_study_app.task.httpclient.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
-
-        UUID uuid = UUID.randomUUID();
-
-        BatchProcessIdContext.setTaskId(uuid);
+        long startTime = System.currentTimeMillis();
 
         Object[] args = joinPoint.getArgs();
 
@@ -58,119 +55,80 @@ public class TaskRestTemplateLoggingAspect {
 
         String url = myHttpRequest.url();
 
-        String batchProcessId = BatchProcessIdContext.getTaskId();
-
-        String parentId = BatchProcessIdContext.getStepId();
-
-        String environment = logHelper.getEnvironment();
-
         String httpMethod = joinPoint.getSignature().getName().toUpperCase();
 
         String batchProcessName = findCallerMethodNameForRestTemplate();
-
-        HttpHeaders requestHeaders = myHttpRequest.headers();
-
-        String requestBody = ((Object) myHttpRequest.body()) != null ? ((Object) myHttpRequest.body()).toString() : "";
 
         try {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-            long end = System.currentTimeMillis();
-
-            long responseTime = end - start;
+            long endTime = System.currentTimeMillis();
 
             MyHttpResponse myHttpResponse = getMyHttpResponse(result);
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려. 만약, Discord도 할 때, 클래스명 수정 필요
 
-                // url에 따라
-                GithubApiLog githubApiLog = new GithubApiLog(
-                    end,
-                    environment,
+                GithubApiLog githubApiLog = logHelper.createGithubApiLog(
                     batchProcessName,
                     httpMethod,
-                    url,
-                    requestHeaders,
-                    requestBody,
-                    myHttpResponse.statusCode(),
-                    myHttpResponse.headers(),
-                    myHttpResponse.body(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    myHttpRequest,
+                    myHttpResponse,
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(githubApiLog);
-
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    batchProcessId,
-                    parentId,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.TASK,
+                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
                     batchProcessName,
                     BatchProcessStatus.COMPLETED,
                     "Task 수행 완료",
                     githubApiLog.id(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
+                saveTaskLog(githubApiLog, executionTimeLog);
 
                 return result;
             }
 
             return result;
         } catch (RestClientResponseException restClientResponseException) {
-            long end = System.currentTimeMillis();
-
-            long responseTime = end - start;
+            long endTime = System.currentTimeMillis();
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려.
                 // url에 따라
-                GithubApiLog githubApiLog = new GithubApiLog(
-                    end,
-                    environment,
+                GithubApiLog githubApiLog = logHelper.createExceptionGithubApiLog(
                     batchProcessName,
                     httpMethod,
-                    url,
-                    requestHeaders,
-                    requestBody,
-                    restClientResponseException.getStatusCode().value(),
-                    restClientResponseException.getResponseHeaders(),
-                    restClientResponseException.getResponseBodyAsString(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    myHttpRequest,
+                    restClientResponseException,
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(githubApiLog);
-
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    batchProcessId,
-                    parentId,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.TASK,
+                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
                     batchProcessName,
                     BatchProcessStatus.STOPPED,
                     "예외 발생 : "+restClientResponseException.getMessage(),
                     githubApiLog.id(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
+                saveTaskLog(githubApiLog, executionTimeLog);
             }
 
             throw restClientResponseException;
         } catch (Exception exception) {
             log.error("exception={}", exception.getMessage()); // TODO : 예외 처리 어떻게 할까?
 
-
             throw exception;
-        } finally {
-            BatchProcessIdContext.clearTaskId();
         }
+    }
 
+    private void saveTaskLog(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
+        logService.saveTaskLog(githubApiLog, executionTimeLog);
     }
 
     /**
@@ -180,17 +138,13 @@ public class TaskRestTemplateLoggingAspect {
     private String findCallerMethodNameForRestTemplate() {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
 
-        int index = 0;
-
         for (StackTraceElement element : stackTraceElements) {
             if (element.getClassName().startsWith("com.example.review_study_app.task.httpclient.RestTemplateHttpClient")) { // Adjust the package name to match your application's package
-                return stackTraceElements[index+1].getMethodName(); // RestTemplateHttpClient을 호출한 메서드명
+                return element.getMethodName(); // RestTemplateHttpClient을 호출한 메서드명
             }
-
-            index++;
         }
 
-        return "";
+        return ""; // TODO : 예외를 던져주는 것도 좋을 것 같음
     }
 
     private MyHttpResponse getMyHttpResponse(Object object) {

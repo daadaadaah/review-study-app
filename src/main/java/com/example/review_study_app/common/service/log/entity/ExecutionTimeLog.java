@@ -2,6 +2,7 @@ package com.example.review_study_app.common.service.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
+import java.util.UUID;
 
 /**
  *
@@ -19,8 +20,8 @@ import com.example.review_study_app.common.enums.BatchProcessType;
  * @param createdAt : log 생성 시간 (예 : 2024-07-21 15:43:10)
  */
 public record ExecutionTimeLog<T>(
-    String id,
-    String parentId,
+    UUID id,
+    UUID parentId,
     String environment,
     String job,
     String step,
@@ -45,8 +46,8 @@ public record ExecutionTimeLog<T>(
      * - 또한, BatchProcessType 외의 값이 들어갈 오류도 없어, 방법 1 보다 안정적으로 수정할 수 있다는 점에서 방법 2를 택했다.
      */
     public static ExecutionTimeLog of(
-        String id,
-        String parentId,
+        UUID id,
+        UUID parentId,
         String environment,
         BatchProcessType batchProcessType,
         String batchProcessName,

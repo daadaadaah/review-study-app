@@ -11,6 +11,7 @@ import com.example.review_study_app.common.enums.BatchProcessStatus;
  * @param batchProcessStatus : 배치 프로세스 상태
  * @param batchProcessStatusReason : 배치 프로세스 상태 이유
  * @param stepReturnValue : Step 의 return 값
+ * @param executionTime : 소요시간
  * @param createdAt : log 생성 시간 (예 :  2024-07-21 15:43:10)
  */
 
@@ -21,6 +22,7 @@ public record StepDetailLog<T>(
     BatchProcessStatus batchProcessStatus,
     String batchProcessStatusReason,
     T stepReturnValue,
+    long executionTime,
     String createdAt
 ) {
 

@@ -1,21 +1,19 @@
 package com.example.review_study_app.job.aop;
 
 
-import com.example.review_study_app.common.utils.BatchProcessIdContext;
+import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.job.dto.JobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
-import com.example.review_study_app.common.service.notification.NotificationService;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 
@@ -26,23 +24,20 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-public class GithubJobFacadeLoggingAspect {
+@Order(value = 2)
+public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
 
     private final LogHelper logHelper;
 
-    private final NotificationService notificationService;
-
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
+    private final LogService logService;
 
     @Autowired
-    public GithubJobFacadeLoggingAspect(
+    public GithubJobLoggingAspect(
         LogHelper logHelper,
-        NotificationService notificationService,
-        LogGoogleSheetsRepository logGoogleSheetsRepository
+        LogService logService
     ) {
         this.logHelper = logHelper;
-        this.notificationService = notificationService;
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
+        this.logService = logService;
     }
 
     /**
@@ -66,71 +61,36 @@ public class GithubJobFacadeLoggingAspect {
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        UUID uuid = UUID.randomUUID();
-
-        BatchProcessIdContext.setJobId(uuid);
-
-        String environment = logHelper.getEnvironment();
-
-        String createdAt = logHelper.getCreatedAt(startTime);
-
         String methodName = joinPoint.getSignature().getName();
 
         try {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-
-
-
-
-//            new JobResult(
-//                methodName,
-//                BatchProcessStatus.COMPLETED,
-//                "Job 수행 성공",
-//                successItems,
-//                failItems
-//            );
-
-
-
-
-
-
             if(result instanceof JobResult) {
                 JobResult jobResult = (JobResult) result;
 
                 long endTime = System.currentTimeMillis();
 
-                long jodDetailLogId = endTime; // 그냥, endTime으로 넣어줄 수 있는데, jodDetailLogId 이 구체적으로 어떤 값이 명시하기 위해 이렇게 함
-
-                long timeTaken = endTime - startTime;
-
-                JobDetailLog jobDetailLog = JobDetailLog.of(
-                    jodDetailLogId,
-                    environment,
+                JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
+                    methodName,
+                    BatchProcessStatus.COMPLETED,
+                    "Job 수행 성공",
                     jobResult,
-
-                    timeTaken,
-                    createdAt
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(jobDetailLog);
-
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    BatchProcessIdContext.getJobId(),
-                    null,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.JOB,
+                ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
                     methodName,
                     BatchProcessStatus.COMPLETED,
                     "Job 수행 완료",
                     jobDetailLog.id(),
-                    timeTaken,
-                    logHelper.getCreatedAt(endTime)
+                    startTime,
+                    endTime
                 );
 
-                logGoogleSheetsRepository.save(executionTimeLog);
+                saveJobLog(jobDetailLog, executionTimeLog);
 
                 return result;
             } else {
@@ -141,46 +101,32 @@ public class GithubJobFacadeLoggingAspect {
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            long jodDetailLogId = endTime; // 그냥, endTime으로 넣어줄 수 있는데, jodDetailLogId 이 구체적으로 어떤 값이 명시하기 위해 이렇게 함
-
-            long timeTaken = endTime - startTime;
-
-            JobResult jobResult = new JobResult(
+            JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
                 methodName,
                 BatchProcessStatus.STOPPED,
-                "예외 발생 : "+exception.getMessage(), // TODO : 현재 구조는 어떤 요청에 의해 예외가 발생했는지 모름! -> 개선 필요!
+                "예외 발생 : "+exception.getMessage(),
                 null,
-                null
+                startTime,
+                endTime
             );
 
-            JobDetailLog jobDetailLog = JobDetailLog.of(
-                jodDetailLogId,
-                environment,
-                jobResult,
-                timeTaken,
-                createdAt
-            );
-
-            logGoogleSheetsRepository.save(jobDetailLog);
-
-            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                BatchProcessIdContext.getJobId(),
-                null,
-                logHelper.getEnvironment(),
-                BatchProcessType.JOB,
+            ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
                 jobDetailLog.id(),
-                timeTaken,
-                logHelper.getCreatedAt(endTime)
+                startTime,
+                endTime
             );
 
-            logGoogleSheetsRepository.save(executionTimeLog);
+            saveJobLog(jobDetailLog, executionTimeLog);
+
             throw exception;
-        } finally {
-            BatchProcessIdContext.clearJobId();
         }
+    }
+
+    private void saveJobLog(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
+        logService.saveJobLog(jobDetailLog, executionTimeLog);
     }
 }
 

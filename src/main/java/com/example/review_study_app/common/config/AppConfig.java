@@ -2,11 +2,17 @@ package com.example.review_study_app.common.config;
 
 import com.example.review_study_app.common.service.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.LogHelper;
+import com.example.review_study_app.common.service.event.LogMessageEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -50,5 +56,20 @@ public class AppConfig {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    @Primary
+    @Bean
+    public Queue<LogMessageEvent> detailLogMessageEventQueue() {
+        return new ConcurrentLinkedQueue<>();
+    }
+
+    @Bean
+    public TaskScheduler scheduledTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1); // 스케줄링 작업에 사용할 스레드 풀의 크기
+        scheduler.setThreadNamePrefix("ScheduledTask-"); // 스레드 이름 접두사
+        scheduler.initialize();
+        return scheduler;
     }
 }

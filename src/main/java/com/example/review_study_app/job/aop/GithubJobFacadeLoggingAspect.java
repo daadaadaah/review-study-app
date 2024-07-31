@@ -62,7 +62,7 @@ public class GithubJobFacadeLoggingAspect {
      *      방법 3. job 이라는 패키지에 Job들을 모아놓고, job이라는 패키지들에게 AOP를 적용하는 방법
      *
      */
-    @Around("execution(* com.example.review_study_app.job.GithubJobFacade.*(..))")
+    @Around("execution(* com.example.review_study_app.job.GithubJob.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 

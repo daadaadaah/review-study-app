@@ -47,7 +47,7 @@ public class RestTemplateHttpClientTaskLoggingAspect {
      */
     @Around("execution(* com.example.review_study_app.task.httpclient.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         Object[] args = joinPoint.getArgs();
 
@@ -55,112 +55,80 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
         String url = myHttpRequest.url();
 
-        UUID batchProcessId = logHelper.getTaskId();
-
-        UUID parentId = logHelper.getStepId();
-
-        String environment = logHelper.getEnvironment();
-
         String httpMethod = joinPoint.getSignature().getName().toUpperCase();
 
         String batchProcessName = findCallerMethodNameForRestTemplate();
-
-        HttpHeaders requestHeaders = myHttpRequest.headers();
-
-        String requestBody = ((Object) myHttpRequest.body()) != null ? ((Object) myHttpRequest.body()).toString() : "";
 
         try {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-            long end = System.currentTimeMillis();
-
-            long responseTime = end - start;
+            long endTime = System.currentTimeMillis();
 
             MyHttpResponse myHttpResponse = getMyHttpResponse(result);
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려. 만약, Discord도 할 때, 클래스명 수정 필요
 
-                // url에 따라
-                GithubApiLog githubApiLog = new GithubApiLog(
-                    end,
-                    environment,
+                GithubApiLog githubApiLog = logHelper.createGithubApiLog(
                     batchProcessName,
                     httpMethod,
-                    url,
-                    requestHeaders,
-                    requestBody,
-                    myHttpResponse.statusCode(),
-                    myHttpResponse.headers(),
-                    myHttpResponse.body(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    myHttpRequest,
+                    myHttpResponse,
+                    startTime,
+                    endTime
                 );
 
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    batchProcessId,
-                    parentId,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.TASK,
+                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
                     batchProcessName,
                     BatchProcessStatus.COMPLETED,
                     "Task 수행 완료",
                     githubApiLog.id(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    startTime,
+                    endTime
                 );
 
-                logService.saveTaskLog(githubApiLog, executionTimeLog);
+                saveTaskLog(githubApiLog, executionTimeLog);
 
                 return result;
             }
 
             return result;
         } catch (RestClientResponseException restClientResponseException) {
-            long end = System.currentTimeMillis();
-
-            long responseTime = end - start;
+            long endTime = System.currentTimeMillis();
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려.
                 // url에 따라
-                GithubApiLog githubApiLog = new GithubApiLog(
-                    end,
-                    environment,
+                GithubApiLog githubApiLog = logHelper.createExceptionGithubApiLog(
                     batchProcessName,
                     httpMethod,
-                    url,
-                    requestHeaders,
-                    requestBody,
-                    restClientResponseException.getStatusCode().value(),
-                    restClientResponseException.getResponseHeaders(),
-                    restClientResponseException.getResponseBodyAsString(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    myHttpRequest,
+                    restClientResponseException,
+                    startTime,
+                    endTime
                 );
 
-                ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                    batchProcessId,
-                    parentId,
-                    logHelper.getEnvironment(),
-                    BatchProcessType.TASK,
+                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
                     batchProcessName,
                     BatchProcessStatus.STOPPED,
                     "예외 발생 : "+restClientResponseException.getMessage(),
                     githubApiLog.id(),
-                    responseTime,
-                    logHelper.getCreatedAt(end)
+                    startTime,
+                    endTime
                 );
 
-                logService.saveTaskLog(githubApiLog, executionTimeLog);
+                saveTaskLog(githubApiLog, executionTimeLog);
             }
 
             throw restClientResponseException;
         } catch (Exception exception) {
             log.error("exception={}", exception.getMessage()); // TODO : 예외 처리 어떻게 할까?
 
-
             throw exception;
         }
+    }
+
+    private void saveTaskLog(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
+        logService.saveTaskLog(githubApiLog, executionTimeLog);
     }
 
     /**

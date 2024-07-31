@@ -46,47 +46,30 @@ public class GithubIssueServiceStepLoggingAspect {
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        String environment = logHelper.getEnvironment();
-
         String methodName = joinPoint.getSignature().getName();
 
         try {
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-            UUID stepId = logHelper.getStepId();
-
-            UUID parentId = logHelper.getJobId();
-
             long endTime = System.currentTimeMillis();
 
-            String createdAt = logHelper.getCreatedAt(endTime);
-
-            long timeTaken = endTime - startTime;
-
-            long stepDetailLogId = endTime;
-
-            StepDetailLog stepDetailLog = new StepDetailLog(
-                stepDetailLogId,
-                environment,
+            StepDetailLog stepDetailLog = logHelper.createStepDetailLog(
                 methodName,
                 BatchProcessStatus.COMPLETED,
                 "Step 수행 완료",
                 result,
-                createdAt
+                startTime,
+                endTime
             );
 
-            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                stepId,
-                parentId,
-                environment,
-                BatchProcessType.STEP,
+            ExecutionTimeLog executionTimeLog = logHelper.createStepExecutionTimeLog(
                 methodName,
-                BatchProcessStatus.COMPLETED,
-                "Step 수행 완료",
-                endTime,
-                timeTaken,
-                createdAt
+                stepDetailLog.batchProcessStatus(),
+                stepDetailLog.batchProcessStatusReason(),
+                stepDetailLog.id(),
+                startTime,
+                endTime
             );
 
             logService.saveStepLog(stepDetailLog, executionTimeLog);
@@ -95,37 +78,22 @@ public class GithubIssueServiceStepLoggingAspect {
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            UUID stepId = logHelper.getStepId();
-
-            UUID parentId = logHelper.getJobId();
-
-            String createdAt = logHelper.getCreatedAt(endTime);
-
-            long timeTaken = System.currentTimeMillis() - startTime;
-
-            long stepDetailLogId = endTime;
-
-            StepDetailLog stepDetailLog = new StepDetailLog(
-                stepDetailLogId,
-                environment,
+            StepDetailLog stepDetailLog = logHelper.createStepDetailLog(
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
-                exception, // TODO : 어떤걸 넣어주는게 좋을까?
-                createdAt
+                exception,
+                startTime,
+                endTime
             );
 
-            ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
-                stepId,
-                parentId,
-                environment,
-                BatchProcessType.STEP,
+            ExecutionTimeLog executionTimeLog = logHelper.createStepExecutionTimeLog(
                 methodName,
-                BatchProcessStatus.STOPPED,
-                "예외 발생 : "+exception.getMessage(),
-                endTime,
-                timeTaken,
-                createdAt
+                stepDetailLog.batchProcessStatus(),
+                stepDetailLog.batchProcessStatusReason(),
+                stepDetailLog.id(),
+                startTime,
+                endTime
             );
 
             logService.saveStepLog(stepDetailLog, executionTimeLog);

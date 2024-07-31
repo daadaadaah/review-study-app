@@ -6,6 +6,7 @@ import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
+import com.example.review_study_app.common.service.log.entity.StepDetailLog;
 import com.example.review_study_app.job.dto.JobResult;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -134,6 +135,39 @@ public class LogHelper {
         threadLocalStepId.remove();
     }
 
+    public <T> StepDetailLog createStepDetailLog(String methodName, BatchProcessStatus status, String statusReason, T result,long startTime, long endTime) {
+        long timeTaken = endTime - startTime;
+
+        long stepDetailLogId = endTime;
+
+        return new StepDetailLog(
+            stepDetailLogId,
+            getEnvironment(),
+            methodName,
+            status,
+            statusReason,
+            result,
+            timeTaken,
+            getCreatedAt(endTime)
+        );
+    }
+
+    public ExecutionTimeLog createStepExecutionTimeLog(String methodName, BatchProcessStatus status, String message, long stepDetailLogId, long startTime, long endTime) {
+        long timeTaken = endTime - startTime;
+
+        return ExecutionTimeLog.of(
+            getStepId(),
+            getJobId(),
+            getEnvironment(),
+            BatchProcessType.STEP,
+            methodName,
+            status,
+            message,
+            stepDetailLogId,
+            timeTaken,
+            getCreatedAt(endTime)
+        );
+    }
 
     /** Task **/
     public void setTaskId() {

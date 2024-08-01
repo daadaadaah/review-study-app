@@ -3,11 +3,8 @@ package com.example.review_study_app.step.aop;
 
 import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.service.log.entity.StepDetailLog;
-import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
+import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.common.service.log.LogHelper;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -54,51 +51,34 @@ public class GithubIssueServiceStepLoggingAspect {
 
             long endTime = System.currentTimeMillis();
 
-            StepDetailLog stepDetailLog = logHelper.createStepDetailLog(
+            saveStepLog(new SaveStepLogDto(
                 methodName,
                 BatchProcessStatus.COMPLETED,
                 "Step 수행 완료",
                 result,
                 startTime,
                 endTime
-            );
-
-            ExecutionTimeLog executionTimeLog = logHelper.createStepExecutionTimeLog(
-                methodName,
-                stepDetailLog.batchProcessStatus(),
-                stepDetailLog.batchProcessStatusReason(),
-                stepDetailLog.id(),
-                startTime,
-                endTime
-            );
-
-            logService.saveStepLog(stepDetailLog, executionTimeLog);
+            ));
 
             return result;
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            StepDetailLog stepDetailLog = logHelper.createStepDetailLog(
+
+            saveStepLog(new SaveStepLogDto(
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
                 exception,
                 startTime,
                 endTime
-            );
-
-            ExecutionTimeLog executionTimeLog = logHelper.createStepExecutionTimeLog(
-                methodName,
-                stepDetailLog.batchProcessStatus(),
-                stepDetailLog.batchProcessStatusReason(),
-                stepDetailLog.id(),
-                startTime,
-                endTime
-            );
-
-            logService.saveStepLog(stepDetailLog, executionTimeLog);
+            ));
 
             throw exception;
         }
+    }
+
+    private void saveStepLog(SaveStepLogDto saveStepLogDto) {
+        logService.saveStepLog(saveStepLogDto);
     }
 }

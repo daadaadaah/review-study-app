@@ -3,6 +3,7 @@ package com.example.review_study_app.common.service.log;
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.repostiory.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
+import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.GithubApiLog;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
@@ -57,10 +58,31 @@ public class DirectSaveLogService implements LogService {
     }
 
     @Async("logSaveTaskExecutor")
-    public void saveStepLog(StepDetailLog stepDetailLog, ExecutionTimeLog executionTimeLog) {
-        logGoogleSheetsRepository.save(stepDetailLog);
+    public void saveStepLog(SaveStepLogDto saveStepLogDto) {
 
-        logGoogleSheetsRepository.save(executionTimeLog);
+        long stepDetailLogId = saveStepLogDto.endTime();
+
+        logGoogleSheetsRepository.save(StepDetailLog.of(
+            stepDetailLogId,
+            logHelper.getEnvironment(),
+            saveStepLogDto,
+            logHelper.getCreatedAt(saveStepLogDto.endTime())
+        ));
+
+        long timeTaken = saveStepLogDto.endTime() - saveStepLogDto.startTime();
+
+        logGoogleSheetsRepository.save(ExecutionTimeLog.of(
+            logHelper.getStepId(),
+            logHelper.getJobId(),
+            logHelper.getEnvironment(),
+            BatchProcessType.STEP,
+            saveStepLogDto.methodName(),
+            saveStepLogDto.status(),
+            saveStepLogDto.statusReason(),
+            stepDetailLogId,
+            timeTaken,
+            logHelper.getCreatedAt(saveStepLogDto.endTime())
+        ));
     }
 
     @Async("logSaveTaskExecutor")

@@ -107,40 +107,6 @@ public class LogHelper {
         threadLocalStepId.remove();
     }
 
-    public <T> StepDetailLog createStepDetailLog(String methodName, BatchProcessStatus status, String statusReason, T result,long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        long stepDetailLogId = endTime;
-
-        return new StepDetailLog(
-            stepDetailLogId,
-            getEnvironment(),
-            methodName,
-            status,
-            statusReason,
-            result,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
-    public ExecutionTimeLog createStepExecutionTimeLog(String methodName, BatchProcessStatus status, String message, long stepDetailLogId, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        return ExecutionTimeLog.of(
-            getStepId(),
-            getJobId(),
-            getEnvironment(),
-            BatchProcessType.STEP,
-            methodName,
-            status,
-            message,
-            stepDetailLogId,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
     /** Task **/
     public void setTaskId() {
         UUID uuid = UUID.randomUUID();

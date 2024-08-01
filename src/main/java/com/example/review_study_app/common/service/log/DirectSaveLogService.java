@@ -1,6 +1,8 @@
 package com.example.review_study_app.common.service.log;
 
+import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.repostiory.LogGoogleSheetsRepository;
+import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.GithubApiLog;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
@@ -17,18 +19,41 @@ public class DirectSaveLogService implements LogService {
 
     private final LogGoogleSheetsRepository logGoogleSheetsRepository;
 
+    private final LogHelper logHelper;
+
     @Autowired
     public DirectSaveLogService(
-        LogGoogleSheetsRepository logGoogleSheetsRepository
+        LogGoogleSheetsRepository logGoogleSheetsRepository,
+        LogHelper logHelper
     ) {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
+        this.logHelper = logHelper;
     }
 
     @Async("logSaveTaskExecutor")
-    public void saveJobLog(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
-        logGoogleSheetsRepository.save(jobDetailLog);
+    public void saveJobLog(SaveJobLogDto saveJobLogDto) {
 
-        logGoogleSheetsRepository.save(executionTimeLog);
+        long jobDetailLogId = saveJobLogDto.endTime();
+
+        logGoogleSheetsRepository.save(JobDetailLog.of(
+            jobDetailLogId,
+            logHelper.getEnvironment(),
+            saveJobLogDto,
+            logHelper.getCreatedAt(saveJobLogDto.startTime())
+        ));
+
+        logGoogleSheetsRepository.save(ExecutionTimeLog.of(
+            logHelper.getJobId(),
+            null,
+            logHelper.getEnvironment(),
+            BatchProcessType.JOB,
+            saveJobLogDto.methodName(),
+            saveJobLogDto.status(),
+            saveJobLogDto.statusReason(),
+            jobDetailLogId,
+            saveJobLogDto.endTime() - saveJobLogDto.startTime(),
+            logHelper.getCreatedAt(saveJobLogDto.startTime())
+        ));
     }
 
     @Async("logSaveTaskExecutor")

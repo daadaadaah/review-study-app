@@ -1,6 +1,6 @@
 package com.example.review_study_app.common.httpclient.aop;
 
-import com.example.review_study_app.service.log.LogHelper;
+import com.example.review_study_app.service.log.helper.LogHelper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

@@ -1,6 +1,6 @@
 package com.example.review_study_app.service.github.aop;
 
-import com.example.review_study_app.service.log.LogHelper;
+import com.example.review_study_app.service.log.helper.LogHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

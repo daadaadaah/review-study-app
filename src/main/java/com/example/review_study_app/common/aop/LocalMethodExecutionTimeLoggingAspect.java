@@ -1,7 +1,7 @@
 package com.example.review_study_app.common.aop;
 
 import com.example.review_study_app.common.config.LocalEnvironmentCondition;
-import com.example.review_study_app.common.service.notification.NotificationService;
+import com.example.review_study_app.service.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

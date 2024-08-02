@@ -2,14 +2,14 @@ package com.example.review_study_app.scheduler;
 
 
 
-import com.example.review_study_app.job.dto.JobResult;
-import com.example.review_study_app.step.exception.GetIssuesToCloseFailException;
-import com.example.review_study_app.step.exception.IsWeekNumberLabelPresentFailException;
-import com.example.review_study_app.step.exception.IssuesToCloseIsEmptyException;
-import com.example.review_study_app.job.dto.GithubIssueApiFailureResult;
-import com.example.review_study_app.job.dto.GithubIssueApiSuccessResult;
-import com.example.review_study_app.job.GithubJob;
-import com.example.review_study_app.common.service.notification.NotificationService;
+import com.example.review_study_app.service.github.dto.GithubJobResult;
+import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
+import com.example.review_study_app.service.github.exception.IsWeekNumberLabelPresentFailException;
+import com.example.review_study_app.service.github.exception.IssuesToCloseIsEmptyException;
+import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.GithubIssueJobService;
+import com.example.review_study_app.service.notification.NotificationService;
 import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,16 +25,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewStudySchedulerFacade {
 
-    private final GithubJob githubJob;
+    private final GithubIssueJobService githubIssueJobService;
 
     private final NotificationService notificationService;
 
     @Autowired
     public ReviewStudySchedulerFacade(
-        GithubJob githubJob,
+        GithubIssueJobService githubIssueJobService,
         NotificationService notificationService
     ) {
-        this.githubJob = githubJob;
+        this.githubIssueJobService = githubIssueJobService;
         this.notificationService = notificationService;
     }
 
@@ -49,7 +49,7 @@ public class ReviewStudySchedulerFacade {
         log.info("주차 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubJob.createNewLabelJob(year, weekNumber);
+            githubIssueJobService.createNewLabelJob(year, weekNumber);
 
             log.info("주차 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 
@@ -84,11 +84,11 @@ public class ReviewStudySchedulerFacade {
         log.info("주간 회고 Issue 생성 Job 을 시작합니다. weekNumberLabelName = {} ", weekNumberLabelName);
 
         try {
-            JobResult jobResult = githubJob.batchCreateNewWeeklyReviewIssuesJob(ReviewStudyInfo.MEMBERS, year, weekNumber);
+            GithubJobResult githubJobResult = githubIssueJobService.batchCreateNewWeeklyReviewIssuesJob(ReviewStudyInfo.MEMBERS, year, weekNumber);
 
             log.info("주간 회고 Issue 생성 Job 이 성공했습니다. weekNumberLabelName={}", weekNumberLabelName);
 
-            notifyCreateNewWeeklyReviewIssuesResult(weekNumberLabelName, jobResult);
+            notifyCreateNewWeeklyReviewIssuesResult(weekNumberLabelName, githubJobResult);
         } catch (IsWeekNumberLabelPresentFailException isWeekNumberLabelPresentFailException) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 라벨 존재 여부 파악 실패) : weekNumberLabelName={}, exception={}", weekNumberLabelName, isWeekNumberLabelPresentFailException.getMessage());
 
@@ -104,10 +104,10 @@ public class ReviewStudySchedulerFacade {
         }
     }
 
-    private void notifyCreateNewWeeklyReviewIssuesResult(String weekNumberLabelName, JobResult jobResult) {
-        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
+    private void notifyCreateNewWeeklyReviewIssuesResult(String weekNumberLabelName, GithubJobResult githubJobResult) {
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = githubJobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = githubJobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
         // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()
@@ -140,11 +140,11 @@ public class ReviewStudySchedulerFacade {
 
         try {
 
-            JobResult jobResult = githubJob.batchCloseWeeklyReviewIssuesJob(labelNameToClose);
+            GithubJobResult githubJobResult = githubIssueJobService.batchCloseWeeklyReviewIssuesJob(labelNameToClose);
 
             log.info("주간 회고 Issue Close Job 성공했습니다. weekNumberLabelName = {} ", labelNameToClose);
 
-            notifyCloseWeeklyReviewIssueResult(labelNameToClose, jobResult);
+            notifyCloseWeeklyReviewIssueResult(labelNameToClose, githubJobResult);
 
         } catch (GetIssuesToCloseFailException getIssuesToCloseFailException) {
             log.error("주간 회고 Issue Close Job 실패(원인 : Close할 Issue 목록 가져오기 실패) : labelNameToClose={}, exception={}", labelNameToClose, getIssuesToCloseFailException.getMessage());
@@ -167,11 +167,11 @@ public class ReviewStudySchedulerFacade {
         }
     }
 
-    private void notifyCloseWeeklyReviewIssueResult(String labelNameToClose, JobResult jobResult) {
+    private void notifyCloseWeeklyReviewIssueResult(String labelNameToClose, GithubJobResult githubJobResult) {
 
-        List<GithubIssueApiSuccessResult> githubApiSuccessResults = jobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiSuccessResult> githubApiSuccessResults = githubJobResult.successItems().stream().map(githubApiTaskResult -> (GithubIssueApiSuccessResult) githubApiTaskResult.taskResult()).toList();
 
-        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = jobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
+        List<GithubIssueApiFailureResult> githubIssueApiFailureResults = githubJobResult.failItems().stream().map(githubApiTaskResult -> (GithubIssueApiFailureResult) githubApiTaskResult.taskResult()).toList();
 
         // 성공 결과 모음
         String successResult = githubApiSuccessResults.isEmpty()

@@ -1,9 +1,9 @@
-package com.example.review_study_app.common.service.notification;
+package com.example.review_study_app.service.notification;
 
 import static com.example.review_study_app.domain.ReviewStudyInfo.createIssueUrl;
 import static com.example.review_study_app.domain.ReviewStudyInfo.createLabelUrl;
 
-import com.example.review_study_app.common.service.notification.dto.NotificationMessage;
+import com.example.review_study_app.service.notification.dto.NotificationMessage;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.task.httpclient.RestTemplateHttpClient;

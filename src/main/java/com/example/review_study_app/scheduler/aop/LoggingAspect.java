@@ -3,7 +3,7 @@ package com.example.review_study_app.scheduler.aop;
 import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 import static com.example.review_study_app.common.utils.MyDateUtils.getNow;
 
-import com.example.review_study_app.common.service.notification.NotificationService;
+import com.example.review_study_app.service.notification.NotificationService;
 import java.time.ZonedDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;

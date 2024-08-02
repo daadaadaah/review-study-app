@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.notification;
+package com.example.review_study_app.service.notification;
 
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;

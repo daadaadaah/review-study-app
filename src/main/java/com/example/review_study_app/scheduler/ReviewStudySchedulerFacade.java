@@ -9,7 +9,7 @@ import com.example.review_study_app.step.exception.IssuesToCloseIsEmptyException
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import com.example.review_study_app.service.github.GithubIssueJobService;
-import com.example.review_study_app.common.service.notification.NotificationService;
+import com.example.review_study_app.service.notification.NotificationService;
 import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.List;
 import java.util.stream.Collectors;

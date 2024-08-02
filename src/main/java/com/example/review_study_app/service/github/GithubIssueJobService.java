@@ -42,13 +42,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class GithubIssueJobService {
 
-    private final GithubIssueRepository githubIssueServiceStep;
+    private final GithubIssueRepository githubIssueRepository;
 
     @Autowired
     public GithubIssueJobService( // TODO : 총 수행 시간 로깅하기
-        GithubIssueRepository githubIssueServiceStep
+        GithubIssueRepository githubIssueRepository
     ) {
-        this.githubIssueServiceStep = githubIssueServiceStep;
+        this.githubIssueRepository = githubIssueRepository;
     }
 
     private String getMethodName(Thread thread) {
@@ -68,7 +68,7 @@ public class GithubIssueJobService {
 
         // Ite
 
-        NewLabelName newLabelName = githubIssueServiceStep.createNewLabelStep(labelCreateForm); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
+        NewLabelName newLabelName = githubIssueRepository.createNewLabelStep(labelCreateForm); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
 
         GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
 
@@ -88,7 +88,7 @@ public class GithubIssueJobService {
         boolean isWeekNumberLabelPresent = false;
 
         try {
-            isWeekNumberLabelPresent = githubIssueServiceStep.isWeekNumberLabelPresentStep(weekNumberLabelName);
+            isWeekNumberLabelPresent = githubIssueRepository.isWeekNumberLabelPresentStep(weekNumberLabelName);
 
             log.info("라벨 존재 여부 파악에 성공했습니다. labelName = {}", weekNumberLabelName);
         } catch (Exception exception) {
@@ -124,7 +124,7 @@ public class GithubIssueJobService {
                     labels
                 );
 
-                NewIssue newGhIssue = githubIssueServiceStep.createNewIssueStep(issueCreateForm);
+                NewIssue newGhIssue = githubIssueRepository.createNewIssueStep(issueCreateForm);
 
                 log.info("새로운 이슈가 생성되었습니다. issueTitle = {}, issueNumber = {} ", newGhIssue.title(), newGhIssue.number());
 
@@ -162,7 +162,7 @@ public class GithubIssueJobService {
         List<GithubApiTaskResult> githubApiTaskResults = new ArrayList<>();
 
         try {
-            closedIssues = githubIssueServiceStep.getIssuesToCloseStep(labelNameToClose);
+            closedIssues = githubIssueRepository.getIssuesToCloseStep(labelNameToClose);
 
             log.info("Close 할 이슈 목록 가져오기 성공했습니다. labelNameToClose = {} ", labelNameToClose);
         } catch (Exception exception) {
@@ -187,7 +187,7 @@ public class GithubIssueJobService {
             String issueTitle = ghIssue.title();
 
             try {
-                githubIssueServiceStep.closeIssueStep(issueNumber);
+                githubIssueRepository.closeIssueStep(issueNumber);
 
                 log.info("이슈 Close 성공했습니다. issueNumber = {}, issueTitle = {} ", issueNumber,
                     issueTitle);

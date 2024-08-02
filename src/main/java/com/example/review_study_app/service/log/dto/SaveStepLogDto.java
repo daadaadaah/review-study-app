@@ -1,4 +1,4 @@
-package com.example.review_study_app.service.log;
+package com.example.review_study_app.service.log.dto;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import java.util.UUID;

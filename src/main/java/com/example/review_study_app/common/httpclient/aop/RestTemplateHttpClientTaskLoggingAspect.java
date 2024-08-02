@@ -2,7 +2,7 @@ package com.example.review_study_app.common.httpclient.aop;
 
 import com.example.review_study_app.service.log.LogHelper;
 import com.example.review_study_app.service.log.LogService;
-import com.example.review_study_app.service.log.SaveTaskLogDto;
+import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.common.enums.BatchProcessStatus;

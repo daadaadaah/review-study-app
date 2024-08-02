@@ -1,7 +1,7 @@
 package com.example.review_study_app.repository.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.service.log.SaveJobLogDto;
+import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import java.util.List;

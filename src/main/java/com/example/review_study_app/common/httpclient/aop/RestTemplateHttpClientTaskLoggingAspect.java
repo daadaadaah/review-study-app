@@ -1,5 +1,6 @@
 package com.example.review_study_app.common.httpclient.aop;
 
+import com.example.review_study_app.service.log.LogHelper;
 import com.example.review_study_app.service.log.LogService;
 import com.example.review_study_app.service.log.SaveTaskLogDto;
 import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
@@ -23,11 +24,14 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
     private final LogService logService;
 
+    private final LogHelper logHelper;
     @Autowired
     public RestTemplateHttpClientTaskLoggingAspect(
-        LogService logService
+        LogService logService,
+        LogHelper logHelper
     ) {
         this.logService = logService;
+        this.logHelper = logHelper;
     }
 
     /**
@@ -36,7 +40,7 @@ public class RestTemplateHttpClientTaskLoggingAspect {
      * - 따라서, 재사용성 있게 범용성 있는 이름을 가진 클래스를 만드는 것보다, 세부 사항별로 Task Logging을 하는게, 좀더 단순하게 구현할 수 있을 것이라 생각했기 때문에, 구체적인 클래스를 지정했다.
      * - 만약, 추가적인 Task가 생긴다면, 그 Task의 이름을 가진 Aspect를 하나 더 만드는 방식으로 하는게 관심사 분리 관점에서 좋을 것 같다.
      */
-    @Around("execution(* com.example.review_study_app.task.httpclient.RestTemplateHttpClient.*(..))")
+    @Around("execution(* com.example.review_study_app.common.httpclient.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
@@ -61,6 +65,8 @@ public class RestTemplateHttpClientTaskLoggingAspect {
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려. 만약, Discord도 할 때, 클래스명 수정 필요
 
                 saveTaskLog(new SaveTaskLogDto(
+                    logHelper.getTaskId(),
+                    logHelper.getStepId(),
                     batchProcessName,
                     BatchProcessStatus.COMPLETED,
                     "Task 수행 완료",
@@ -81,6 +87,8 @@ public class RestTemplateHttpClientTaskLoggingAspect {
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려.
 
                 saveTaskLog(new SaveTaskLogDto(
+                    logHelper.getTaskId(),
+                    logHelper.getStepId(),
                     batchProcessName,
                     BatchProcessStatus.STOPPED,
                     "예외 발생 : "+restClientResponseException.getMessage(),

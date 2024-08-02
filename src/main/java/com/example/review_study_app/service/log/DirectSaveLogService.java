@@ -44,7 +44,7 @@ public class DirectSaveLogService implements LogService {
         ));
 
         logGoogleSheetsRepository.save(ExecutionTimeLog.of(
-            logHelper.getJobId(),
+            saveJobLogDto.jobId(),
             null,
             logHelper.getEnvironment(),
             BatchProcessType.JOB,
@@ -72,8 +72,8 @@ public class DirectSaveLogService implements LogService {
         long timeTaken = saveStepLogDto.endTime() - saveStepLogDto.startTime();
 
         logGoogleSheetsRepository.save(ExecutionTimeLog.of(
-            logHelper.getStepId(),
-            logHelper.getJobId(),
+            saveStepLogDto.stepId(),
+            saveStepLogDto.jobId(),
             logHelper.getEnvironment(),
             BatchProcessType.STEP,
             saveStepLogDto.methodName(),
@@ -136,8 +136,8 @@ public class DirectSaveLogService implements LogService {
         }
 
         logGoogleSheetsRepository.save(ExecutionTimeLog.of(
-            logHelper.getTaskId(),
-            logHelper.getStepId(),
+            saveTaskLogDto.taskId(),
+            saveTaskLogDto.stepId(),
             logHelper.getEnvironment(),
             BatchProcessType.TASK,
             saveTaskLogDto.batchProcessName(),

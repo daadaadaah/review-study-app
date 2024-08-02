@@ -52,6 +52,8 @@ public class GithubIssueRestTemplateRepositoryStepLoggingAspect {
             long endTime = System.currentTimeMillis();
 
             saveStepLog(new SaveStepLogDto(
+                logHelper.getStepId(),
+                logHelper.getJobId(),
                 methodName,
                 BatchProcessStatus.COMPLETED,
                 "Step 수행 완료",
@@ -66,6 +68,8 @@ public class GithubIssueRestTemplateRepositoryStepLoggingAspect {
 
 
             saveStepLog(new SaveStepLogDto(
+                logHelper.getStepId(),
+                logHelper.getJobId(),
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),

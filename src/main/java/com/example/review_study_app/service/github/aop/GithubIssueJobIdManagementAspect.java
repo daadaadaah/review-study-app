@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(value = 1) // 가장 바깥쪽에 감싸지도록
-public class GithubJobIdManagementAspect {
+public class GithubIssueJobIdManagementAspect {
 
     private final LogHelper logHelper;
 
     @Autowired
-    public GithubJobIdManagementAspect(
+    public GithubIssueJobIdManagementAspect(
         LogHelper logHelper
     ) {
         this.logHelper = logHelper;
@@ -32,7 +32,7 @@ public class GithubJobIdManagementAspect {
      * @return
      * @throws Throwable
      */
-    @Around("execution(* com.example.review_study_app.job.GithubJob.*(..))")
+    @Around("execution(* com.example.review_study_app.service.github.GithubIssueJobService.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             logHelper.setJobId();

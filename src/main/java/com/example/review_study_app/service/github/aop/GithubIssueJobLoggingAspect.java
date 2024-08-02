@@ -23,14 +23,14 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(value = 2)
-public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
+public class GithubIssueJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect 로 수정 필요!
 
     private final LogHelper logHelper;
 
     private final LogService logService;
 
     @Autowired
-    public GithubJobLoggingAspect(
+    public GithubIssueJobLoggingAspect(
         LogHelper logHelper,
         LogService logService
     ) {
@@ -55,7 +55,7 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
      *      방법 3. job 이라는 패키지에 Job들을 모아놓고, job이라는 패키지들에게 AOP를 적용하는 방법
      *
      */
-    @Around("execution(* com.example.review_study_app.job.GithubJob.*(..))")
+    @Around("execution(* com.example.review_study_app.service.github.GithubIssueJobService.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
@@ -71,6 +71,7 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
                 long endTime = System.currentTimeMillis();
 
                 saveJobLog(new SaveJobLogDto(
+                    logHelper.getJobId(),
                     methodName,
                     BatchProcessStatus.COMPLETED,
                     "Job 수행 성공",
@@ -89,6 +90,7 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
             long endTime = System.currentTimeMillis();
 
             saveJobLog(new SaveJobLogDto(
+                logHelper.getJobId(),
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),

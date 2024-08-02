@@ -22,7 +22,7 @@ public class RestTemplateHttpClientTaskIdManagementAspect {
         this.logHelper = logHelper;
     }
 
-    @Around("execution(* com.example.review_study_app.task.httpclient.RestTemplateHttpClient.*(..))")
+    @Around("execution(* com.example.review_study_app.common.httpclient.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             logHelper.setTaskId();

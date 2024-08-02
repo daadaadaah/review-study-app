@@ -1,12 +1,13 @@
-package com.example.review_study_app.common.service.log.dto;
+package com.example.review_study_app.service.log;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
+import com.example.review_study_app.service.github.dto.GithubJobResult;
 
-public record SaveStepLogDto<T>(
+public record SaveJobLogDto(
     String methodName,
     BatchProcessStatus status,
     String statusReason,
-    T result,
+    GithubJobResult githubJobResult,
     long startTime,
     long endTime
 ) {

@@ -1,11 +1,11 @@
 package com.example.review_study_app.service.github.aop;
 
 
-import com.example.review_study_app.common.service.log.LogService;
-import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
+import com.example.review_study_app.service.log.LogService;
+import com.example.review_study_app.service.log.SaveJobLogDto;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.service.log.LogHelper;
+import com.example.review_study_app.service.log.LogHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

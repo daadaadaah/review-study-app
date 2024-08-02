@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.log;
+package com.example.review_study_app.service.log;
 
 import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 

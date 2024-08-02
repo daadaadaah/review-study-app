@@ -1,7 +1,7 @@
 package com.example.review_study_app.repostiory.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
+import com.example.review_study_app.service.log.SaveStepLogDto;
 
 /**
  * StepDetailLog 는 배치 프로세스 중 Step 의 상세 로그를 담는 클레스이다.

@@ -1,10 +1,7 @@
-package com.example.review_study_app.common.service.log;
+package com.example.review_study_app.service.log;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.repostiory.log.LogGoogleSheetsRepository;
-import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
-import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
-import com.example.review_study_app.common.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.repostiory.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repostiory.log.entity.GithubApiLog;
 import com.example.review_study_app.repostiory.log.entity.JobDetailLog;

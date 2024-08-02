@@ -1,16 +1,16 @@
 package com.example.review_study_app.repository.github;
 
-import com.example.review_study_app.task.mapper.GithubApiResponseMapper;
+import com.example.review_study_app.repository.github.mapper.GithubApiResponseMapper;
 import com.example.review_study_app.repository.github.dto.IssueCloseForm;
 import com.example.review_study_app.repository.github.dto.IssueCreateForm;
 import com.example.review_study_app.repository.github.dto.IssueToClose;
 import com.example.review_study_app.repository.github.dto.LabelCreateForm;
 import com.example.review_study_app.repository.github.dto.NewIssue;
 import com.example.review_study_app.repository.github.dto.NewLabelName;
-import com.example.review_study_app.task.mapper.excpetion.MyJsonParseFailException;
-import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
-import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
-import com.example.review_study_app.task.httpclient.RestTemplateHttpClient;
+import com.example.review_study_app.repository.github.mapper.excpetion.MyJsonParseFailException;
+import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
+import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
+import com.example.review_study_app.common.httpclient.RestTemplateHttpClient;
 import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

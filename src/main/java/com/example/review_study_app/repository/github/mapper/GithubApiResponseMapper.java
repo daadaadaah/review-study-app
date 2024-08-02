@@ -1,9 +1,9 @@
-package com.example.review_study_app.task.mapper;
+package com.example.review_study_app.repository.github.mapper;
 
 import com.example.review_study_app.repository.github.dto.IssueToClose;
 import com.example.review_study_app.repository.github.dto.NewIssue;
 import com.example.review_study_app.repository.github.dto.NewLabelName;
-import com.example.review_study_app.task.mapper.excpetion.MyJsonParseFailException;
+import com.example.review_study_app.repository.github.mapper.excpetion.MyJsonParseFailException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;

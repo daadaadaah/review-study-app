@@ -1,7 +1,7 @@
-package com.example.review_study_app.task.httpclient;
+package com.example.review_study_app.common.httpclient;
 
-import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
-import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
+import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
+import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;

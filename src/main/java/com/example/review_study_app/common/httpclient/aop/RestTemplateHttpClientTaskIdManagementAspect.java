@@ -1,4 +1,4 @@
-package com.example.review_study_app.task.httpclient.aop;
+package com.example.review_study_app.common.httpclient.aop;
 
 import com.example.review_study_app.service.log.LogHelper;
 import org.aspectj.lang.ProceedingJoinPoint;

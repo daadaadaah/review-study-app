@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.log;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
+import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
 
 public record SaveTaskLogDto<T>(
     String batchProcessName,

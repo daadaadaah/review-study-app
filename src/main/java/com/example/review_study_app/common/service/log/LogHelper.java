@@ -92,40 +92,6 @@ public class LogHelper {
         threadLocalJobId.remove();
     }
 
-    public JobDetailLog createJobDetailLog(String methodName, BatchProcessStatus status, String statusReason, JobResult jobResult, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        long jobDetailLogId = endTime;
-
-        return JobDetailLog.of(
-            jobDetailLogId,
-            getEnvironment(),
-            methodName,
-            status,
-            statusReason,
-            jobResult,
-            timeTaken,
-            getCreatedAt(startTime)
-        );
-    }
-
-    public ExecutionTimeLog createJobExecutionTimeLog(String methodName, BatchProcessStatus status, String message, long jobDetailLogId, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        return ExecutionTimeLog.of(
-            getJobId(),
-            null,
-            getEnvironment(),
-            BatchProcessType.JOB,
-            methodName,
-            status,
-            message,
-            jobDetailLogId,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
     /** Step **/
     public void setStepId() {
         UUID uuid = UUID.randomUUID();
@@ -139,40 +105,6 @@ public class LogHelper {
 
     public void clearStepId() {
         threadLocalStepId.remove();
-    }
-
-    public <T> StepDetailLog createStepDetailLog(String methodName, BatchProcessStatus status, String statusReason, T result,long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        long stepDetailLogId = endTime;
-
-        return new StepDetailLog(
-            stepDetailLogId,
-            getEnvironment(),
-            methodName,
-            status,
-            statusReason,
-            result,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
-    public ExecutionTimeLog createStepExecutionTimeLog(String methodName, BatchProcessStatus status, String message, long stepDetailLogId, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        return ExecutionTimeLog.of(
-            getStepId(),
-            getJobId(),
-            getEnvironment(),
-            BatchProcessType.STEP,
-            methodName,
-            status,
-            message,
-            stepDetailLogId,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
     }
 
     /** Task **/

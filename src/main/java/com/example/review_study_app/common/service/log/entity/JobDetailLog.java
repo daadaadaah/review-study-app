@@ -1,6 +1,7 @@
 package com.example.review_study_app.common.service.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
+import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.job.dto.GithubApiTaskResult;
 import com.example.review_study_app.job.dto.JobResult;
 import java.util.List;
@@ -36,13 +37,18 @@ public record JobDetailLog(
     long executionTime,
     String createdAt
 ) {
-    public static JobDetailLog of(long id, String environment, String methodName, BatchProcessStatus status, String statusReason, JobResult jobResult, long executionTime, String createdAt) {
+    public static JobDetailLog of(long id, String environment, SaveJobLogDto saveJobLogDto, String createdAt) {
+
+        JobResult jobResult = saveJobLogDto.jobResult();
+
+        long executionTime = saveJobLogDto.endTime() - saveJobLogDto.startTime();
+
         return new JobDetailLog(
             id,
             environment,
-            methodName,
-            status,
-            statusReason,
+            saveJobLogDto.methodName(),
+            saveJobLogDto.status(),
+            saveJobLogDto.statusReason(),
             jobResult.successItems().size() + jobResult.failItems().size(),
             jobResult.successItems().size(),
             jobResult.successItems(),

@@ -1,6 +1,7 @@
 package com.example.review_study_app.common.service.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
+import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
 
 /**
  * StepDetailLog 는 배치 프로세스 중 Step 의 상세 로그를 담는 클레스이다.
@@ -26,4 +27,16 @@ public record StepDetailLog<T>(
     String createdAt
 ) {
 
+    public static StepDetailLog of(long id, String environment, SaveStepLogDto saveStepLogDto, String createdAt) {
+        return new StepDetailLog(
+            id,
+            environment,
+            saveStepLogDto.methodName(),
+            saveStepLogDto.status(),
+            saveStepLogDto.statusReason(),
+            saveStepLogDto.result(),
+            saveStepLogDto.endTime() - saveStepLogDto.endTime(),
+            createdAt
+        );
+    }
 }

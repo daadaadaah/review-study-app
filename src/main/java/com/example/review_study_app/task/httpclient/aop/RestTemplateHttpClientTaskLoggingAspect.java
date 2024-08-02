@@ -1,21 +1,16 @@
 package com.example.review_study_app.task.httpclient.aop;
 
 import com.example.review_study_app.common.service.log.LogService;
+import com.example.review_study_app.common.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.entity.GithubApiLog;
-import com.example.review_study_app.common.service.log.LogHelper;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -26,16 +21,12 @@ import org.springframework.web.client.RestClientResponseException;
 @Order(value = 2)
 public class RestTemplateHttpClientTaskLoggingAspect {
 
-    private final LogHelper logHelper;
-
     private final LogService logService;
 
     @Autowired
     public RestTemplateHttpClientTaskLoggingAspect(
-        LogHelper logHelper,
         LogService logService
     ) {
-        this.logHelper = logHelper;
         this.logService = logService;
     }
 
@@ -69,25 +60,16 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려. 만약, Discord도 할 때, 클래스명 수정 필요
 
-                GithubApiLog githubApiLog = logHelper.createGithubApiLog(
+                saveTaskLog(new SaveTaskLogDto(
                     batchProcessName,
+                    BatchProcessStatus.COMPLETED,
+                    "Task 수행 완료",
                     httpMethod,
                     myHttpRequest,
                     myHttpResponse,
                     startTime,
                     endTime
-                );
-
-                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
-                    batchProcessName,
-                    BatchProcessStatus.COMPLETED,
-                    "Task 수행 완료",
-                    githubApiLog.id(),
-                    startTime,
-                    endTime
-                );
-
-                saveTaskLog(githubApiLog, executionTimeLog);
+                ));
 
                 return result;
             }
@@ -97,26 +79,17 @@ public class RestTemplateHttpClientTaskLoggingAspect {
             long endTime = System.currentTimeMillis();
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려.
-                // url에 따라
-                GithubApiLog githubApiLog = logHelper.createExceptionGithubApiLog(
+
+                saveTaskLog(new SaveTaskLogDto(
                     batchProcessName,
+                    BatchProcessStatus.STOPPED,
+                    "예외 발생 : "+restClientResponseException.getMessage(),
                     httpMethod,
                     myHttpRequest,
                     restClientResponseException,
                     startTime,
                     endTime
-                );
-
-                ExecutionTimeLog executionTimeLog = logHelper.createTaskExecutionTimeLog(
-                    batchProcessName,
-                    BatchProcessStatus.STOPPED,
-                    "예외 발생 : "+restClientResponseException.getMessage(),
-                    githubApiLog.id(),
-                    startTime,
-                    endTime
-                );
-
-                saveTaskLog(githubApiLog, executionTimeLog);
+                ));
             }
 
             throw restClientResponseException;
@@ -127,8 +100,8 @@ public class RestTemplateHttpClientTaskLoggingAspect {
         }
     }
 
-    private void saveTaskLog(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
-        logService.saveTaskLog(githubApiLog, executionTimeLog);
+    private void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
+        logService.saveTaskLog(saveTaskLogDto);
     }
 
     /**

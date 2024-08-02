@@ -2,12 +2,10 @@ package com.example.review_study_app.job.aop;
 
 
 import com.example.review_study_app.common.service.log.LogService;
+import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.job.dto.JobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.LogHelper;
-import com.example.review_study_app.common.service.log.entity.JobDetailLog;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -72,25 +70,14 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
 
                 long endTime = System.currentTimeMillis();
 
-                JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
+                saveJobLog(new SaveJobLogDto(
                     methodName,
                     BatchProcessStatus.COMPLETED,
                     "Job 수행 성공",
                     jobResult,
                     startTime,
                     endTime
-                );
-
-                ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
-                    methodName,
-                    BatchProcessStatus.COMPLETED,
-                    "Job 수행 완료",
-                    jobDetailLog.id(),
-                    startTime,
-                    endTime
-                );
-
-                saveJobLog(jobDetailLog, executionTimeLog);
+                ));
 
                 return result;
             } else {
@@ -101,32 +88,21 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
         } catch (Exception exception) {
             long endTime = System.currentTimeMillis();
 
-            JobDetailLog jobDetailLog = logHelper.createJobDetailLog(
+            saveJobLog(new SaveJobLogDto(
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
                 null,
                 startTime,
                 endTime
-            );
-
-            ExecutionTimeLog executionTimeLog = logHelper.createJobExecutionTimeLog(
-                methodName,
-                BatchProcessStatus.STOPPED,
-                "예외 발생 : "+exception.getMessage(),
-                jobDetailLog.id(),
-                startTime,
-                endTime
-            );
-
-            saveJobLog(jobDetailLog, executionTimeLog);
+            ));
 
             throw exception;
         }
     }
 
-    private void saveJobLog(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
-        logService.saveJobLog(jobDetailLog, executionTimeLog);
+    private void saveJobLog(SaveJobLogDto saveJobLogDto) {
+        logService.saveJobLog(saveJobLogDto);
     }
 }
 

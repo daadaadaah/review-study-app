@@ -1,15 +1,28 @@
 package com.example.review_study_app.common.config;
 
+import com.example.review_study_app.common.service.log.LogService;
+import com.example.review_study_app.task.httpclient.RestTemplateLoggingGitHubApiInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+
+    private final LogService logService;
+
+    @Autowired
+    public AppConfig(LogService logService) {
+        this.logService = logService;
+    }
 
     /**
      *
@@ -29,6 +42,8 @@ public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
+        restTemplate.setInterceptors(Collections.singletonList(new RestTemplateLoggingGitHubApiInterceptor(logService)));
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         return restTemplate;
     }

@@ -19,6 +19,7 @@ import org.springframework.web.client.RestClientResponseException;
 @Aspect
 @Component
 @Order(value = 2)
+@Deprecated
 public class RestTemplateHttpClientTaskLoggingAspect {
 
     private final LogService logService;
@@ -60,16 +61,16 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려. 만약, Discord도 할 때, 클래스명 수정 필요
 
-                saveTaskLog(new SaveTaskLogDto(
-                    batchProcessName,
-                    BatchProcessStatus.COMPLETED,
-                    "Task 수행 완료",
-                    httpMethod,
-                    myHttpRequest,
-                    myHttpResponse,
-                    startTime,
-                    endTime
-                ));
+//                saveTaskLog(new SaveTaskLogDto(
+//                    batchProcessName,
+//                    BatchProcessStatus.COMPLETED,
+//                    "Task 수행 완료",
+//                    httpMethod,
+//                    myHttpRequest,
+//                    myHttpResponse,
+//                    startTime,
+//                    endTime
+//                ));
 
                 return result;
             }
@@ -80,16 +81,16 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
             if(url.contains("api.github.com/repos")) { // TODO : 일단 Github API만, Discord는 추후에 고려.
 
-                saveTaskLog(new SaveTaskLogDto(
-                    batchProcessName,
-                    BatchProcessStatus.STOPPED,
-                    "예외 발생 : "+restClientResponseException.getMessage(),
-                    httpMethod,
-                    myHttpRequest,
-                    restClientResponseException,
-                    startTime,
-                    endTime
-                ));
+//                saveTaskLog(new SaveTaskLogDto(
+//                    batchProcessName,
+//                    BatchProcessStatus.STOPPED,
+//                    "예외 발생 : "+restClientResponseException.getMessage(),
+//                    httpMethod,
+//                    myHttpRequest,
+//                    restClientResponseException,
+//                    startTime,
+//                    endTime
+//                ));
             }
 
             throw restClientResponseException;

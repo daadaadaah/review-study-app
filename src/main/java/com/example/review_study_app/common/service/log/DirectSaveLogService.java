@@ -9,12 +9,10 @@ import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.common.service.log.entity.GithubApiLog;
 import com.example.review_study_app.common.service.log.entity.JobDetailLog;
 import com.example.review_study_app.common.service.log.entity.StepDetailLog;
-import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientResponseException;
 
 
 @Slf4j
@@ -89,61 +87,37 @@ public class DirectSaveLogService implements LogService {
     }
 
     @Async("logSaveTaskExecutor")
-    public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
+    public void saveTaskLog(SaveTaskLogDto saveTaskLogDto){
 
         long taskDetailLogId = saveTaskLogDto.endTime();
 
+        String batchProcessName = "restTemplate."+saveTaskLogDto.httpMethod().toLowerCase();
+
         long timeTaken = saveTaskLogDto.endTime() - saveTaskLogDto.startTime();
 
-        if(saveTaskLogDto.taskResult() instanceof MyHttpResponse) {
+        GithubApiLog githubApiLog = new GithubApiLog(
+            taskDetailLogId,
+            logHelper.getEnvironment(),
+            batchProcessName,
+            saveTaskLogDto.httpMethod(),
+            saveTaskLogDto.url(),
+            saveTaskLogDto.requestHeaders(),
+            saveTaskLogDto.requestBody(),
+            saveTaskLogDto.responseStatusCode(),
+            saveTaskLogDto.responseHeaders(),
+            saveTaskLogDto.responseBody(),
+            timeTaken,
+            logHelper.getCreatedAt(saveTaskLogDto.endTime())
+        );
 
-            MyHttpResponse myHttpResponse = (MyHttpResponse) saveTaskLogDto.taskResult();
-
-            String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
-
-            logGoogleSheetsRepository.save(new GithubApiLog(
-                taskDetailLogId,
-                logHelper.getEnvironment(),
-                saveTaskLogDto.batchProcessName(),
-                saveTaskLogDto.httpMethod(),
-                saveTaskLogDto.myHttpRequest().url(),
-                saveTaskLogDto.myHttpRequest().headers(),
-                requestBody,
-                myHttpResponse.statusCode(),
-                myHttpResponse.headers(),
-                myHttpResponse.body(),
-                timeTaken,
-                logHelper.getCreatedAt(saveTaskLogDto.endTime())
-            ));
-        } else if(saveTaskLogDto.taskResult() instanceof RestClientResponseException) {
-            RestClientResponseException restClientResponseException = (RestClientResponseException) saveTaskLogDto.taskResult();
-
-            String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
-
-            logGoogleSheetsRepository.save(new GithubApiLog(
-                taskDetailLogId,
-                logHelper.getEnvironment(),
-                saveTaskLogDto.batchProcessName(),
-                saveTaskLogDto.httpMethod(),
-                saveTaskLogDto.myHttpRequest().url(),
-                saveTaskLogDto.myHttpRequest().headers(),
-                requestBody,
-                restClientResponseException.getStatusCode().value(),
-                restClientResponseException.getResponseHeaders(),
-                restClientResponseException.getResponseBodyAsString(),
-                timeTaken,
-                logHelper.getCreatedAt(saveTaskLogDto.endTime())
-            ));
-        } else {
-            // TODO :
-        }
+        logGoogleSheetsRepository.save(githubApiLog);
 
         logGoogleSheetsRepository.save(ExecutionTimeLog.of(
             logHelper.getTaskId(),
             logHelper.getStepId(),
             logHelper.getEnvironment(),
             BatchProcessType.TASK,
-            saveTaskLogDto.batchProcessName(),
+            batchProcessName,
             saveTaskLogDto.status(),
             saveTaskLogDto.statusReason(),
             taskDetailLogId,

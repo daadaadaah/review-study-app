@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.log.entity;
+package com.example.review_study_app.repostiory.log.entity;
 
 import org.springframework.http.HttpHeaders;
 

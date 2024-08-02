@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.log.entity;
+package com.example.review_study_app.repostiory.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;

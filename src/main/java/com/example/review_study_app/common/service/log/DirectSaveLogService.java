@@ -1,14 +1,14 @@
 package com.example.review_study_app.common.service.log;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.repostiory.LogGoogleSheetsRepository;
+import com.example.review_study_app.repostiory.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.common.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.common.service.log.dto.SaveTaskLogDto;
-import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.entity.GithubApiLog;
-import com.example.review_study_app.common.service.log.entity.JobDetailLog;
-import com.example.review_study_app.common.service.log.entity.StepDetailLog;
+import com.example.review_study_app.repostiory.log.entity.ExecutionTimeLog;
+import com.example.review_study_app.repostiory.log.entity.GithubApiLog;
+import com.example.review_study_app.repostiory.log.entity.JobDetailLog;
+import com.example.review_study_app.repostiory.log.entity.StepDetailLog;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

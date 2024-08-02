@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.service.log.exception;
+package com.example.review_study_app.repostiory.log.exception;
 
 public class SaveLogFailException extends RuntimeException {
 

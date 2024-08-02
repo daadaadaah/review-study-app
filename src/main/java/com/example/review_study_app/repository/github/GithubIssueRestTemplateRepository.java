@@ -1,13 +1,13 @@
-package com.example.review_study_app.step;
+package com.example.review_study_app.repository.github;
 
 import com.example.review_study_app.task.mapper.GithubApiResponseMapper;
-import com.example.review_study_app.step.dto.IssueCloseForm;
-import com.example.review_study_app.step.dto.IssueCreateForm;
-import com.example.review_study_app.step.dto.IssueToClose;
-import com.example.review_study_app.step.dto.LabelCreateForm;
-import com.example.review_study_app.step.dto.NewIssue;
-import com.example.review_study_app.step.dto.NewLabelName;
-import com.example.review_study_app.step.exception.MyJsonParseFailException;
+import com.example.review_study_app.repository.github.dto.IssueCloseForm;
+import com.example.review_study_app.repository.github.dto.IssueCreateForm;
+import com.example.review_study_app.repository.github.dto.IssueToClose;
+import com.example.review_study_app.repository.github.dto.LabelCreateForm;
+import com.example.review_study_app.repository.github.dto.NewIssue;
+import com.example.review_study_app.repository.github.dto.NewLabelName;
+import com.example.review_study_app.task.mapper.excpetion.MyJsonParseFailException;
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.task.httpclient.RestTemplateHttpClient;
@@ -38,7 +38,7 @@ import org.springframework.web.client.RestClientResponseException;
  */
 @Slf4j
 @Service
-public class GithubIssueRestTemplateServiceStep implements GithubIssueServiceStep {
+public class GithubIssueRestTemplateRepository implements GithubIssueRepository {
 
     @Value("${github.oauth.accessToken}")
     private String GITHUB_OAUTH_ACCESS_TOKEN;
@@ -48,7 +48,7 @@ public class GithubIssueRestTemplateServiceStep implements GithubIssueServiceSte
     private GithubApiResponseMapper githubApiResponseMapper;
 
     @Autowired
-    public GithubIssueRestTemplateServiceStep(
+    public GithubIssueRestTemplateRepository(
         RestTemplateHttpClient restTemplateHttpClient,
         GithubApiResponseMapper githubApiResponseMapper
     ) {

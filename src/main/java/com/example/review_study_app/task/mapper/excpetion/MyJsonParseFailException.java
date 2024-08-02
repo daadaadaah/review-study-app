@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.exception;
+package com.example.review_study_app.task.mapper.excpetion;
 
 public class MyJsonParseFailException extends RuntimeException {
 

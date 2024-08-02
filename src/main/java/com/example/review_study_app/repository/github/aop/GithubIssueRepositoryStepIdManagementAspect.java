@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.aop;
+package com.example.review_study_app.repository.github.aop;
 
 import com.example.review_study_app.service.log.LogHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -14,18 +14,18 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(value = 1) // 가장 바깥쪽에 감싸지도록
-public class GithubIssueServiceStepIdManagementAspect {
+public class GithubIssueRepositoryStepIdManagementAspect {
 
     private final LogHelper logHelper;
 
     @Autowired
-    public GithubIssueServiceStepIdManagementAspect(
+    public GithubIssueRepositoryStepIdManagementAspect(
         LogHelper logHelper
     ) {
         this.logHelper = logHelper;
     }
 
-    @Pointcut("target(com.example.review_study_app.step.GithubIssueServiceStep)")
+    @Pointcut("target(com.example.review_study_app.repository.github.GithubIssueRepository)")
     public void targetImplementingInterface() {}
 
     @Around("targetImplementingInterface()")

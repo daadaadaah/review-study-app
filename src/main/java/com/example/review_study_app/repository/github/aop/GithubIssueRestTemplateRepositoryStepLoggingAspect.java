@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.aop;
+package com.example.review_study_app.repository.github.aop;
 
 
 import com.example.review_study_app.service.log.LogService;
@@ -18,14 +18,14 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(value = 2)
-public class GithubIssueServiceStepLoggingAspect {
+public class GithubIssueRestTemplateRepositoryStepLoggingAspect {
 
     private final LogHelper logHelper;
 
     private final LogService logService;
 
     @Autowired
-    public GithubIssueServiceStepLoggingAspect(
+    public GithubIssueRestTemplateRepositoryStepLoggingAspect(
         LogHelper logHelper,
         LogService logService
     ) {
@@ -33,7 +33,7 @@ public class GithubIssueServiceStepLoggingAspect {
         this.logService = logService;
     }
 
-    @Pointcut("target(com.example.review_study_app.step.GithubIssueServiceStep)")
+    @Pointcut("target(com.example.review_study_app.repository.github.GithubIssueRestTemplateRepository)")
     public void targetImplementingInterface() {}
 
     /**

@@ -1,7 +1,7 @@
-package com.example.review_study_app.repostiory.log;
+package com.example.review_study_app.repository.log;
 
-import com.example.review_study_app.repostiory.log.exception.SaveLogFailException;
-import com.example.review_study_app.repostiory.log.exception.UnsupportedProfileException;
+import com.example.review_study_app.repository.log.exception.SaveLogFailException;
+import com.example.review_study_app.repository.log.exception.UnsupportedProfileException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;

@@ -4,16 +4,16 @@ import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
-import com.example.review_study_app.step.GithubIssueServiceStep;
+import com.example.review_study_app.repository.github.GithubIssueRepository;
 import com.example.review_study_app.service.github.domain.GithubLabelApiSuccessResult;
-import com.example.review_study_app.step.dto.IssueCreateForm;
-import com.example.review_study_app.step.dto.IssueToClose;
-import com.example.review_study_app.step.dto.LabelCreateForm;
-import com.example.review_study_app.step.dto.NewIssue;
-import com.example.review_study_app.step.dto.NewLabelName;
-import com.example.review_study_app.step.exception.GetIssuesToCloseFailException;
-import com.example.review_study_app.step.exception.IsWeekNumberLabelPresentFailException;
-import com.example.review_study_app.step.exception.IssuesToCloseIsEmptyException;
+import com.example.review_study_app.repository.github.dto.IssueCreateForm;
+import com.example.review_study_app.repository.github.dto.IssueToClose;
+import com.example.review_study_app.repository.github.dto.LabelCreateForm;
+import com.example.review_study_app.repository.github.dto.NewIssue;
+import com.example.review_study_app.repository.github.dto.NewLabelName;
+import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
+import com.example.review_study_app.service.github.exception.IsWeekNumberLabelPresentFailException;
+import com.example.review_study_app.service.github.exception.IssuesToCloseIsEmptyException;
 import com.example.review_study_app.domain.Member;
 import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.ArrayList;
@@ -42,11 +42,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class GithubIssueJobService {
 
-    private final GithubIssueServiceStep githubIssueServiceStep;
+    private final GithubIssueRepository githubIssueServiceStep;
 
     @Autowired
     public GithubIssueJobService( // TODO : 총 수행 시간 로깅하기
-        GithubIssueServiceStep githubIssueServiceStep
+        GithubIssueRepository githubIssueServiceStep
     ) {
         this.githubIssueServiceStep = githubIssueServiceStep;
     }

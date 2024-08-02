@@ -1,10 +1,10 @@
-package com.example.review_study_app.step;
+package com.example.review_study_app.repository.github;
 
-import com.example.review_study_app.step.dto.IssueCreateForm;
-import com.example.review_study_app.step.dto.IssueToClose;
-import com.example.review_study_app.step.dto.LabelCreateForm;
-import com.example.review_study_app.step.dto.NewIssue;
-import com.example.review_study_app.step.dto.NewLabelName;
+import com.example.review_study_app.repository.github.dto.IssueCreateForm;
+import com.example.review_study_app.repository.github.dto.IssueToClose;
+import com.example.review_study_app.repository.github.dto.LabelCreateForm;
+import com.example.review_study_app.repository.github.dto.NewIssue;
+import com.example.review_study_app.repository.github.dto.NewLabelName;
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ import java.util.List;
  * - 여러 Service 들간의 조율을 담당하는 ReviewStudySchedulerFacade 에서 처리하도록 하기 위함이다.
  * - 만약, 디스코드로 알림을 보내주지 않고, log만 남겨도 되는 상황의 메서드라면, Excpetion을 throw 하지 않을 것 같다.
  */
-public interface GithubIssueServiceStep {
+public interface GithubIssueRepository {
 
     NewLabelName createNewLabelStep(LabelCreateForm labelCreateForm) throws Exception;
 

@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.dto;
+package com.example.review_study_app.repository.github.dto;
 
 /**
  * IssueCloseForm는 Github API를 통해 이슈를 Close 시킬 때 필요한 데이터를 담는 클래스이다.

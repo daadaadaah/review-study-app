@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.dto;
+package com.example.review_study_app.repository.github.dto;
 
 import java.util.List;
 

@@ -3,9 +3,9 @@ package com.example.review_study_app.scheduler;
 
 
 import com.example.review_study_app.service.github.dto.GithubJobResult;
-import com.example.review_study_app.step.exception.GetIssuesToCloseFailException;
-import com.example.review_study_app.step.exception.IsWeekNumberLabelPresentFailException;
-import com.example.review_study_app.step.exception.IssuesToCloseIsEmptyException;
+import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
+import com.example.review_study_app.service.github.exception.IsWeekNumberLabelPresentFailException;
+import com.example.review_study_app.service.github.exception.IssuesToCloseIsEmptyException;
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import com.example.review_study_app.service.github.GithubIssueJobService;

@@ -1,4 +1,4 @@
-package com.example.review_study_app.step.exception;
+package com.example.review_study_app.service.github.exception;
 
 /**
  * IssuesToCloseIsEmptyException 는 Close 할 이슈 목록이 없을 때 발생하는 예외이다.

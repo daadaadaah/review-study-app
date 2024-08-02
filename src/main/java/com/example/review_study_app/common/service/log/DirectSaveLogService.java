@@ -99,6 +99,8 @@ public class DirectSaveLogService implements LogService {
 
             MyHttpResponse myHttpResponse = (MyHttpResponse) saveTaskLogDto.taskResult();
 
+            String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
+
             logGoogleSheetsRepository.save(new GithubApiLog(
                 taskDetailLogId,
                 logHelper.getEnvironment(),
@@ -106,7 +108,7 @@ public class DirectSaveLogService implements LogService {
                 saveTaskLogDto.httpMethod(),
                 saveTaskLogDto.myHttpRequest().url(),
                 saveTaskLogDto.myHttpRequest().headers(),
-                saveTaskLogDto.myHttpRequest().body().toString(),
+                requestBody,
                 myHttpResponse.statusCode(),
                 myHttpResponse.headers(),
                 myHttpResponse.body(),
@@ -116,6 +118,8 @@ public class DirectSaveLogService implements LogService {
         } else if(saveTaskLogDto.taskResult() instanceof RestClientResponseException) {
             RestClientResponseException restClientResponseException = (RestClientResponseException) saveTaskLogDto.taskResult();
 
+            String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
+
             logGoogleSheetsRepository.save(new GithubApiLog(
                 taskDetailLogId,
                 logHelper.getEnvironment(),
@@ -123,7 +127,7 @@ public class DirectSaveLogService implements LogService {
                 saveTaskLogDto.httpMethod(),
                 saveTaskLogDto.myHttpRequest().url(),
                 saveTaskLogDto.myHttpRequest().headers(),
-                saveTaskLogDto.myHttpRequest().body().toString(),
+                requestBody,
                 restClientResponseException.getStatusCode().value(),
                 restClientResponseException.getResponseHeaders(),
                 restClientResponseException.getResponseBodyAsString(),

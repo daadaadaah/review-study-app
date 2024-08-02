@@ -9,6 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * ReviewStudyScheduler 는 스케줄링 작업을 수행 책임을 담당하는 클래스이다.
+ *
+ * < year과 weekNumber를 reviewStudySchedulerFacade 에서 관리할 수 있는데, 여기서 관리하는 이유 >
+ * - @scheduled의 cron을 설정할 때, 이번주인지, 다음주인지, 지난주인지에 대해 고려해야 할 때가 있다.
+ * - 이를 위해 한 곳에서만 수정 작업을 가능하게 하는게 유지보수성이 더 좋은 것 같아서
+ */
+
 @Slf4j
 @Component
 public class ReviewStudyScheduler {

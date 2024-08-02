@@ -26,10 +26,14 @@ public interface NotificationService {
 
     String createEmptyIssuesToCloseMessage(String weekNumberLabelName);
 
+    String createUnexpectedIssueCloseFailureMessage(String weekNumberLabelName, Exception exception);
+
     String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult);
 
     String createIssueCloseFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
 
     /** 로그 **/
+    String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime);
+
     String createExecutionTimeMessage(String methodName, long totalExecutionTime);
 }

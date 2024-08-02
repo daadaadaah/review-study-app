@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * ReviewStudySchedulerFacade 는 Github 작업을 관리하고, 그 결과를 대해 Notification 하는 책임이 있는 클래스이다.
+ * ReviewStudySchedulerFacade 는 Github Job 작업을 실행하고, 그 결과를 Notification 으로 전달하는 책임을 담당하는 클래스이다.
  */
 @Slf4j
 @Component
@@ -39,9 +39,13 @@ public class ReviewStudySchedulerFacade {
     }
 
     /**
-     * 새로운 주차 Label을 생성하는 함수 - 라벨 중복 체크 로직 추가 안 이유 : 이름이 중복되면 라벨 자체가 생성이 안 되므로, 이떄, 다음과 같은 에러 메시지가
-     * 나온다. 에러 메시지 : {"message":"Validation
-     * Failed","errors":[{"resource":"Label","code":"already_exists","field":"name"}],"documentation_url":"https://docs.github.com/rest/issues/labels#create-a-label"}
+     * createNewWeekNumberLabel 는 새로운 주차 Label을 생성하는 메서드이다.
+     *
+     * < 라벨 중복 체크 로직 추가 안 이유 >
+     * - Github 라벨 생성 API 자체가 멱등성이 보장되므로,
+     * - 만약, 중복된 라벨을 생성하려고 하면, 다음과 같은 에러 메시지가 나온다.
+     * 에러 메시지 : {"message":"Validation Failed","errors":[{"resource":"Label","code":"already_exists","field":"name"}],"documentation_url":"https://docs.github.com/rest/issues/labels#create-a-label"}
+     *
      */
     public void createNewWeekNumberLabel(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
@@ -76,7 +80,7 @@ public class ReviewStudySchedulerFacade {
     }
 
     /**
-     * 이번주 주간회고 여러개 Issue를 생성하는 함수
+     * createNewWeeklyReviewIssues는 해당 년과 주차에 해당하는 주간회고 Issue를 일괄 생성하는 메서드이다.
      */
     public void createNewWeeklyReviewIssues(int year, int weekNumber) {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
@@ -131,7 +135,7 @@ public class ReviewStudySchedulerFacade {
     }
 
     /**
-     * 이번주의 모든 주간회고 Issue를 Close 하는 함수
+     * closeWeeklyReviewIssues는 해당 년도의 주차에 해당하는 주간회고 Issue 를 일괄 Close 하는 메서드이다.
      */
     public void closeWeeklyReviewIssues(int year, int weekNumber) {
         String labelNameToClose = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
@@ -160,10 +164,12 @@ public class ReviewStudySchedulerFacade {
 
             notificationService.sendMessage(emptyIssuesToCloseMessage);
 
-        } catch (Exception exception) { // TODO : 예외 처리 로직 어떻게 할까?
+        } catch (Exception exception) {
             log.error("주간 회고 Issue Close Job 실패(원인 : 예상치 못한 예외 발생) : labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
 
-            notificationService.sendMessage("예상치 못한 예외가 발생했습니다. exception="+exception.getMessage());
+            String unexpectedIssueCloseFailureMessage = notificationService.createUnexpectedIssueCloseFailureMessage(labelNameToClose, exception);
+
+            notificationService.sendMessage(unexpectedIssueCloseFailureMessage);
         }
     }
 

@@ -2,15 +2,6 @@ package com.example.review_study_app.common.service.log;
 
 import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 
-import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.service.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.common.service.log.entity.GithubApiLog;
-import com.example.review_study_app.common.service.log.entity.JobDetailLog;
-import com.example.review_study_app.common.service.log.entity.StepDetailLog;
-import com.example.review_study_app.job.dto.JobResult;
-import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
-import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +9,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientResponseException;
 
 /**
  * LogHelper 는 log에서 자주 사용될만한 함수들을 모아놓은 클래스이다.
@@ -120,68 +110,5 @@ public class LogHelper {
 
     public void clearTaskId() {
         threadLocalTaskId.remove();
-    }
-
-    public GithubApiLog createGithubApiLog(String batchProcessName, String httpMethod, MyHttpRequest myHttpRequest, MyHttpResponse myHttpResponse, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        long taskDetailLogId = endTime;
-
-        String requestBody = ((Object) myHttpRequest.body()) != null ? ((Object) myHttpRequest.body()).toString() : "";
-
-        return new GithubApiLog(
-            taskDetailLogId,
-            getEnvironment(),
-            batchProcessName,
-            httpMethod,
-            myHttpRequest.url(),
-            myHttpRequest.headers(),
-            requestBody,
-            myHttpResponse.statusCode(),
-            myHttpResponse.headers(),
-            myHttpResponse.body(),
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
-    public GithubApiLog createExceptionGithubApiLog(String batchProcessName, String httpMethod, MyHttpRequest myHttpRequest, RestClientResponseException restClientResponseException, long startTime, long endTime) {
-        long timeTaken = endTime - startTime;
-
-        long taskDetailLogId = endTime;
-
-        String requestBody = ((Object) myHttpRequest.body()) != null ? ((Object) myHttpRequest.body()).toString() : "";
-
-        return new GithubApiLog(
-            taskDetailLogId,
-            getEnvironment(),
-            batchProcessName,
-            httpMethod,
-            myHttpRequest.url(),
-            myHttpRequest.headers(),
-            requestBody,
-            restClientResponseException.getStatusCode().value(),
-            restClientResponseException.getResponseHeaders(),
-            restClientResponseException.getResponseBodyAsString(),
-            timeTaken,
-            getCreatedAt(endTime)
-        );
-    }
-
-    public ExecutionTimeLog createTaskExecutionTimeLog(String batchProcessName, BatchProcessStatus status, String message, long taskDetailLogId, long startTime, long endTime ) {
-        long timeTaken = endTime - startTime;
-
-        return ExecutionTimeLog.of(
-            getTaskId(),
-            getStepId(),
-            getEnvironment(),
-            BatchProcessType.TASK,
-            batchProcessName,
-            status,
-            message,
-            taskDetailLogId,
-            timeTaken,
-            getCreatedAt(endTime)
-        );
     }
 }

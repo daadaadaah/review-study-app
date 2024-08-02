@@ -1,4 +1,4 @@
-package com.example.review_study_app.job.dto;
+package com.example.review_study_app.service.github.domain;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.example.review_study_app.job.aop;
+package com.example.review_study_app.service.github.aop;
 
 import com.example.review_study_app.common.service.log.LogHelper;
 import lombok.extern.slf4j.Slf4j;

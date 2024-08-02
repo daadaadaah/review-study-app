@@ -1,7 +1,7 @@
 package com.example.review_study_app.common.service.notification;
 
-import com.example.review_study_app.job.dto.GithubIssueApiFailureResult;
-import com.example.review_study_app.job.dto.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 
 public interface NotificationService {
 

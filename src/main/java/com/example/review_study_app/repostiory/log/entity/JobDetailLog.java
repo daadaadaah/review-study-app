@@ -2,8 +2,8 @@ package com.example.review_study_app.repostiory.log.entity;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
-import com.example.review_study_app.job.dto.GithubApiTaskResult;
-import com.example.review_study_app.job.dto.JobResult;
+import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
+import com.example.review_study_app.service.github.dto.GithubJobResult;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public record JobDetailLog(
 ) {
     public static JobDetailLog of(long id, String environment, SaveJobLogDto saveJobLogDto, String createdAt) {
 
-        JobResult jobResult = saveJobLogDto.jobResult();
+        GithubJobResult githubJobResult = saveJobLogDto.githubJobResult();
 
         long executionTime = saveJobLogDto.endTime() - saveJobLogDto.startTime();
 
@@ -49,11 +49,11 @@ public record JobDetailLog(
             saveJobLogDto.methodName(),
             saveJobLogDto.status(),
             saveJobLogDto.statusReason(),
-            jobResult.successItems().size() + jobResult.failItems().size(),
-            jobResult.successItems().size(),
-            jobResult.successItems(),
-            jobResult.failItems().size(),
-            jobResult.failItems(),
+            githubJobResult.successItems().size() + githubJobResult.failItems().size(),
+            githubJobResult.successItems().size(),
+            githubJobResult.successItems(),
+            githubJobResult.failItems().size(),
+            githubJobResult.failItems(),
             executionTime,
             createdAt);
     }

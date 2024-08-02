@@ -1,7 +1,6 @@
-package com.example.review_study_app.job.dto;
+package com.example.review_study_app.service.github.dto;
 
-import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.job.dto.GithubApiTaskResult;
+import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
 import java.util.List;
 
 /**
@@ -9,7 +8,7 @@ import java.util.List;
  * @param successItems : 성공 Item 목록 (예 : GithubApiTaskResult 목록)
  * @param failItems : 실패 Item 목록 (예 : GithubApiTaskResult 목록)
  */
-public record JobResult( // TODO : 용어 수정 필요!
+public record GithubJobResult(
 
     List<GithubApiTaskResult> successItems,
 

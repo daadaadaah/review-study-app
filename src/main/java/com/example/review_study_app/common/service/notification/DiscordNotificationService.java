@@ -7,8 +7,8 @@ import com.example.review_study_app.common.service.notification.dto.Notification
 import com.example.review_study_app.task.httpclient.dto.MyHttpRequest;
 import com.example.review_study_app.task.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.task.httpclient.RestTemplateHttpClient;
-import com.example.review_study_app.job.dto.GithubIssueApiFailureResult;
-import com.example.review_study_app.job.dto.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

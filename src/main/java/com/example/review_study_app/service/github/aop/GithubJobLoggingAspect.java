@@ -1,9 +1,9 @@
-package com.example.review_study_app.job.aop;
+package com.example.review_study_app.service.github.aop;
 
 
 import com.example.review_study_app.common.service.log.LogService;
 import com.example.review_study_app.common.service.log.dto.SaveJobLogDto;
-import com.example.review_study_app.job.dto.JobResult;
+import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.common.service.log.LogHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -65,8 +65,8 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
 
             Object result = joinPoint.proceed(); // 함수 실행
 
-            if(result instanceof JobResult) {
-                JobResult jobResult = (JobResult) result;
+            if(result instanceof GithubJobResult) {
+                GithubJobResult githubJobResult = (GithubJobResult) result;
 
                 long endTime = System.currentTimeMillis();
 
@@ -74,7 +74,7 @@ public class GithubJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspect �
                     methodName,
                     BatchProcessStatus.COMPLETED,
                     "Job 수행 성공",
-                    jobResult,
+                    githubJobResult,
                     startTime,
                     endTime
                 ));

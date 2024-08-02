@@ -1,12 +1,11 @@
-package com.example.review_study_app.job;
+package com.example.review_study_app.service.github;
 
-import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.job.dto.GithubApiTaskResult;
-import com.example.review_study_app.job.dto.JobResult;
-import com.example.review_study_app.job.dto.GithubIssueApiFailureResult;
-import com.example.review_study_app.job.dto.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
+import com.example.review_study_app.service.github.dto.GithubJobResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import com.example.review_study_app.step.GithubIssueServiceStep;
-import com.example.review_study_app.job.dto.GithubLabelApiSuccessResult;
+import com.example.review_study_app.service.github.domain.GithubLabelApiSuccessResult;
 import com.example.review_study_app.step.dto.IssueCreateForm;
 import com.example.review_study_app.step.dto.IssueToClose;
 import com.example.review_study_app.step.dto.LabelCreateForm;
@@ -41,12 +40,12 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class GithubJob {
+public class GithubIssueJobService {
 
     private final GithubIssueServiceStep githubIssueServiceStep;
 
     @Autowired
-    public GithubJob( // TODO : 총 수행 시간 로깅하기
+    public GithubIssueJobService( // TODO : 총 수행 시간 로깅하기
         GithubIssueServiceStep githubIssueServiceStep
     ) {
         this.githubIssueServiceStep = githubIssueServiceStep;
@@ -56,7 +55,7 @@ public class GithubJob {
         return thread.getStackTrace()[2].getMethodName(); // 1인 경우, getMethodName 이 찍힘!
     }
 
-    public JobResult createNewLabelJob(int year, int weekNumber) throws Exception {
+    public GithubJobResult createNewLabelJob(int year, int weekNumber) throws Exception {
         long taskId = System.currentTimeMillis();
 
         String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
@@ -77,13 +76,13 @@ public class GithubJob {
 
         List<GithubApiTaskResult> failItems = new ArrayList<>();
 
-        return new JobResult(
+        return new GithubJobResult(
             successItems,
             failItems
         );
     }
 
-    public JobResult batchCreateNewWeeklyReviewIssuesJob(List<Member> members, int year, int weekNumber) throws Exception {
+    public GithubJobResult batchCreateNewWeeklyReviewIssuesJob(List<Member> members, int year, int weekNumber) throws Exception {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         boolean isWeekNumberLabelPresent = false;
@@ -150,13 +149,13 @@ public class GithubJob {
 
         List<GithubApiTaskResult> failItems = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
 
-        return new JobResult(
+        return new GithubJobResult(
             successItems,
             failItems
         );
     }
 
-    public JobResult batchCloseWeeklyReviewIssuesJob(String labelNameToClose) throws Exception {
+    public GithubJobResult batchCloseWeeklyReviewIssuesJob(String labelNameToClose) throws Exception {
         // 1. 이슈 Close
         List<IssueToClose> closedIssues = new ArrayList<>();
 
@@ -213,7 +212,7 @@ public class GithubJob {
 
         List<GithubApiTaskResult> failItems = githubApiTaskResults.stream().filter(githubApiFailureResult -> !githubApiFailureResult.isSuccess()).toList();
 
-        return new JobResult(
+        return new GithubJobResult(
             successItems,
             failItems
         );

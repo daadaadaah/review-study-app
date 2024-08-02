@@ -48,7 +48,7 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
         String httpMethod = joinPoint.getSignature().getName().toUpperCase();
 
-        String batchProcessName = findCallerMethodNameForRestTemplate();
+        String batchProcessName = joinPoint.getSignature().getName();
 
         try {
 
@@ -102,22 +102,6 @@ public class RestTemplateHttpClientTaskLoggingAspect {
 
     private void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
         logService.saveTaskLog(saveTaskLogDto);
-    }
-
-    /**
-     * findCallerMethodNameForRestTemplate 는 RestTemplate를 사용하는 메서드 이름을 찾는 함수이다.
-     * 어떤 작업의 API 통신인지를 알기 위해 필요한 함수이다.
-     */
-    private String findCallerMethodNameForRestTemplate() {
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-
-        for (StackTraceElement element : stackTraceElements) {
-            if (element.getClassName().startsWith("com.example.review_study_app.task.httpclient.RestTemplateHttpClient")) { // Adjust the package name to match your application's package
-                return element.getMethodName(); // RestTemplateHttpClient을 호출한 메서드명
-            }
-        }
-
-        return ""; // TODO : 예외를 던져주는 것도 좋을 것 같음
     }
 
     private MyHttpResponse getMyHttpResponse(Object object) {

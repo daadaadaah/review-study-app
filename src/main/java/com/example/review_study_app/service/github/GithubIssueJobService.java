@@ -25,14 +25,14 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * GithubIssueJobService 는 여러 Github 작업들을 조율하는 책임을 담당하는 클래스이다.
+ * GithubIssueJobService 는 여러 Github 작업들을 조율하여 Job 을 책임지는 클래스이다.
  *
  * < 용어 정리 >
- * 여러 개의 이슈를 만드는 전체 작업: Job
- * 여러 개의 이슈 만드는 단계 : Step
- * 각 단계 별로 Github API 통신 작업 : Task
- *
- * 처리된 이슈의 단위 : Item
+ * - 일괄 이슈 생성 상황을 예를 들면, 각 용어는 다음과 같다.
+ * (1) Job : 여러 개의 이슈를 만드는 전체 작업
+ * (2) Step : Job 의 하위 단계 작업 (예 : Service 계층의 작업(라벨 존재 여부 파악하는 작업, 각각의 이슈 생성하는 작업 등))
+ * (3) Task : Step 의 하위 단계 작업 (예 : Repository 계층의 작업(각 단계 별로 Github API 통신 작업), Github의 응답 객체를 우리 비즈니스 로직에 필요한 데이터만 Mapping 하는 작업)
+ * (4) Item : 처리된 이슈
  *
  * < 참고 사항 >
  * GithubIssueJobService 는 Job 수행 결과를 로깅을 위해 무조건 GithubJobResult 객체를 return 하도록 한다.
@@ -51,7 +51,10 @@ public class GithubIssueJobService {
         this.githubIssueRepository = githubIssueRepository;
     }
 
-    public GithubJobResult createNewLabelJob(int year, int weekNumber) throws Exception {
+    /**
+     * createNewWeeklyLabelJob 는 새로운 주차 라벨을 생성하는 Job이다.
+     */
+    public GithubJobResult createNewWeeklyLabelJob(int year, int weekNumber) throws Exception {
         String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         String labelColor = ReviewStudyInfo.THIS_WEEK_NUMBER_LABEL_COLOR;
@@ -74,6 +77,9 @@ public class GithubIssueJobService {
         );
     }
 
+    /**
+     * batchCreateNewWeeklyReviewIssuesJob 는 새로운 주차 주간 회고 이슈를 일괄 생성하는 Job 이다.
+     */
     public GithubJobResult batchCreateNewWeeklyReviewIssuesJob(List<Member> members, int year, int weekNumber) throws Exception {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
@@ -90,7 +96,7 @@ public class GithubIssueJobService {
         }
 
         if(!isWeekNumberLabelPresent) {
-            createNewLabelJob(year, weekNumber); // 새로운 라벨에 대한 예외는 createNewWeekNumberLabel에서 처리함!
+            createNewWeeklyLabelJob(year, weekNumber); // 새로운 라벨에 대한 예외는 createNewWeekNumberLabel에서 처리함!
         }
 
         // 1. 이슈 생성
@@ -146,6 +152,9 @@ public class GithubIssueJobService {
         );
     }
 
+    /**
+     * batchCloseWeeklyReviewIssuesJob 는 지난 주차 주간 회고 이슈를 일괄 Close 하는 Job 이다.
+     */
     public GithubJobResult batchCloseWeeklyReviewIssuesJob(String labelNameToClose) throws Exception {
         // 1. 이슈 Close
         List<IssueToClose> closedIssues = new ArrayList<>();

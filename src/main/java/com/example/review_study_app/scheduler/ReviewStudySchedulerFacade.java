@@ -53,7 +53,7 @@ public class ReviewStudySchedulerFacade {
         log.info("주차 라벨 생성을 시작합니다. labelName = {} ", weekNumberLabelName);
 
         try {
-            githubIssueJobService.createNewLabelJob(year, weekNumber);
+            githubIssueJobService.createNewWeeklyLabelJob(year, weekNumber);
 
             log.info("주차 라벨 생성이 성공했습니다. labelName = {} ", weekNumberLabelName);
 

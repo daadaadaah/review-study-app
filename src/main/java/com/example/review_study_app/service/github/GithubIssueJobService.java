@@ -25,17 +25,17 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * GithubJobFacade 는 여러 Github 작업들을 조율하는 책임을 가진 클래스이다.
+ * GithubIssueJobService 는 여러 Github 작업들을 조율하여 Job 을 책임지는 클래스이다.
  *
  * < 용어 정리 >
- * 여러 개의 이슈를 만드는 전체 작업: Job
- * 여러 개의 이슈 만드는 단계 : Step
- * 각 단계 별로 Github API 통신 작업 : Task
- *
- * 처리된 이슈의 단위 : Item
+ * - 일괄 이슈 생성 상황을 예를 들면, 각 용어는 다음과 같다.
+ * (1) Job : 여러 개의 이슈를 만드는 전체 작업
+ * (2) Step : Job 의 하위 단계 작업 (예 : Service 계층의 작업(라벨 존재 여부 파악하는 작업, 각각의 이슈 생성하는 작업 등))
+ * (3) Task : Step 의 하위 단계 작업 (예 : Repository 계층의 작업(각 단계 별로 Github API 통신 작업), Github의 응답 객체를 우리 비즈니스 로직에 필요한 데이터만 Mapping 하는 작업)
+ * (4) Item : 처리된 이슈
  *
  * < 참고 사항 >
- * GithubJobFacade 는 Job 수행 시간 로깅을 위해 무조건 JobResult 객체를 return 하도록 한다.
+ * GithubIssueJobService 는 Job 수행 결과를 로깅을 위해 무조건 GithubJobResult 객체를 return 하도록 한다.
  *
  */
 @Slf4j
@@ -45,19 +45,16 @@ public class GithubIssueJobService {
     private final GithubIssueRepository githubIssueRepository;
 
     @Autowired
-    public GithubIssueJobService( // TODO : 총 수행 시간 로깅하기
+    public GithubIssueJobService(
         GithubIssueRepository githubIssueRepository
     ) {
         this.githubIssueRepository = githubIssueRepository;
     }
 
-    private String getMethodName(Thread thread) {
-        return thread.getStackTrace()[2].getMethodName(); // 1인 경우, getMethodName 이 찍힘!
-    }
-
-    public GithubJobResult createNewLabelJob(int year, int weekNumber) throws Exception {
-        long taskId = System.currentTimeMillis();
-
+    /**
+     * createNewWeeklyLabelJob 는 새로운 주차 라벨을 생성하는 Job이다.
+     */
+    public GithubJobResult createNewWeeklyLabelJob(int year, int weekNumber) throws Exception {
         String labelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
         String labelColor = ReviewStudyInfo.THIS_WEEK_NUMBER_LABEL_COLOR;
@@ -66,11 +63,9 @@ public class GithubIssueJobService {
 
         LabelCreateForm labelCreateForm = new LabelCreateForm(labelName, labelDescription, labelColor);
 
-        // Ite
+        NewLabelName newLabelName = githubIssueRepository.createNewLabelStep(labelCreateForm);
 
-        NewLabelName newLabelName = githubIssueRepository.createNewLabelStep(labelCreateForm); // TODO : 라벨 이름을 매개변수로 바꾸는 것도 좋을 것 같음
-
-        GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, new GithubLabelApiSuccessResult(newLabelName.name()));
+        GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(true, new GithubLabelApiSuccessResult(newLabelName.name()));
 
         List<GithubApiTaskResult> successItems = Arrays.asList(githubApiTaskResult);
 
@@ -82,6 +77,9 @@ public class GithubIssueJobService {
         );
     }
 
+    /**
+     * batchCreateNewWeeklyReviewIssuesJob 는 새로운 주차 주간 회고 이슈를 일괄 생성하는 Job 이다.
+     */
     public GithubJobResult batchCreateNewWeeklyReviewIssuesJob(List<Member> members, int year, int weekNumber) throws Exception {
         String weekNumberLabelName = ReviewStudyInfo.getFormattedThisWeekNumberLabelName(year, weekNumber);
 
@@ -98,14 +96,13 @@ public class GithubIssueJobService {
         }
 
         if(!isWeekNumberLabelPresent) {
-            createNewLabelJob(year, weekNumber); // 새로운 라벨에 대한 예외는 createNewWeekNumberLabel에서 처리함!
+            createNewWeeklyLabelJob(year, weekNumber); // 새로운 라벨에 대한 예외는 createNewWeekNumberLabel에서 처리함!
         }
 
         // 1. 이슈 생성
         List<GithubApiTaskResult> githubApiTaskResults = new ArrayList<>();
 
         members.stream().forEach(member -> {
-            long taskId = System.currentTimeMillis();
 
             String issueTitle = ReviewStudyInfo.getFormattedWeeklyReviewIssueTitle(year, weekNumber, member.fullName()); // TODO : 서비스에서만 도메인 객체 알도록 변경 필요
 
@@ -130,7 +127,7 @@ public class GithubIssueJobService {
 
                 GithubIssueApiSuccessResult githubApiSuccessResult = new GithubIssueApiSuccessResult(newGhIssue.number(), issueTitle);
 
-                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, githubApiSuccessResult);
+                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(true, githubApiSuccessResult);
 
                 githubApiTaskResults.add(githubApiTaskResult);
 
@@ -139,7 +136,7 @@ public class GithubIssueJobService {
 
                 GithubIssueApiFailureResult githubIssueApiFailureResult = new GithubIssueApiFailureResult(null, issueTitle, exception.getMessage());
 
-                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, false, githubIssueApiFailureResult);
+                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(false, githubIssueApiFailureResult);
 
                 githubApiTaskResults.add(githubApiTaskResult);
             }
@@ -155,6 +152,9 @@ public class GithubIssueJobService {
         );
     }
 
+    /**
+     * batchCloseWeeklyReviewIssuesJob 는 지난 주차 주간 회고 이슈를 일괄 Close 하는 Job 이다.
+     */
     public GithubJobResult batchCloseWeeklyReviewIssuesJob(String labelNameToClose) throws Exception {
         // 1. 이슈 Close
         List<IssueToClose> closedIssues = new ArrayList<>();
@@ -180,7 +180,6 @@ public class GithubIssueJobService {
         log.info("(" + labelNameToClose + ") 주간회고 이슈들 Close 시작합니다.");
 
         closedIssues.stream().forEach(ghIssue -> {
-            long taskId = System.currentTimeMillis();
 
             int issueNumber = ghIssue.number();
 
@@ -193,7 +192,7 @@ public class GithubIssueJobService {
                     issueTitle);
                 GithubIssueApiSuccessResult githubApiSuccessResult = new GithubIssueApiSuccessResult(issueNumber, issueTitle);
 
-                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, true, githubApiSuccessResult);
+                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(true, githubApiSuccessResult);
 
                 githubApiTaskResults.add(githubApiTaskResult);
             } catch (Exception exception) {
@@ -202,7 +201,7 @@ public class GithubIssueJobService {
 
                 GithubIssueApiFailureResult githubIssueApiFailureResult = new GithubIssueApiFailureResult(issueNumber, issueTitle, exception.getMessage());
 
-                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(taskId, false, githubIssueApiFailureResult);
+                GithubApiTaskResult githubApiTaskResult = new GithubApiTaskResult(false, githubIssueApiFailureResult);
 
                 githubApiTaskResults.add(githubApiTaskResult);
             }

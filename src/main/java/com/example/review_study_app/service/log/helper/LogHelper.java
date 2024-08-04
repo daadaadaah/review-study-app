@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
  * LogHelper 는 log에서 자주 사용될만한 함수들을 모아놓은 클래스이다.
  *
  * < UUID로 한 이유>
- * - long 으로 했을 때, id가 겹치는 문제 발생 해서 UUID로 함.
+ * - 기존에는 System.currentTimeMillis() 값으로 했었다.
+ * - 그런데, 기존 방법으로 했을 때, 겹치는 문제가 발생해서 UUID로 했다.
+ * - UUID로 할 경우, 시간순으로 정렬하기가 어렵다는 단점이 있는데, createdAt이라는 필드가 존재하므로, 지금 상황에서는 단점이 되지 않는다고 생각한다.
+ * -
  *
  * < 각 배치 프로세스의 ID 를 ThreadLocal에 저장하는 이유 >
  * - 각 배치 프로세스별로 로깅용 AOP에서 각 배치 프로세스의 ID가 필요한 상황이었다.
@@ -31,6 +34,9 @@ import org.springframework.stereotype.Component;
  * - 지금 데이터 수준이랑 스케줄 작업 수준을 고려해볼 때, 멀티 스레드가 필요한 상황이 아니므로, ThreadLocal이 괜찮다고 생각한다.
  * - 만약, 성능을 향상시키고 싶다면, 멀티 스레드가 아닌 비동기로도 해결할 수도 있기 때문에, ThreadLocal로 고고!
  *
+ * - 참고로, spring의 @Scheduled를 여러개 동시에 실행시키면, 스레드를 따로 설정해주지 않는 이상, 1개의 스케줄링이 실행되고 완료된 후에 다른 스케줄링이 실행된다.
+ * - 즉, 스레드를 따로 설정해주지 않는 한 기본적으로 여러개가 동시에 실행되지 않는다.
+ * - 따라서, 스레드 독립성이 보장되어 데이터 정합성을 유지할 수 있고, 코드 수정 범위가 적기 때문에 ThreadLocal을 선택했다.
  */
 @Component
 public class LogHelper {

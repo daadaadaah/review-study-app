@@ -114,6 +114,13 @@ public class DiscordNotificationService implements NotificationService {
     }
 
     @Override
+    public String createUnexpectedIssueCloseFailureMessage(String weekNumberLabelName, Exception exception) {
+        return EMOJI_WARING+" ("+weekNumberLabelName+") Issue Close Job 실패 (원인 : 예상치 못한 예외 발생)"+ EMOJI_WARING
+            +"\n"
+            + "에러 메시지 : "+exception.getMessage();
+    }
+
+    @Override
     public String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult) {
         int issueNumber = githubApiSuccessResult.issueNumber();
 
@@ -132,5 +139,10 @@ public class DiscordNotificationService implements NotificationService {
     @Override
     public String createExecutionTimeMessage(String methodName, long totalExecutionTime) {
         return EMOJI_CLOCK + " (" +methodName+") 의 총 소요시간 : "+totalExecutionTime+" ms"+" "+EMOJI_CLOCK;
+    }
+
+    @Override
+    public String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime) {
+        return EMOJI_CLOCK +" (" +methodName+") : 시작 시간 - "+startTime+", 종료 시간 - "+endTime+", 총 소요시간 - "+totalExecutionTime+" ms, "+EMOJI_CLOCK;
     }
 }

@@ -47,8 +47,8 @@ public class ReviewStudyScheduler {
     /**
      * 매주 월요일 AM 00:30 에 모든 멤버의 이번주차 주간회고 Issues 를 생성하는 스케줄 함수
      */
-    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
-//    @Scheduled(fixedRate = 1200000) // TODO : 테스트용 20분마다
+//    @Scheduled(cron = "0 30 0 ? * MON", zone = "Asia/Seoul")
+    @Scheduled(fixedRate = 60000) // TODO : 테스트용 20분마다
     public void runCreateNewIssue() {
         ZonedDateTime seoulDateTime = ZonedDateTime.now(ZONE_ID_SEOUL);
 

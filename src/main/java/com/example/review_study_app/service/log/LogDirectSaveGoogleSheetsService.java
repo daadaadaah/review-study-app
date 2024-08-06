@@ -1,7 +1,6 @@
 package com.example.review_study_app.service.log;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.infrastructure.googlesheets.exception.CreateSheetsFailException;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
@@ -12,7 +11,6 @@ import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.service.log.helper.LogHelper;
-import com.example.review_study_app.service.notification.DiscordNotificationService;
 import com.example.review_study_app.service.notification.NotificationService;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,23 +93,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             logGoogleSheetsRepository.saveExecutionTimeLog(executionTimeLog);
 
             String message = String.format("Job 로그 저장 성공 : jobId=%s", jobId);
-
-            notificationService.sendMessage(message);
-
-        } catch (CreateSheetsFailException createSheetsFailException) {
-
-            String message = String.format(""
-                    + DiscordNotificationService.EMOJI_WARING+"Job 로그 저장 실패 (원인 : 구글 시트 객체 생성 실패 - %s)"+DiscordNotificationService.EMOJI_WARING+"\n"
-                    + "<예외 메시지> \n"
-                    + "- %s \n"
-                    + "<저장되지 않는 로그> \n"
-                    + "- jobDetailLog=%s \n"
-                    + "- executionTimeLog=%s",
-                createSheetsFailException.getReason(),
-                createSheetsFailException.getMessage(),
-                jobDetailLog,
-                executionTimeLog
-            );
 
             notificationService.sendMessage(message);
 

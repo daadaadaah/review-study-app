@@ -6,6 +6,7 @@ import com.example.review_study_app.repository.log.entity.JobDetailLog;
 import com.example.review_study_app.repository.log.entity.StepDetailLog;
 import com.example.review_study_app.infrastructure.googlesheets.GoogleSheetsClient;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +46,12 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         return appendValuesResponse.getUpdates().getUpdatedRange();
     }
 
-
-    public void saveStepDetailLog(StepDetailLog stepDetailLog) throws Exception {
+    public String saveStepDetailLog(StepDetailLog stepDetailLog) throws Exception {
         String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
 
-        googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+        AppendValuesResponse appendValuesResponse = googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+
+        return appendValuesResponse.getUpdates().getUpdatedRange();
     }
 
     public void saveGithubApiLog(GithubApiLog githubApiLog) throws Exception {
@@ -64,7 +66,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         googleSheetsClient.append(executionTimeLog.getClass().getSimpleName(), executionTimeLogStrings);
     }
 
-    public void remove(String range) throws Exception {
+    public void remove(String range) throws IOException {
         googleSheetsClient.remove(range);
     }
 

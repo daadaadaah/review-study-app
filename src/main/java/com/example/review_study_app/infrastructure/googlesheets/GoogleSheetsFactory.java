@@ -65,8 +65,6 @@ public class GoogleSheetsFactory {
 
             Credential credential = createCredentials(); // IOException 발생
 
-            log.info("---------------------------------------credential={}", credential);
-
             return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();

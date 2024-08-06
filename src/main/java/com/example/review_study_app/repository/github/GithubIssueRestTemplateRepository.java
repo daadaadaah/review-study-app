@@ -30,11 +30,13 @@ import org.springframework.web.client.RestClientResponseException;
  * < 알아두면 좋은 사항 >
  * 1. RestClientResponseException 는 HttpClientErrorException 및 HttpServerErrorException의 부모 클래스이다.
  *
- * 2. 기본적으로 재시도는 서버 측 원인으로 예외가 발생한 경우와 재시도로 인해 데이터 정합성이 깨지지 않는 경우(예 : 멱등성이 보장되는 API)로 했다.
+ * 2. 기본적으로 재시도는 서버 측 원인으로 예외가 발생한 경우이면서 동시에 재시도로 인해 데이터 정합성이 깨지지 않는 경우(예 : 멱등성이 보장되는 API)에 재시도 되도록 했다.
  * 왜냐하면, 클라이언트 측 원인으로 실패한 경우, 계속 동일한 요청으로 재시도 해봤자 결과는 같아서, 재시도의 의미가 없다고 생각했기 때문이다.
- * 다만, 경우에 따라서 HttpClientErrorException 에도 재시도를 했을 때, 통신에 성공할 수 있는 경우(예 : 429 Too Many Requests)가 있을 수 있다.
+ * 다만, 경우에 따라서 400번대여도 재시도를 했을 때, 통신에 성공할 수 있는 경우(예 : 429 Too Many Requests)가 있을 수 있다.
  * 따라서, 일단, Github 통신시 발생하는 예외들을 log로 남겨 놓고, 그 자료를 토대로 추후에 판단해 보는게 좋겠다.
  *
+ * 3. Github 요청 한도량 참고 링크
+ * - https://docs.github.com/ko/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#about-secondary-rate-limits
  */
 @Slf4j
 @Service

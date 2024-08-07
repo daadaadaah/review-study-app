@@ -67,12 +67,29 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         }
     }
 
-    public String saveStepDetailLog(StepDetailLog stepDetailLog) throws Exception {
-        String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
+    @GoogleSheetsTransactional
+    public void saveStepLogsWithTx(StepDetailLog stepDetailLog, ExecutionTimeLog executionTimeLog) {
+        String newStepDetailLogRange = null;
 
-        AppendValuesResponse appendValuesResponse = googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+        try {
+            newStepDetailLogRange = saveStepDetailLog(stepDetailLog);
 
-        return appendValuesResponse.getUpdates().getUpdatedRange();
+            saveExecutionTimeLog(executionTimeLog);
+        } catch (SaveExecutionTimeLogException exception) {
+            throw new GoogleSheetsTransactionException(exception, newStepDetailLogRange);
+        }
+    }
+
+    private String saveStepDetailLog(StepDetailLog stepDetailLog) {
+        try {
+            String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
+
+            AppendValuesResponse appendValuesResponse = googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+
+            return appendValuesResponse.getUpdates().getUpdatedRange();
+        } catch (Exception exception) {
+            throw new SaveDetailLogException(exception);
+        }
     }
 
     public void saveGithubApiLog(GithubApiLog githubApiLog) throws Exception {

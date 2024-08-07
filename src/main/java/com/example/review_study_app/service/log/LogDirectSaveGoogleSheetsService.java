@@ -5,6 +5,11 @@ import static com.example.review_study_app.service.notification.factory.message.
 import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackSuccessMessage;
 import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveSuccessMessage;
 import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveUnknownFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveUnKnownFailureMessage;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
@@ -55,10 +60,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
         this.notificationService = notificationService;
         this.logHelper = logHelper;
-    }
-
-    private void rollback(String rangeToRemoved) throws IOException {
-        logGoogleSheetsRepository.remove(rangeToRemoved);
     }
 
     /**
@@ -171,37 +172,32 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
 
         try {
-
-            newStepDetailLogRange = logGoogleSheetsRepository.saveStepDetailLog(stepDetailLog);
-
-            if(newStepDetailLogRange != null) {
-                logGoogleSheetsRepository.saveExecutionTimeLog(executionTimeLog);
-            }
+            logGoogleSheetsRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
             notificationService.sendMessage(createStepLogsSaveSuccessMessage(stepId));
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-        } catch (SaveExecutionTimeLogException exception) {
+            notificationService.sendMessage(createStepLogsSaveDetailLogFailureMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog
+            ));
+        } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
 
-            try {
-                rollback(newStepDetailLogRange); // 위에서 newRange이 null 이 아닌 경우, 저장하므로, 이 예외가 발생한 경우 무조건 rollback 필요!
+            notificationService.sendMessage(createStepLogsSaveRollbackSuccessMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog,
+                newStepDetailLogRange
+            ));
+        } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-                notificationService.sendMessage(createStepLogsSaveRollbackSuccessMessage(
-                    exception,
-                    stepDetailLog,
-                    executionTimeLog,
-                    newStepDetailLogRange
-                ));
-
-            } catch (Exception rollbackException) {
-
-                notificationService.sendMessage(createStepLogsSaveRollbackFailureMessage(
-                    rollbackException,
-                    stepDetailLog,
-                    executionTimeLog,
-                    newStepDetailLogRange
-                ));
-            }
-
+            notificationService.sendMessage(createStepLogsSaveRollbackFailureMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog,
+                newStepDetailLogRange
+            ));
         } catch (Exception exception) {
 
             notificationService.sendMessage(createStepLogsSaveUnKnownFailureMessage(
@@ -211,90 +207,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             ));
         }
     }
-
-    private String createStepLogsSaveSuccessMessage(UUID stepId) {
-        return String.format(
-            "%sStep 로그 저장 성공 : stepId=%s %s",
-            DiscordNotificationService.EMOJI_CONGRATS,
-            stepId,
-            DiscordNotificationService.EMOJI_CONGRATS
-        );
-    }
-
-    private String createStepLogsSaveRollbackSuccessMessage(
-        Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
-    ){
-        return String.format(
-            "%sStep 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
-                + "<rollback 성공 여부> \n"
-                + "- %s (range : %s)",
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
-            "true",
-            range
-        );
-    }
-
-    private String createStepLogsSaveRollbackFailureMessage(
-        Exception rollbackException,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
-    ) {
-        return String.format(
-            "%sStep 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
-                + "<rollback 성공 여부> \n"
-                + "- false (range : %s) \n"
-                + "- 예외 메시지 : %s",
-            DiscordNotificationService.EMOJI_WARING,
-            rollbackException.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            rollbackException.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
-            rollbackException.getMessage()
-        );
-    }
-
-    private String createStepLogsSaveUnKnownFailureMessage(
-        Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog
-    ) {
-        return String.format(
-            "%sStep 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n",
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog
-        );
-    }
-
 
     @Async("logSaveTaskExecutor") // TODO : resttemplate 통신 로그 저장 방법 AOP -> 인터셉터로 바꾼 후에 수정하기
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {

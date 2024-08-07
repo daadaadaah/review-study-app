@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.log.dto;
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;
-import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
+import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpRequest;
 import java.util.UUID;
 
 public record SaveTaskLogDto<T>(

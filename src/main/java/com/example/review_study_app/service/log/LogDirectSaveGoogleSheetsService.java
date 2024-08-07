@@ -12,7 +12,7 @@ import static com.example.review_study_app.service.notification.factory.message.
 import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveUnKnownFailureMessage;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
+import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpResponse;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
@@ -21,12 +21,10 @@ import com.example.review_study_app.repository.log.entity.StepDetailLog;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
-import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.service.log.helper.LogHelper;
-import com.example.review_study_app.service.notification.DiscordNotificationService;
 import com.example.review_study_app.service.notification.NotificationService;
 import java.io.IOException;
 import java.util.ArrayList;

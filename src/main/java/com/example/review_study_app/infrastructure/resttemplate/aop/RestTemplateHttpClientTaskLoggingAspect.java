@@ -1,10 +1,10 @@
-package com.example.review_study_app.common.httpclient.aop;
+package com.example.review_study_app.infrastructure.resttemplate.aop;
 
 import com.example.review_study_app.service.log.helper.LogHelper;
 import com.example.review_study_app.service.log.LogService;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
-import com.example.review_study_app.common.httpclient.dto.MyHttpRequest;
-import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
+import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpRequest;
+import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpResponse;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -40,7 +40,7 @@ public class RestTemplateHttpClientTaskLoggingAspect {
      * - 따라서, 재사용성 있게 범용성 있는 이름을 가진 클래스를 만드는 것보다, 세부 사항별로 Task Logging을 하는게, 좀더 단순하게 구현할 수 있을 것이라 생각했기 때문에, 구체적인 클래스를 지정했다.
      * - 만약, 추가적인 Task가 생긴다면, 그 Task의 이름을 가진 Aspect를 하나 더 만드는 방식으로 하는게 관심사 분리 관점에서 좋을 것 같다.
      */
-    @Around("execution(* com.example.review_study_app.common.httpclient.RestTemplateHttpClient.*(..))")
+    @Around("execution(* com.example.review_study_app.infrastructure.resttemplate.RestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 

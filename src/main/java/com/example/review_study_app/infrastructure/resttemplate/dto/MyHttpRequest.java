@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.httpclient.dto;
+package com.example.review_study_app.infrastructure.resttemplate.dto;
 
 import org.springframework.http.HttpHeaders;
 

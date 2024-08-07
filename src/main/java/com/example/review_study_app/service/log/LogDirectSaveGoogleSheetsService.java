@@ -1,5 +1,11 @@
 package com.example.review_study_app.service.log;
 
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveUnknownFailureMessage;
+
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
@@ -132,108 +138,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         }
     }
 
-    private String createJobLogsSaveSuccessMessage(UUID jobId) {
-        return String.format(
-            "%sJob 로그 저장 성공 : jobId=%s %s",
-            DiscordNotificationService.EMOJI_CONGRATS,
-            jobId,
-            DiscordNotificationService.EMOJI_CONGRATS
-        );
-    }
-
-    private String createJobLogsSaveDetailLogFailureMessage(
-        SaveDetailLogException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
-    ) {
-        return String.format(
-            "%sJob 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s",
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
-        );
-    }
-
-    private String createJobLogsSaveRollbackSuccessMessage(
-        GoogleSheetsTransactionException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
-    ) {
-        return String.format(
-            "%sJob 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
-                + "<rollback 성공 여부> \n"
-                + "- true (range : %s)",
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
-            range
-        );
-    }
-
-    private String createJobLogsSaveRollbackFailureMessage(
-        Exception rollbackException,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
-    ) {
-        return String.format(
-            "%sJob 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
-                + "<rollback 성공 여부> \n"
-                + "- false (range : %s) \n"
-                + "- 예외 메시지 : %s",
-            DiscordNotificationService.EMOJI_WARING,
-            rollbackException.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            rollbackException.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
-            rollbackException.getMessage()
-        );
-    }
-
-    private String createJobLogsSaveUnknownFailureMessage(
-        Exception exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
-    ) {
-        return String.format(
-            "%sJob 로그 저장 실패(원인 : %s)%s\n"
-                + "<예외 메시지> \n"
-                + "- %s \n"
-                + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s",
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getClass().getSimpleName(),
-            DiscordNotificationService.EMOJI_WARING,
-            exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
-        );
-    }
 
     @Async("logSaveTaskExecutor")
     public void saveStepLog(SaveStepLogDto saveStepLogDto) {

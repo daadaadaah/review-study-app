@@ -7,6 +7,9 @@ import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
 import com.example.review_study_app.repository.log.entity.StepDetailLog;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
+import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
@@ -92,38 +95,35 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
 
         try {
-
-            newJobDetailLogRange = logGoogleSheetsRepository.saveJobDetailLog(jobDetailLog);
-
-            if(newJobDetailLogRange != null) {
-                logGoogleSheetsRepository.saveExecutionTimeLog(executionTimeLog);
-            }
+            logGoogleSheetsRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
 
             notificationService.sendMessage(createJobLogsSaveSuccessMessage(jobId));
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-        } catch (SaveExecutionTimeLogException exception) {
+            notificationService.sendMessage(createJobLogsSaveDetailLogFailureMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog
+            ));
 
-            try {
-                rollback(newJobDetailLogRange); // 위에서 newRange이 null 이 아닌 경우, 저장하므로, 이 예외가 발생한 경우 무조건 rollback 필요!
+        } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
+            notificationService.sendMessage(createJobLogsSaveRollbackSuccessMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog,
+                newJobDetailLogRange
+            ));
 
-                notificationService.sendMessage(createJobLogsSaveRollbackSuccessMessage(
-                    exception,
-                    jobDetailLog,
-                    executionTimeLog,
-                    newJobDetailLogRange
-                ));
+        } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-            } catch (Exception rollbackException) {
+            notificationService.sendMessage(createJobLogsSaveRollbackFailureMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog,
+                newJobDetailLogRange
+            ));
 
-                notificationService.sendMessage(createJobLogsSaveRollbackFailureMessage(
-                    rollbackException,
-                    jobDetailLog,
-                    executionTimeLog,
-                    newJobDetailLogRange
-                ));
-            }
         } catch (Exception exception) {
-
             notificationService.sendMessage(createJobLogsSaveUnknownFailureMessage(
                 exception,
                 jobDetailLog,
@@ -141,8 +141,29 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
     }
 
+    private String createJobLogsSaveDetailLogFailureMessage(
+        SaveDetailLogException exception,
+        JobDetailLog jobDetailLog,
+        ExecutionTimeLog executionTimeLog
+    ) {
+        return String.format(
+            "%sJob 로그 저장 실패(원인 : %s)%s\n"
+                + "<예외 메시지> \n"
+                + "- %s \n"
+                + "<저장되지 않는 로그> \n"
+                + "- jobDetailLog=%s \n"
+                + "- executionTimeLog=%s",
+            DiscordNotificationService.EMOJI_WARING,
+            exception.getClass().getSimpleName(),
+            DiscordNotificationService.EMOJI_WARING,
+            exception.getMessage(),
+            jobDetailLog,
+            executionTimeLog
+        );
+    }
+
     private String createJobLogsSaveRollbackSuccessMessage(
-        SaveExecutionTimeLogException exception,
+        GoogleSheetsTransactionException exception,
         JobDetailLog jobDetailLog,
         ExecutionTimeLog executionTimeLog,
         String range
@@ -289,7 +310,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     private String createStepLogsSaveSuccessMessage(UUID stepId) {
         return String.format(
-            "%Step 로그 저장 성공 : stepId=%s %s",
+            "%sStep 로그 저장 성공 : stepId=%s %s",
             DiscordNotificationService.EMOJI_CONGRATS,
             stepId,
             DiscordNotificationService.EMOJI_CONGRATS

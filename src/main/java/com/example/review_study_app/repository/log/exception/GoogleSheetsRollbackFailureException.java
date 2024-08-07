@@ -8,8 +8,14 @@ package com.example.review_study_app.repository.log.exception;
  */
 
 public class GoogleSheetsRollbackFailureException extends RuntimeException {
+    private final String googleSheetsRollbackRange;
 
-    public GoogleSheetsRollbackFailureException(Throwable cause) {
+    public GoogleSheetsRollbackFailureException(Throwable cause, String googleSheetsRollbackRange) {
         super(cause);
+        this.googleSheetsRollbackRange = googleSheetsRollbackRange;
+    }
+
+    public String getGoogleSheetsRollbackRange() {
+        return googleSheetsRollbackRange;
     }
 }

@@ -1,17 +1,32 @@
 package com.example.review_study_app.common.config;
 
 import com.example.review_study_app.infrastructure.googlesheets.GoogleSheetsFactory;
+import com.example.review_study_app.infrastructure.resttemplate.interceptor.GitHubApiLoggingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.sheets.v4.Sheets;
+import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+
+    private final GitHubApiLoggingInterceptor gitHubApiLoggingInterceptor;
+
+    @Autowired
+    public AppConfig(
+        GitHubApiLoggingInterceptor gitHubApiLoggingInterceptor
+    ) {
+        this.gitHubApiLoggingInterceptor = gitHubApiLoggingInterceptor;
+    }
 
     /**
      *
@@ -31,6 +46,8 @@ public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
+        restTemplate.setInterceptors(Collections.singletonList(gitHubApiLoggingInterceptor));
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         return restTemplate;
     }

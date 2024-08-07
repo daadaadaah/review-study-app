@@ -1,11 +1,16 @@
 package com.example.review_study_app.repository.log;
 
+import com.example.review_study_app.repository.log.aop.GoogleSheetsTransactional;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
 import com.example.review_study_app.repository.log.entity.StepDetailLog;
 import com.example.review_study_app.infrastructure.googlesheets.GoogleSheetsClient;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
+import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
+import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +42,54 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         this.googleSheetsClient = googleSheetsClient;
     }
 
-    public String saveJobDetailLog(JobDetailLog jobDetailLog) throws Exception {
-        String[] jobDetailLogStrings = convertObjectToStringArray(jobDetailLog);
+    @GoogleSheetsTransactional
+    public void saveJobLogsWithTx(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
+        String newJobDetailLogRange = null;
 
-        AppendValuesResponse appendValuesResponse = googleSheetsClient.append(jobDetailLog.getClass().getSimpleName(), jobDetailLogStrings);
+        try {
+            newJobDetailLogRange = saveJobDetailLog(jobDetailLog);
 
-        return appendValuesResponse.getUpdates().getUpdatedRange();
+            saveExecutionTimeLog(executionTimeLog);
+        } catch (SaveExecutionTimeLogException exception) {
+            throw new GoogleSheetsTransactionException(exception, newJobDetailLogRange);
+        }
     }
 
+    private String saveJobDetailLog(JobDetailLog jobDetailLog) {
+        try {
+            String[] jobDetailLogStrings = convertObjectToStringArray(jobDetailLog);
 
-    public void saveStepDetailLog(StepDetailLog stepDetailLog) throws Exception {
-        String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
+            AppendValuesResponse appendValuesResponse = googleSheetsClient.append(jobDetailLog.getClass().getSimpleName(), jobDetailLogStrings);
 
-        googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+            return appendValuesResponse.getUpdates().getUpdatedRange();
+        } catch (Exception exception) {
+            throw new SaveDetailLogException(exception);
+        }
+    }
+
+    @GoogleSheetsTransactional
+    public void saveStepLogsWithTx(StepDetailLog stepDetailLog, ExecutionTimeLog executionTimeLog) {
+        String newStepDetailLogRange = null;
+
+        try {
+            newStepDetailLogRange = saveStepDetailLog(stepDetailLog);
+
+            saveExecutionTimeLog(executionTimeLog);
+        } catch (SaveExecutionTimeLogException exception) {
+            throw new GoogleSheetsTransactionException(exception, newStepDetailLogRange);
+        }
+    }
+
+    private String saveStepDetailLog(StepDetailLog stepDetailLog) {
+        try {
+            String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
+
+            AppendValuesResponse appendValuesResponse = googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
+
+            return appendValuesResponse.getUpdates().getUpdatedRange();
+        } catch (Exception exception) {
+            throw new SaveDetailLogException(exception);
+        }
     }
 
     public void saveGithubApiLog(GithubApiLog githubApiLog) throws Exception {
@@ -58,13 +98,17 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         googleSheetsClient.append(githubApiLog.getClass().getSimpleName(), githubApiLogStrings);
     }
 
-    public void saveExecutionTimeLog(ExecutionTimeLog executionTimeLog) throws Exception {
-        String[] executionTimeLogStrings = convertObjectToStringArray(executionTimeLog);
+    public void saveExecutionTimeLog(ExecutionTimeLog executionTimeLog) { // TODO : task 까지 다 하고 private로 바꿔야 할 것 같음
+        try {
+            String[] executionTimeLogStrings = convertObjectToStringArray(executionTimeLog);
 
-        googleSheetsClient.append(executionTimeLog.getClass().getSimpleName(), executionTimeLogStrings);
+            googleSheetsClient.append(executionTimeLog.getClass().getSimpleName(), executionTimeLogStrings);
+        } catch (Exception exception) {
+            throw new SaveExecutionTimeLogException(exception);
+        }
     }
 
-    public void remove(String range) throws Exception {
+    public void remove(String range) throws IOException {
         googleSheetsClient.remove(range);
     }
 

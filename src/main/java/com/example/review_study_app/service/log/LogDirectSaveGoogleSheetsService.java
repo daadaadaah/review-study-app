@@ -1,16 +1,32 @@
 package com.example.review_study_app.service.log;
 
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveUnknownFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveUnKnownFailureMessage;
+
 import com.example.review_study_app.common.enums.BatchProcessType;
+import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
 import com.example.review_study_app.repository.log.entity.StepDetailLog;
-import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
+import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
+import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.service.log.helper.LogHelper;
+import com.example.review_study_app.service.notification.DiscordNotificationService;
 import com.example.review_study_app.service.notification.NotificationService;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,12 +71,11 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
      *
      *
      */
-
     // TODO : 디스코드로! Job, Step, Task 모두 보내면, 디스코드 시끄러울 것 같은데, 이거 어떻게 할지 고민해보기
     @Async("logSaveTaskExecutor") // TODO : 로그 저장 실패시, 비동기 예외 처리 어떻게 할 것인지 + 트랜잭션 처리
     public void saveJobLog(SaveJobLogDto saveJobLogDto) {
 
-        String newRange = null;
+        String newJobDetailLogRange = null;
 
         UUID jobId = saveJobLogDto.jobId();
 
@@ -87,86 +102,113 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
 
         try {
+            logGoogleSheetsRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
 
-            newRange = logGoogleSheetsRepository.saveJobDetailLog(jobDetailLog);
+            notificationService.sendMessage(createJobLogsSaveSuccessMessage(jobId));
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-            logGoogleSheetsRepository.saveExecutionTimeLog(executionTimeLog);
+            notificationService.sendMessage(createJobLogsSaveDetailLogFailureMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog
+            ));
 
-            String message = String.format("Job 로그 저장 성공 : jobId=%s", jobId);
+        } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
+            notificationService.sendMessage(createJobLogsSaveRollbackSuccessMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog,
+                newJobDetailLogRange
+            ));
 
-            notificationService.sendMessage(message);
+        } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-        } catch (IOException ioException) {
-            if(newRange == null) { // saveJobDetailLog 저장하면서 IOException 발생한 상황
-                // 롤백 안해도 됨
-                notificationService.sendMessage("로그 저장 실패 (원인 : "+ioException.getMessage()+")");
+            notificationService.sendMessage(createJobLogsSaveRollbackFailureMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog,
+                newJobDetailLogRange
+            ));
 
-
-            } else { // saveJobDetailLog은 성공했으나, saveExecutionTimeLog 저장하면서 IOException 발생한 상황
-                // TODO : 롤백 처리 해야 함.
-                try {
-                    logGoogleSheetsRepository.remove(newRange);
-                } catch (Exception exception) {
-
-                }
-                notificationService.sendMessage("로그 저장 실패 (원인 : "+ioException.getMessage()+")");
-            }
         } catch (Exception exception) {
-
-            notificationService.sendMessage("Job 로그 저장 실패(원인 : 예상치 못한 예외 발생) jobId="+jobId+", ex="+exception.getMessage());
+            notificationService.sendMessage(createJobLogsSaveUnknownFailureMessage(
+                exception,
+                jobDetailLog,
+                executionTimeLog
+            ));
         }
     }
+
 
     @Async("logSaveTaskExecutor")
     public void saveStepLog(SaveStepLogDto saveStepLogDto) {
 
-        UUID jobId = saveStepLogDto.jobId();
+        String newStepDetailLogRange = null;
 
+        UUID stepId = saveStepLogDto.stepId();
+
+        long stepDetailLogId = saveStepLogDto.endTime();
+
+        StepDetailLog stepDetailLog = StepDetailLog.of(
+            stepDetailLogId,
+            logHelper.getEnvironment(),
+            saveStepLogDto,
+            logHelper.getCreatedAt(saveStepLogDto.endTime())
+        );
+
+        long timeTaken = saveStepLogDto.endTime() - saveStepLogDto.startTime();
+
+        ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
+            saveStepLogDto.stepId(),
+            saveStepLogDto.jobId(),
+            logHelper.getEnvironment(),
+            BatchProcessType.STEP,
+            saveStepLogDto.methodName(),
+            saveStepLogDto.status(),
+            saveStepLogDto.statusReason(),
+            stepDetailLogId,
+            timeTaken,
+            logHelper.getCreatedAt(saveStepLogDto.endTime())
+        );
 
         try {
+            logGoogleSheetsRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
-            long stepDetailLogId = saveStepLogDto.endTime();
+            notificationService.sendMessage(createStepLogsSaveSuccessMessage(stepId));
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-            logGoogleSheetsRepository.saveStepDetailLog(StepDetailLog.of(
-                stepDetailLogId,
-                logHelper.getEnvironment(),
-                saveStepLogDto,
-                logHelper.getCreatedAt(saveStepLogDto.endTime())
+            notificationService.sendMessage(createStepLogsSaveDetailLogFailureMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog
             ));
+        } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
 
-            long timeTaken = saveStepLogDto.endTime() - saveStepLogDto.startTime();
-
-            logGoogleSheetsRepository.saveExecutionTimeLog(ExecutionTimeLog.of(
-                saveStepLogDto.stepId(),
-                saveStepLogDto.jobId(),
-                logHelper.getEnvironment(),
-                BatchProcessType.STEP,
-                saveStepLogDto.methodName(),
-                saveStepLogDto.status(),
-                saveStepLogDto.statusReason(),
-                stepDetailLogId,
-                timeTaken,
-                logHelper.getCreatedAt(saveStepLogDto.endTime())
+            notificationService.sendMessage(createStepLogsSaveRollbackSuccessMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog,
+                newStepDetailLogRange
             ));
+        } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-        } catch (IOException exception) {
-            // 디테일로그 저장 성공. 그러나, 실행 로그 저장 실패
-            // TODO : 롤백
-            notificationService.sendMessage("Job 로그 저장 실패(원인 : IOException) jobId="+jobId+", ex="+exception.getMessage());
-
+            notificationService.sendMessage(createStepLogsSaveRollbackFailureMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog,
+                newStepDetailLogRange
+            ));
         } catch (Exception exception) {
 
-            notificationService.sendMessage("Job 로그 저장 실패(원인 : 예상치 못한 예외 발생) jobId="+jobId+", ex="+exception.getMessage());
-
-            // jobId, 실패 이유
-            // stepId, parentId 실패 이유
-            // taskId, parentId 실패 이유
-
-//            notificationService.createIssueCloseFailureMessage();
+            notificationService.sendMessage(createStepLogsSaveUnKnownFailureMessage(
+                exception,
+                stepDetailLog,
+                executionTimeLog
+            ));
         }
     }
 
-    @Async("logSaveTaskExecutor")
+    @Async("logSaveTaskExecutor") // TODO : resttemplate 통신 로그 저장 방법 AOP -> 인터셉터로 바꾼 후에 수정하기
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
 
         UUID stepId = saveTaskLogDto.stepId();

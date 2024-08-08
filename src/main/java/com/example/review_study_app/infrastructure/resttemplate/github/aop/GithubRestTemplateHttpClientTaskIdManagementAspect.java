@@ -1,4 +1,4 @@
-package com.example.review_study_app.common.httpclient.aop;
+package com.example.review_study_app.infrastructure.resttemplate.github.aop;
 
 import com.example.review_study_app.service.log.helper.LogHelper;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -11,18 +11,18 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(value = 1) // 가장 바깥쪽에 감싸지도록
-public class RestTemplateHttpClientTaskIdManagementAspect {
+public class GithubRestTemplateHttpClientTaskIdManagementAspect {
 
     private final LogHelper logHelper;
 
     @Autowired
-    public RestTemplateHttpClientTaskIdManagementAspect(
+    public GithubRestTemplateHttpClientTaskIdManagementAspect(
         LogHelper logHelper
     ) {
         this.logHelper = logHelper;
     }
 
-    @Around("execution(* com.example.review_study_app.common.httpclient.RestTemplateHttpClient.*(..))")
+    @Around("execution(* com.example.review_study_app.infrastructure.resttemplate.github.GithubRestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             logHelper.setTaskId();

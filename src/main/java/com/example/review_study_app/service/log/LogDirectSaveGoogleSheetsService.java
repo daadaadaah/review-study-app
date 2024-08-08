@@ -1,18 +1,10 @@
 package com.example.review_study_app.service.log;
 
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveDetailLogFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackSuccessMessage;
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveSuccessMessage;
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveUnknownFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveDetailLogFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackSuccessMessage;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveSuccessMessage;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveUnKnownFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.*;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.common.httpclient.dto.MyHttpResponse;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
@@ -21,22 +13,16 @@ import com.example.review_study_app.repository.log.entity.StepDetailLog;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
-import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.service.log.helper.LogHelper;
-import com.example.review_study_app.service.notification.DiscordNotificationService;
 import com.example.review_study_app.service.notification.NotificationService;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientResponseException;
 
 
 @Slf4j
@@ -48,8 +34,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
     private final NotificationService notificationService;
 
     private final LogHelper logHelper;
-
-    private final List<String> exceptions = new ArrayList<>();
 
     @Autowired
     public LogDirectSaveGoogleSheetsService(
@@ -114,6 +98,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             ));
 
         } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
+
             notificationService.sendMessage(createJobLogsSaveRollbackSuccessMessage(
                 exception,
                 jobDetailLog,
@@ -142,9 +127,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     @Async("logSaveTaskExecutor")
     public void saveStepLog(SaveStepLogDto saveStepLogDto) {
-
-        String newStepDetailLogRange = null;
-
         UUID stepId = saveStepLogDto.stepId();
 
         long stepDetailLogId = saveStepLogDto.endTime();
@@ -182,22 +164,25 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
                 stepDetailLog,
                 executionTimeLog
             ));
+
         } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
 
             notificationService.sendMessage(createStepLogsSaveRollbackSuccessMessage(
                 exception,
                 stepDetailLog,
                 executionTimeLog,
-                newStepDetailLogRange
+                exception.getGoogleSheetsRollbackRange()
             ));
+
         } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
             notificationService.sendMessage(createStepLogsSaveRollbackFailureMessage(
                 exception,
                 stepDetailLog,
                 executionTimeLog,
-                newStepDetailLogRange
+                exception.getGoogleSheetsRollbackRange()
             ));
+
         } catch (Exception exception) {
 
             notificationService.sendMessage(createStepLogsSaveUnKnownFailureMessage(
@@ -213,83 +198,76 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
         UUID stepId = saveTaskLogDto.stepId();
 
+        long taskDetailLogId = saveTaskLogDto.endTime();
+
+        long timeTaken = saveTaskLogDto.endTime() - saveTaskLogDto.startTime();
+
+        GithubApiLog githubApiLog = new GithubApiLog(
+            taskDetailLogId,
+            logHelper.getEnvironment(),
+            saveTaskLogDto.batchProcessName(),
+            saveTaskLogDto.httpMethod(),
+            saveTaskLogDto.url(),
+            saveTaskLogDto.requestHeaders(),
+            saveTaskLogDto.requestBody(),
+            saveTaskLogDto.responseStatusCode(),
+            saveTaskLogDto.responseHeaders(),
+            saveTaskLogDto.responseBody(),
+            timeTaken,
+            logHelper.getCreatedAt(saveTaskLogDto.endTime())
+        );
+
+        ExecutionTimeLog executionTimeLog = ExecutionTimeLog.of(
+            saveTaskLogDto.taskId(),
+            saveTaskLogDto.stepId(),
+            logHelper.getEnvironment(),
+            BatchProcessType.TASK,
+            saveTaskLogDto.batchProcessName(),
+            saveTaskLogDto.status(),
+            saveTaskLogDto.statusReason(),
+            taskDetailLogId,
+            timeTaken,
+            logHelper.getCreatedAt(saveTaskLogDto.endTime())
+        );
 
         try {
-            long taskDetailLogId = saveTaskLogDto.endTime();
 
-            long timeTaken = saveTaskLogDto.endTime() - saveTaskLogDto.startTime();
+            logGoogleSheetsRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
 
-            if(saveTaskLogDto.taskResult() instanceof MyHttpResponse) {
+            notificationService.sendMessage(createGithubApiLogsSaveSuccessMessage(stepId));
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-                MyHttpResponse myHttpResponse = (MyHttpResponse) saveTaskLogDto.taskResult();
-
-                String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
-
-                logGoogleSheetsRepository.saveGithubApiLog(new GithubApiLog(
-                    taskDetailLogId,
-                    logHelper.getEnvironment(),
-                    saveTaskLogDto.batchProcessName(),
-                    saveTaskLogDto.httpMethod(),
-                    saveTaskLogDto.myHttpRequest().url(),
-                    saveTaskLogDto.myHttpRequest().headers(),
-                    requestBody,
-                    myHttpResponse.statusCode(),
-                    myHttpResponse.headers(),
-                    myHttpResponse.body(),
-                    timeTaken,
-                    logHelper.getCreatedAt(saveTaskLogDto.endTime())
-                ));
-            } else if(saveTaskLogDto.taskResult() instanceof RestClientResponseException) {
-                RestClientResponseException restClientResponseException = (RestClientResponseException) saveTaskLogDto.taskResult();
-
-                String requestBody = saveTaskLogDto.myHttpRequest().body() != null ? saveTaskLogDto.myHttpRequest().body().toString() : null;
-
-                logGoogleSheetsRepository.saveGithubApiLog(new GithubApiLog(
-                    taskDetailLogId,
-                    logHelper.getEnvironment(),
-                    saveTaskLogDto.batchProcessName(),
-                    saveTaskLogDto.httpMethod(),
-                    saveTaskLogDto.myHttpRequest().url(),
-                    saveTaskLogDto.myHttpRequest().headers(),
-                    requestBody,
-                    restClientResponseException.getStatusCode().value(),
-                    restClientResponseException.getResponseHeaders(),
-                    restClientResponseException.getResponseBodyAsString(),
-                    timeTaken,
-                    logHelper.getCreatedAt(saveTaskLogDto.endTime())
-                ));
-            } else {
-                // TODO :
-            }
-
-            logGoogleSheetsRepository.saveExecutionTimeLog(ExecutionTimeLog.of(
-                saveTaskLogDto.taskId(),
-                saveTaskLogDto.stepId(),
-                logHelper.getEnvironment(),
-                BatchProcessType.TASK,
-                saveTaskLogDto.batchProcessName(),
-                saveTaskLogDto.status(),
-                saveTaskLogDto.statusReason(),
-                taskDetailLogId,
-                timeTaken,
-                logHelper.getCreatedAt(saveTaskLogDto.endTime())
+            notificationService.sendMessage(createGithubApiLogsSaveDetailLogFailureMessage(
+                exception,
+                githubApiLog,
+                executionTimeLog
             ));
-        } catch (IOException exception) {
-            // 디테일로그 저장 성공. 그러나, 실행 로그 저장 실패
-            // TODO : 롤백
 
-            notificationService.sendMessage("Job 로그 저장 실패(원인 : 예상치 못한 예외 발생) stepId="+stepId+", ex="+exception.getMessage());
+        } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
+
+            notificationService.sendMessage(createGithubApiLogsSaveRollbackSuccessMessage(
+                exception,
+                githubApiLog,
+                executionTimeLog,
+                exception.getGoogleSheetsRollbackRange()
+            ));
+
+        } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
+
+            notificationService.sendMessage(createGithubApiLogsSaveRollbackFailureMessage(
+                exception,
+                githubApiLog,
+                executionTimeLog,
+                exception.getGoogleSheetsRollbackRange()
+            ));
 
         } catch (Exception exception) {
 
-
-            notificationService.sendMessage("Job 로그 저장 실패(원인 : 예상치 못한 예외 발생) stepId="+stepId+", ex="+exception.getMessage());
-
-            // jobId, 실패 이유
-            // stepId, parentId 실패 이유
-            // taskId, parentId 실패 이유
-
-//            notificationService.createIssueCloseFailureMessage();
+            notificationService.sendMessage(createGithubApiLogsSaveUnKnownFailureMessage(
+                exception,
+                githubApiLog,
+                executionTimeLog
+            ));
         }
     }
 }

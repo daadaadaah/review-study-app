@@ -92,13 +92,33 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         }
     }
 
-    public void saveGithubApiLog(GithubApiLog githubApiLog) throws Exception {
-        String[] githubApiLogStrings = convertObjectToStringArray(githubApiLog);
 
-        googleSheetsClient.append(githubApiLog.getClass().getSimpleName(), githubApiLogStrings);
+    @GoogleSheetsTransactional
+    public void saveGithubApiLogsWithTx(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
+        String newGithubApiLogRange = null;
+
+        try {
+            newGithubApiLogRange = saveGithubApiLog(githubApiLog);
+
+            saveExecutionTimeLog(executionTimeLog);
+        } catch (SaveExecutionTimeLogException exception) {
+            throw new GoogleSheetsTransactionException(exception, newGithubApiLogRange);
+        }
     }
 
-    public void saveExecutionTimeLog(ExecutionTimeLog executionTimeLog) { // TODO : task 까지 다 하고 private로 바꿔야 할 것 같음
+    private String saveGithubApiLog(GithubApiLog githubApiLog) {
+        try {
+            String[] githubApiLogStrings = convertObjectToStringArray(githubApiLog);
+
+            AppendValuesResponse appendValuesResponse = googleSheetsClient.append(githubApiLog.getClass().getSimpleName(), githubApiLogStrings);
+
+            return appendValuesResponse.getUpdates().getUpdatedRange();
+        } catch (Exception exception) {
+            throw new SaveDetailLogException(exception);
+        }
+    }
+
+    private void saveExecutionTimeLog(ExecutionTimeLog executionTimeLog) { // TODO : task 까지 다 하고 private로 바꿔야 할 것 같음
         try {
             String[] executionTimeLogStrings = convertObjectToStringArray(executionTimeLog);
 

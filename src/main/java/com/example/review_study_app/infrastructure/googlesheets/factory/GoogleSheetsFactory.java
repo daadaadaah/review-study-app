@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.googlesheets;
+package com.example.review_study_app.infrastructure.googlesheets.factory;
 
 import static com.example.review_study_app.infrastructure.googlesheets.enums.CreateSheetsFailReason.GOOGLE_HTTP_TRANSPORT_GENERAL_SECURITY_EXCEPTION;
 import static com.example.review_study_app.infrastructure.googlesheets.enums.CreateSheetsFailReason.GOOGLE_CREDENTIAL_FILE_NOT_FOUND;

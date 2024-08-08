@@ -8,9 +8,9 @@ import com.example.review_study_app.repository.github.dto.LabelCreateForm;
 import com.example.review_study_app.repository.github.dto.NewIssue;
 import com.example.review_study_app.repository.github.dto.NewLabelName;
 import com.example.review_study_app.repository.github.mapper.excpetion.MyJsonParseFailException;
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpRequest;
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpResponse;
-import com.example.review_study_app.infrastructure.resttemplate.RestTemplateHttpClient;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
+import com.example.review_study_app.infrastructure.resttemplate.github.GithubRestTemplateHttpClient;
 import com.example.review_study_app.domain.ReviewStudyInfo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -45,16 +45,16 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
     @Value("${github.oauth.accessToken}")
     private String GITHUB_OAUTH_ACCESS_TOKEN;
 
-    private RestTemplateHttpClient restTemplateHttpClient;
+    private GithubRestTemplateHttpClient githubRestTemplateHttpClient;
 
     private GithubApiResponseMapper githubApiResponseMapper;
 
     @Autowired
     public GithubIssueRestTemplateRepository(
-        RestTemplateHttpClient restTemplateHttpClient,
+        GithubRestTemplateHttpClient githubRestTemplateHttpClient,
         GithubApiResponseMapper githubApiResponseMapper
     ) {
-        this.restTemplateHttpClient = restTemplateHttpClient;
+        this.githubRestTemplateHttpClient = githubRestTemplateHttpClient;
         this.githubApiResponseMapper = githubApiResponseMapper;
     }
 
@@ -125,7 +125,7 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
         MyHttpRequest request = new MyHttpRequest(url, httpHeaders, labelCreateForm);
 
         try {
-            MyHttpResponse response = restTemplateHttpClient.post(request);
+            MyHttpResponse response = githubRestTemplateHttpClient.post(request);
 
             NewLabelName newLabelName = githubApiResponseMapper.extractNewLabelNameFromResponseBody(response.body());
 
@@ -174,7 +174,7 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
 
             MyHttpRequest request = new MyHttpRequest(url, httpHeaders, null);
 
-            MyHttpResponse response = restTemplateHttpClient.get(request);
+            MyHttpResponse response = githubRestTemplateHttpClient.get(request);
 
             log.info("라벨이 존재합니다. labelName = {}", labelName);
 
@@ -225,7 +225,7 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
 
         try {
 
-            MyHttpResponse response = restTemplateHttpClient.post(request);
+            MyHttpResponse response = githubRestTemplateHttpClient.post(request);
 
             NewIssue newIssue = githubApiResponseMapper.extractNewIssueFromResponseBody(response.body());
 
@@ -273,7 +273,7 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
         MyHttpRequest request = new MyHttpRequest(url, httpHeaders, null);
 
         try {
-            MyHttpResponse response = restTemplateHttpClient.get(request);
+            MyHttpResponse response = githubRestTemplateHttpClient.get(request);
 
             List<IssueToClose> issuesToClose = githubApiResponseMapper.extractIssueToClosListFromResponseBody(response.body());
 
@@ -320,7 +320,7 @@ public class GithubIssueRestTemplateRepository implements GithubIssueRepository 
         MyHttpRequest request = new MyHttpRequest(url, headers, issueCloseForm);
 
         try {
-            restTemplateHttpClient.patch(request);
+            githubRestTemplateHttpClient.patch(request);
 
             log.info("Github API 통신 성공 issueNumber={}", issueNumber);
         } catch (Exception exception) {

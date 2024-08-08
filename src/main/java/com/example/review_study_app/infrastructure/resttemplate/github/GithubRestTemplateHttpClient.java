@@ -1,23 +1,26 @@
-package com.example.review_study_app.infrastructure.resttemplate;
+package com.example.review_study_app.infrastructure.resttemplate.github;
 
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpRequest;
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpResponse;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
-@Service
-public class RestTemplateHttpClient  {
+@Component
+public class GithubRestTemplateHttpClient {
 
     private final RestTemplate restTemplate;
 
     @Autowired
-    public RestTemplateHttpClient(RestTemplate restTemplate) {
+    public GithubRestTemplateHttpClient(
+        @Qualifier("githubRestTemplate") RestTemplate restTemplate
+    ) {
         this.restTemplate = restTemplate;
     }
 

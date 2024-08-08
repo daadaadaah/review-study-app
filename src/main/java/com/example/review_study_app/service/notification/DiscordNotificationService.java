@@ -3,10 +3,10 @@ package com.example.review_study_app.service.notification;
 import static com.example.review_study_app.domain.ReviewStudyInfo.createIssueUrl;
 import static com.example.review_study_app.domain.ReviewStudyInfo.createLabelUrl;
 
+import com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient;
 import com.example.review_study_app.service.notification.dto.NotificationMessage;
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpRequest;
-import com.example.review_study_app.infrastructure.resttemplate.dto.MyHttpResponse;
-import com.example.review_study_app.infrastructure.resttemplate.RestTemplateHttpClient;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
+import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +30,10 @@ public class DiscordNotificationService implements NotificationService {
     @Value("${discord.webhook.url}")
     private String webhookUrl;
 
-    private final RestTemplateHttpClient restTemplateHttpClient;
+    private final DiscordRestTemplateHttpClient discordGithubRestTemplateHttpClient;
 
-    public DiscordNotificationService(RestTemplateHttpClient restTemplateHttpClient) {
-        this.restTemplateHttpClient = restTemplateHttpClient;
+    public DiscordNotificationService(DiscordRestTemplateHttpClient discordGithubRestTemplateHttpClient) {
+        this.discordGithubRestTemplateHttpClient = discordGithubRestTemplateHttpClient;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DiscordNotificationService implements NotificationService {
 
             MyHttpRequest request = new MyHttpRequest(webhookUrl, httpHeaders, new NotificationMessage(message));
 
-            MyHttpResponse response = restTemplateHttpClient.post(request);
+            MyHttpResponse response = discordGithubRestTemplateHttpClient.post(request);
 
             if (response.statusCode() != HttpStatus.NO_CONTENT.value()) {
                 log.error("Discord 와의 통신 결과, 다음과 같은 에러가 발생했습니다. HTTPStateCode = {}", response.statusCode());

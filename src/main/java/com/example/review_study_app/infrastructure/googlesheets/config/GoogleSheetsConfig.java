@@ -1,5 +1,6 @@
-package com.example.review_study_app.infrastructure.googlesheets;
+package com.example.review_study_app.infrastructure.googlesheets.config;
 
+import com.example.review_study_app.infrastructure.googlesheets.factory.GoogleSheetsFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

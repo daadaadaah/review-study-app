@@ -211,7 +211,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             saveTaskLogDto.requestHeaders(),
             saveTaskLogDto.requestBody(),
             saveTaskLogDto.responseStatusCode(),
-            saveTaskLogDto.requestHeaders(),
+            saveTaskLogDto.responseHeaders(),
             saveTaskLogDto.responseBody(),
             timeTaken,
             logHelper.getCreatedAt(saveTaskLogDto.endTime())

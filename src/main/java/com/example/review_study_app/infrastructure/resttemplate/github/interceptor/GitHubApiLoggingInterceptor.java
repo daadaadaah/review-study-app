@@ -125,7 +125,6 @@ public class GitHubApiLoggingInterceptor implements ClientHttpRequestInterceptor
 
             // byte array를 얻고 String으로 변환 (UTF-8 인코딩 사용)
             String result = outputStream.toString(StandardCharsets.UTF_8.name());
-            System.out.println("Converted String: " + result);
 
             return result;
         } catch (IOException e) {

@@ -1,6 +1,7 @@
 package com.example.review_study_app.repository.log;
 
 import com.example.review_study_app.repository.log.aop.GoogleSheetsTransactional;
+import com.example.review_study_app.repository.log.entity.DiscordApiLog;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
@@ -125,6 +126,17 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
             googleSheetsClient.append(executionTimeLog.getClass().getSimpleName(), executionTimeLogStrings);
         } catch (Exception exception) {
             throw new SaveExecutionTimeLogException(exception);
+        }
+    }
+
+    public void saveDiscordApiLog(DiscordApiLog discordApiLog) {
+        try {
+            String[] githubApiLogStrings = convertObjectToStringArray(discordApiLog);
+
+            googleSheetsClient.append(discordApiLog.getClass().getSimpleName(), githubApiLogStrings);
+
+        } catch (Exception exception) {
+            throw new SaveDetailLogException(exception);
         }
     }
 

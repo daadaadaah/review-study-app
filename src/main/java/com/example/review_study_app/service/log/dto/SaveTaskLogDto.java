@@ -4,7 +4,7 @@ import com.example.review_study_app.common.enums.BatchProcessStatus;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 
-public record SaveTaskLogDto<T>(
+public record SaveTaskLogDto<T>( // TODO : 필드명 보면, 그냥 SaveApiLogDto라고 해도 될듯
     UUID taskId,
     UUID stepId,
     String batchProcessName,

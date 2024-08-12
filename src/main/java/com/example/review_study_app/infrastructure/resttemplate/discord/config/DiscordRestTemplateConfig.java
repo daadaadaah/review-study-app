@@ -1,12 +1,23 @@
 package com.example.review_study_app.infrastructure.resttemplate.discord.config;
 
+import com.example.review_study_app.infrastructure.resttemplate.discord.DiscordApiLoggingInterceptor;
+import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class DiscordRestTemplateConfig {
+
+    private final DiscordApiLoggingInterceptor discordApiLoggingInterceptor;
+
+    @Autowired
+    public DiscordRestTemplateConfig(DiscordApiLoggingInterceptor discordApiLoggingInterceptor) {
+        this.discordApiLoggingInterceptor = discordApiLoggingInterceptor;
+    }
 
 
     @Bean(name = "discordRestTemplate")
@@ -28,7 +39,10 @@ public class DiscordRestTemplateConfig {
          *
          *
          */
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+
+        restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(httpRequestFactory));
+        restTemplate.setInterceptors(Collections.singletonList(discordApiLoggingInterceptor));
 
         return restTemplate;
     }

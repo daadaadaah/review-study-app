@@ -1,6 +1,10 @@
 package com.example.review_study_app.service.log;
 
-import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveUnKnownFailureMessage;
 import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.*;
 import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.*;
 
@@ -192,6 +196,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             ));
         }
     }
+
 
     @Async("logSaveTaskExecutor") // TODO : resttemplate 통신 로그 저장 방법 AOP -> 인터셉터로 바꾼 후에 수정하기
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {

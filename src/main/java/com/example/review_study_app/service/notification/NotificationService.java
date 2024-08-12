@@ -2,10 +2,14 @@ package com.example.review_study_app.service.notification;
 
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import java.util.List;
+import org.springframework.core.io.ByteArrayResource;
 
 public interface NotificationService { // TODO : 도메인별로 messageFactory 만들어서 리팩토링하면 좋을 것 같음. NotificationService에 지금 너무 책임이 많음
 
     boolean sendMessage(String message);
+
+    <T> boolean sendMessageWithFile(String message, List<ByteArrayResource> jsonResources);
 
     /** 라벨 생성 **/
     String createNewLabelCreationSuccessMessage(String weekNumberLabelName);

@@ -83,6 +83,6 @@ public class GithubIssueRestTemplateRepositoryStepLoggingAspect {
     }
 
     private void saveStepLog(SaveStepLogDto saveStepLogDto) {
-        logService.saveStepLog(saveStepLogDto);
+//        logService.saveStepLog(saveStepLogDto);
     }
 }

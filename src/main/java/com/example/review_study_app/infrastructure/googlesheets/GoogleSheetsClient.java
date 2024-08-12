@@ -23,6 +23,10 @@ import org.springframework.stereotype.Component;
  * - 참고 링크 : https://cloud.google.com/docs/quotas/view-manage?hl=ko#managing_your_quota_console
  * - 1개의 유저가 1분당 최대 쓰기 요청의 수 : 60
  *
+ * 3. 구글 시트와의 통신 실패시, 재시도 전략을 취하지 않는 이유
+ * - 추가 : 멱등성 보장 안함. 중복 추가 경우 vs 아예 추가 안된 경우 -> 후자가 작업량이 더 적다. 그냥 알림으로 보내고, 알림 메시지에 어짜피 추가해야할 데이터 넣어주니까
+ * - 삭제 :
+ *
  */
 @Slf4j
 @Component

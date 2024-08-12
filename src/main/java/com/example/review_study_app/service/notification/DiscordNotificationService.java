@@ -9,15 +9,46 @@ import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHtt
 import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
 import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.notification.exception.DiscordMessageLengthExceededException;
+import com.example.review_study_app.service.notification.vo.JsonFile;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+
+/**
+ *
+ *
+ *
+ *
+ * https://discord.com/developers/docs/topics/rate-limits
+ *
+ * https://support.discord.com/hc/en-us/articles/360034632292-Sending-Messages#h_01FSWZRDKD7310TJHGCA616642
+ *
+ *
+ * https://discord.com/safety/using-webhooks-and-embeds
+ *
+ *
+ * https://discord.com/developers/docs/reference#uploading-files
+ */
 @Slf4j
 @Service
 public class DiscordNotificationService implements NotificationService {
+
+    /**
+     * 디스코드의 경우, 2000자 초과되면, 다음과 같은 에러가 난다.
+     * 400 Bad Request: "{"content": ["Must be 2000 or fewer in length."]}"
+     */
+    public static final int MAX_DISCORD_MESSAGE_LENGTH = 2000;
 
     public static final String EMOJI_WARING = ":warning:";
 
@@ -32,12 +63,74 @@ public class DiscordNotificationService implements NotificationService {
 
     private final DiscordRestTemplateHttpClient discordGithubRestTemplateHttpClient;
 
-    public DiscordNotificationService(DiscordRestTemplateHttpClient discordGithubRestTemplateHttpClient) {
+    private final ObjectMapper objectMapper;
+
+    public DiscordNotificationService(
+        DiscordRestTemplateHttpClient discordGithubRestTemplateHttpClient,
+        ObjectMapper objectMapper
+    ) {
         this.discordGithubRestTemplateHttpClient = discordGithubRestTemplateHttpClient;
+        this.objectMapper = objectMapper;
+    }
+
+
+
+    @Override // TODO : 비동기로 뺴야 되는거 아닌가?
+    public <T> boolean sendMessageWithFile(String message, List<ByteArrayResource> jsonResources) {
+
+        try {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("content", message);
+
+            int index = 0;
+
+            for(ByteArrayResource jsonResource: jsonResources) {
+
+                body.add("json_file"+index, jsonResource);
+
+                index++;
+            }
+
+
+
+            MyHttpRequest request = new MyHttpRequest(webhookUrl, headers, body);
+
+            MyHttpResponse response = discordGithubRestTemplateHttpClient.post(request);
+
+            if (response.statusCode() != HttpStatus.NO_CONTENT.value()) {
+                log.error("Discord 와의 통신 결과, 다음과 같은 에러가 발생했습니다. HTTPStateCode = {}", response.statusCode());
+                return false;
+            }
+
+            log.info("Discord 로 메시지 전송이 성공했습니다. message = {}", message);
+
+            return true;
+
+
+        } catch (JsonProcessingException exception) {
+
+            return false;
+        } catch (Exception exception) {
+            log.error("Discord 로 메시지 전송이 실패했습니다. message = {}, exception = {}", message, exception.getMessage());
+            return false;
+        }
     }
 
     @Override
     public boolean sendMessage(String message) {
+
+        if(message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("디스코드로 전송할 메시지가 없습니다.");
+        }
+
+        if(message.length() > MAX_DISCORD_MESSAGE_LENGTH) {
+            throw new DiscordMessageLengthExceededException(MAX_DISCORD_MESSAGE_LENGTH);
+        }
+
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/json; utf-8");

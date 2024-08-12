@@ -24,29 +24,29 @@ public class GithubApiLogsSaveMessageFactory {
 
     public static String createGithubApiLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- githubApiLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog
+            githubApiLogFileName,
+            executionTimeLogFileName
         );
     }
 
     public static String createGithubApiLogsSaveRollbackSuccessMessage(
         Exception exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog,
+        String githubApiLogFileName,
+        String executionTimeLogFileName,
         String range
     ){
         return String.format(
@@ -54,16 +54,16 @@ public class GithubApiLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- githubApiLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- %s (range : %s)",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog,
+            githubApiLogFileName,
+            executionTimeLogFileName,
             "true",
             range
         );
@@ -71,8 +71,8 @@ public class GithubApiLogsSaveMessageFactory {
 
     public static String createGithubApiLogsSaveRollbackFailureMessage(
         Exception rollbackException,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog,
+        String githubApiLogFileName,
+        String executionTimeLogFileName,
         String range
     ) {
         return String.format(
@@ -80,8 +80,8 @@ public class GithubApiLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- githubApiLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- false (range : %s) \n"
                 + "- 예외 메시지 : %s",
@@ -89,8 +89,8 @@ public class GithubApiLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            githubApiLog,
-            executionTimeLog,
+            githubApiLogFileName,
+            executionTimeLogFileName,
             range == null ? "" : range,
             rollbackException.getMessage()
         );
@@ -98,22 +98,22 @@ public class GithubApiLogsSaveMessageFactory {
 
     public static String createGithubApiLogsSaveUnKnownFailureMessage(
         Exception exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- githubApiLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog
+            githubApiLogFileName,
+            executionTimeLogFileName
         );
     }
 }

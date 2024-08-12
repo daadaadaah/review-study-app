@@ -141,6 +141,6 @@ public class GitHubApiLoggingInterceptor implements ClientHttpRequestInterceptor
     }
 
     private void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
-        logService.saveTaskLog(saveTaskLogDto);
+//        logService.saveTaskLog(saveTaskLogDto);
     }
 }

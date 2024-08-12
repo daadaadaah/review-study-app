@@ -9,6 +9,7 @@ import com.example.review_study_app.infrastructure.googlesheets.GoogleSheetsClie
 import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.repository.log.exception.SaveExecutionTimeLogException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -62,7 +63,20 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
             AppendValuesResponse appendValuesResponse = googleSheetsClient.append(jobDetailLog.getClass().getSimpleName(), jobDetailLogStrings);
 
             return appendValuesResponse.getUpdates().getUpdatedRange();
+
+        } catch (GoogleJsonResponseException exception) { // 400, 500
+
+            log.error("--------[saveJobDetailLog] exceptionClass={}", exception.getClass().getSimpleName());
+            log.error("--------[saveJobDetailLog] exceptionCode={}", exception.getDetails().getCode());
+            log.error("--------[saveJobDetailLog] exceptionMessage={}", exception.getDetails().getMessage());
+            log.error("--------[saveJobDetailLog] exceptionStatusMessage={}", exception.getStatusMessage());
+            log.error("--------[saveJobDetailLog] exceptionStatusCode={}", exception.getStatusCode());
+
+            throw new SaveDetailLogException(exception);
         } catch (Exception exception) {
+            log.error("--------[saveJobDetailLog] exceptionClass={}", exception.getClass().getSimpleName());
+
+
             throw new SaveDetailLogException(exception);
         }
     }

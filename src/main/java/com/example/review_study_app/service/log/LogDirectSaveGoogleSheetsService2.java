@@ -1,9 +1,21 @@
 package com.example.review_study_app.service.log;
 
- import static com.example.review_study_app.service.notification.DiscordNotificationService.MAX_DISCORD_MESSAGE_LENGTH;
-import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.*;
-import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.*;
-import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.*;
+import static com.example.review_study_app.service.notification.DiscordNotificationService.MAX_DISCORD_MESSAGE_LENGTH;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.GithubApiLogsSaveMessageFactory.createGithubApiLogsSaveUnKnownFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.JobLogsSaveMessageFactory.createJobLogsSaveUnknownFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveDetailLogFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackFailureMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveRollbackSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveSuccessMessage;
+import static com.example.review_study_app.service.notification.factory.message.StepLogsSaveMessageFactory.createStepLogsSaveUnKnownFailureMessage;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
@@ -37,7 +49,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class LogDirectSaveGoogleSheetsService implements LogService {
+public class LogDirectSaveGoogleSheetsService2 {
 
 //    private final Stack<String> batchProcessResultStack = new Stack<>();
 
@@ -57,7 +69,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LogDirectSaveGoogleSheetsService(
+    public LogDirectSaveGoogleSheetsService2(
         LogGoogleSheetsRepository logGoogleSheetsRepository,
         NotificationService notificationService,
         LogHelper logHelper,
@@ -69,14 +81,14 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         this.objectMapper = objectMapper;
     }
 
-    private <T> ByteArrayResource createJsonResourceFromObject(String fileName, T fileData, String fileType) {
+    private <T> ByteArrayResource createJsonResourceFromObject(String fileName, T fileData) {
 
         try {
             byte[] jsonBytes = objectMapper.writeValueAsBytes(fileData);
 
             ByteArrayResource jsonResource = new ByteArrayResource(jsonBytes) {
                 @Override
-                public String getFilename() {
+                public String getFilename() { // TODO : 파일 형식 다양하게 만들 수 있게. json, xlsx 등
                     return fileName+".json"; // 파일 이름 지정
                 }
             };

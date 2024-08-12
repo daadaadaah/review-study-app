@@ -12,7 +12,7 @@ public class ReviewStudyInfo {
 //        new Member("김찬웅", "Dove-kim"), // TODO : 테스트 용으로 몇개 만 해보려구
 //        new Member("김준우", "Junuu"),
 //        new Member("김도엽", "BrianDYKim"),
-//        new Member("우경준", "Jay-WKJun")
+//        new Member("우경준", "Jay-WKJun"),
 //        new Member("조현준", "Tianea2160"),
 //        new Member("곽다희", "daadaadaah")
 //    );
@@ -47,6 +47,7 @@ public class ReviewStudyInfo {
         new Member("곽다희2", "daadaadaah"),
         new Member("곽다희1", "daadaadaah")
     );
+
     /** 레포 **/
 //    public static final String REPOSITORY_NAME = "Jay-WKJun/reviewStudy";
 

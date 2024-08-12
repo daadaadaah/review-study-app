@@ -25,29 +25,29 @@ public class JobLogsSaveMessageFactory {
 
     public static String createJobLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String jobDetailLogJsonFileName,
+        String executionTimeLogJsonFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s",
+                + "- jobDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
+            jobDetailLogJsonFileName,  // TODO : .json 파일
+            executionTimeLogJsonFileName  // TODO : .json 파일
         );
     }
 
     public static String createJobLogsSaveRollbackSuccessMessage(
         GoogleSheetsTransactionException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
+        String jobDetailLogJsonFileName,
+        String executionTimeLogJsonFileName,
         String range
     ) {
         return String.format(
@@ -55,24 +55,24 @@ public class JobLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- jobDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- true (range : %s)",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
+            jobDetailLogJsonFileName, // TODO : .json 파일
+            executionTimeLogJsonFileName,  // TODO : .json 파일
             range
         );
     }
 
     public static String createJobLogsSaveRollbackFailureMessage(
         Exception rollbackException,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
+        String jobDetailLogJsonFileName,
+        String executionTimeLogJsonFileName,
         String range
     ) {
         return String.format(
@@ -80,8 +80,8 @@ public class JobLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- jobDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- false (range : %s) \n"
                 + "- 예외 메시지 : %s",
@@ -89,31 +89,31 @@ public class JobLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
+            jobDetailLogJsonFileName, // TODO : .json 파일
+            executionTimeLogJsonFileName,  // TODO : .json 파일
+            range,
             rollbackException.getMessage()
         );
     }
 
     public static String createJobLogsSaveUnknownFailureMessage(
         Exception exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String jobDetailLogJsonFileName,
+        String executionTimeLogJsonFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- jobDetailLog=%s \n"
-                + "- executionTimeLog=%s",
+                + "- jobDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
+            jobDetailLogJsonFileName,
+            executionTimeLogJsonFileName
         );
     }
 }

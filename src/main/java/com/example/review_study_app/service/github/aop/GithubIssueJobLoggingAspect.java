@@ -66,7 +66,7 @@ public class GithubIssueJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspe
             Object result = joinPoint.proceed(); // 함수 실행
 
             if(result instanceof GithubJobResult) {
-                GithubJobResult githubJobResult = (GithubJobResult) result;
+                GithubJobResult githubJobResult = (GithubJobResult) result; // TODO : 클로즈할 이슈가 없을 때 예외남.
 
                 long endTime = System.currentTimeMillis();
 
@@ -104,7 +104,7 @@ public class GithubIssueJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspe
     }
 
     private void saveJobLog(SaveJobLogDto saveJobLogDto) {
-        logService.saveJobLog(saveJobLogDto);
+//        logService.saveJobLog(saveJobLogDto);
     }
 }
 

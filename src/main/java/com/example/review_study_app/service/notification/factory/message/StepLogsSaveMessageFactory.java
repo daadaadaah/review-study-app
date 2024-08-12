@@ -1,7 +1,5 @@
 package com.example.review_study_app.service.notification.factory.message;
 
-import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.repository.log.entity.StepDetailLog;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.service.notification.DiscordNotificationService;
 import java.util.UUID;
@@ -24,29 +22,29 @@ public class StepLogsSaveMessageFactory {
 
     public static String createStepLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String stepDetailLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- stepDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog
+            stepDetailLogFileName,
+            executionTimeLogFileName
         );
     }
 
     public static String createStepLogsSaveRollbackSuccessMessage(
         Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
+        String stepDetailLogFileName,
+        String executionTimeLogFileName,
         String range
     ){
         return String.format(
@@ -54,16 +52,16 @@ public class StepLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- stepDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- %s (range : %s)",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
+            stepDetailLogFileName,
+            executionTimeLogFileName,
             "true",
             range
         );
@@ -71,8 +69,8 @@ public class StepLogsSaveMessageFactory {
 
     public static String createStepLogsSaveRollbackFailureMessage(
         Exception rollbackException,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
+        String stepDetailLogFileName,
+        String executionTimeLogFileName,
         String range
     ) {
         return String.format(
@@ -80,8 +78,8 @@ public class StepLogsSaveMessageFactory {
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n"
+                + "- stepDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n"
                 + "<rollback 성공 여부> \n"
                 + "- false (range : %s) \n"
                 + "- 예외 메시지 : %s",
@@ -89,31 +87,31 @@ public class StepLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
+            stepDetailLogFileName,
+            executionTimeLogFileName,
+            range,
             rollbackException.getMessage()
         );
     }
 
     public static String createStepLogsSaveUnKnownFailureMessage(
         Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String stepDetailLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- stepDetailLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- stepDetailLog=%s.json \n"
+                + "- executionTimeLog=%s.json \n",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog
+            stepDetailLogFileName,
+            executionTimeLogFileName
         );
     }
 }

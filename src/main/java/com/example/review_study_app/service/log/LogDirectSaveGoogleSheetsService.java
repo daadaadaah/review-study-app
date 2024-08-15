@@ -18,6 +18,10 @@ import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
 import com.example.review_study_app.service.log.helper.LogHelper;
 import com.example.review_study_app.service.notification.NotificationService;
+import com.example.review_study_app.service.notification.dto.UnSavedLogFile;
+import com.example.review_study_app.service.notification.factory.file.UnSavedLogFileFactory;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +39,19 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     private final LogHelper logHelper;
 
+    private final UnSavedLogFileFactory unSavedLogFileFactory;
+
     @Autowired
     public LogDirectSaveGoogleSheetsService(
         LogGoogleSheetsRepository logGoogleSheetsRepository,
         NotificationService notificationService,
-        LogHelper logHelper
+        LogHelper logHelper,
+        UnSavedLogFileFactory unSavedLogFileFactory
     ) {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
         this.notificationService = notificationService;
         this.logHelper = logHelper;
+        this.unSavedLogFileFactory = unSavedLogFileFactory;
     }
 
     /**
@@ -58,8 +66,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
     // TODO : 디스코드로! Job, Step, Task 모두 보내면, 디스코드 시끄러울 것 같은데, 이거 어떻게 할지 고민해보기
     @Async("logSaveTaskExecutor") // TODO : 로그 저장 실패시, 비동기 예외 처리 어떻게 할 것인지 + 트랜잭션 처리
     public void saveJobLog(SaveJobLogDto saveJobLogDto) {
-
-        String newJobDetailLogRange = null;
 
         UUID jobId = saveJobLogDto.jobId();
 
@@ -91,39 +97,75 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             notificationService.sendMessage(createJobLogsSaveSuccessMessage(jobId));
         } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-            notificationService.sendMessage(createJobLogsSaveDetailLogFailureMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedJobLogsFiles(jobDetailLog, executionTimeLog);
+
+            String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createJobLogsSaveDetailLogFailureMessage(
                 exception,
-                jobDetailLog,
-                executionTimeLog
-            ));
+                jobDetailLogFileName,
+                jobExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
 
-            notificationService.sendMessage(createJobLogsSaveRollbackSuccessMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedJobLogsFiles(jobDetailLog, executionTimeLog);
+
+            String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createJobLogsSaveRollbackSuccessMessage(
                 exception,
-                jobDetailLog,
-                executionTimeLog,
-                newJobDetailLogRange
-            ));
+                jobDetailLogFileName,
+                jobExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-            notificationService.sendMessage(createJobLogsSaveRollbackFailureMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedJobLogsFiles(jobDetailLog, executionTimeLog);
+
+            String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createJobLogsSaveRollbackFailureMessage(
                 exception,
-                jobDetailLog,
-                executionTimeLog,
-                newJobDetailLogRange
-            ));
+                jobDetailLogFileName,
+                jobExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (Exception exception) {
-            notificationService.sendMessage(createJobLogsSaveUnknownFailureMessage(
+
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedJobLogsFiles(jobDetailLog, executionTimeLog);
+
+            String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createJobLogsSaveUnknownFailureMessage(
                 exception,
-                jobDetailLog,
-                executionTimeLog
-            ));
+                jobDetailLogFileName,
+                jobExecutionTimeLogFileName
+            ), unSavedLogFiles);
         }
     }
 
+    private List<UnSavedLogFile> createUnSavedJobLogsFiles(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
+        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
+
+        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(jobDetailLog.getClass().getSimpleName() +"_"+ jobDetailLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, jobDetailLog));
+
+        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
+
+        return unSavedLogFiles;
+    }
 
     @Async("logSaveTaskExecutor")
     public void saveStepLog(SaveStepLogDto saveStepLogDto) {
@@ -154,46 +196,87 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
 
         try {
+
             logGoogleSheetsRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
             notificationService.sendMessage(createStepLogsSaveSuccessMessage(stepId));
+
         } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-            notificationService.sendMessage(createStepLogsSaveDetailLogFailureMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedStepLogsFiles(stepDetailLog, executionTimeLog);
+
+            String stepDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String stepExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createStepLogsSaveDetailLogFailureMessage(
                 exception,
-                stepDetailLog,
-                executionTimeLog
-            ));
+                stepDetailLogFileName,
+                stepExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
 
-            notificationService.sendMessage(createStepLogsSaveRollbackSuccessMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedStepLogsFiles(stepDetailLog, executionTimeLog);
+
+            String stepDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String stepExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createStepLogsSaveRollbackSuccessMessage(
                 exception,
-                stepDetailLog,
-                executionTimeLog,
-                exception.getGoogleSheetsRollbackRange()
-            ));
+                stepDetailLogFileName,
+                stepExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
 
-            notificationService.sendMessage(createStepLogsSaveRollbackFailureMessage(
+
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedStepLogsFiles(stepDetailLog, executionTimeLog);
+
+            String stepDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String stepExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createStepLogsSaveRollbackFailureMessage(
                 exception,
-                stepDetailLog,
-                executionTimeLog,
-                exception.getGoogleSheetsRollbackRange()
-            ));
+                stepDetailLogFileName,
+                stepExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (Exception exception) {
 
-            notificationService.sendMessage(createStepLogsSaveUnKnownFailureMessage(
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedStepLogsFiles(stepDetailLog, executionTimeLog);
+
+            String stepDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String stepExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createStepLogsSaveUnKnownFailureMessage(
                 exception,
-                stepDetailLog,
-                executionTimeLog
-            ));
+                stepDetailLogFileName,
+                stepExecutionTimeLogFileName
+            ), unSavedLogFiles);
         }
     }
 
-    @Async("logSaveTaskExecutor") // TODO : resttemplate 통신 로그 저장 방법 AOP -> 인터셉터로 바꾼 후에 수정하기
+
+    private List<UnSavedLogFile> createUnSavedStepLogsFiles(StepDetailLog stepDetailLog, ExecutionTimeLog executionTimeLog) {
+        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
+
+        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(stepDetailLog.getClass().getSimpleName() +"_"+ stepDetailLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, stepDetailLog));
+
+        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
+
+        return unSavedLogFiles;
+    }
+
+
+    @Async("logSaveTaskExecutor") // TODO : 이름이 배치 프로세스의 Task랑 헷갈린다. 다른 용어로 수정 필요!
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
 
         UUID stepId = saveTaskLogDto.stepId();
@@ -235,39 +318,72 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             logGoogleSheetsRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
 
             notificationService.sendMessage(createGithubApiLogsSaveSuccessMessage(stepId));
-        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
 
-            notificationService.sendMessage(createGithubApiLogsSaveDetailLogFailureMessage(
+        } catch (SaveDetailLogException exception) { // 롤백 필요 없음
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedGithubApiLogFiles(githubApiLog, executionTimeLog);
+
+            String githubApiDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String githubApiExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createGithubApiLogsSaveDetailLogFailureMessage(
                 exception,
-                githubApiLog,
-                executionTimeLog
-            ));
+                githubApiDetailLogFileName,
+                githubApiExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsTransactionException exception) { // 롤백 필요한 상황에서 롤백 성공한 경우
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedGithubApiLogFiles(githubApiLog, executionTimeLog);
 
-            notificationService.sendMessage(createGithubApiLogsSaveRollbackSuccessMessage(
+            String githubApiDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String githubApiExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createGithubApiLogsSaveRollbackSuccessMessage(
                 exception,
-                githubApiLog,
-                executionTimeLog,
-                exception.getGoogleSheetsRollbackRange()
-            ));
+                githubApiDetailLogFileName,
+                githubApiExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (GoogleSheetsRollbackFailureException exception) { // 롤백 필요한 상황에서, 롤백 실패한 경우
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedGithubApiLogFiles(githubApiLog, executionTimeLog);
 
-            notificationService.sendMessage(createGithubApiLogsSaveRollbackFailureMessage(
+            String githubApiDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String githubApiExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(createGithubApiLogsSaveRollbackFailureMessage(
                 exception,
-                githubApiLog,
-                executionTimeLog,
-                exception.getGoogleSheetsRollbackRange()
-            ));
+                githubApiDetailLogFileName,
+                githubApiExecutionTimeLogFileName
+            ), unSavedLogFiles);
 
         } catch (Exception exception) {
 
-            notificationService.sendMessage(createGithubApiLogsSaveUnKnownFailureMessage(
-                exception,
-                githubApiLog,
-                executionTimeLog
-            ));
+            List<UnSavedLogFile> unSavedLogFiles = createUnSavedGithubApiLogFiles(githubApiLog, executionTimeLog);
+
+            String githubApiDetailLogFileName = unSavedLogFiles.get(0).fileName();
+
+            String githubApiExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
+
+            notificationService.sendMessageWithFiles(
+                createGithubApiLogsSaveUnKnownFailureMessage(exception, githubApiDetailLogFileName, githubApiExecutionTimeLogFileName),
+                unSavedLogFiles
+            );
         }
+    }
+
+    private List<UnSavedLogFile> createUnSavedGithubApiLogFiles(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
+        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
+
+        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(githubApiLog.getClass().getSimpleName() +"_"+ githubApiLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, githubApiLog));
+
+        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
+
+        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
+
+        return unSavedLogFiles;
     }
 }

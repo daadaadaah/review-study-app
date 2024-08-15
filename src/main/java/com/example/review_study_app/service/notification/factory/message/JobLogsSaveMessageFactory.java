@@ -1,7 +1,6 @@
 package com.example.review_study_app.service.notification.factory.message;
 
-import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.repository.log.entity.JobDetailLog;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.service.notification.DiscordNotificationService;
@@ -25,8 +24,8 @@ public class JobLogsSaveMessageFactory {
 
     public static String createJobLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String jobDetailLogFileName,
+        String jobExecutionTimeLogFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
@@ -39,16 +38,15 @@ public class JobLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
+            jobDetailLogFileName,
+            jobExecutionTimeLogFileName
         );
     }
 
     public static String createJobLogsSaveRollbackSuccessMessage(
         GoogleSheetsTransactionException exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        String jobDetailLogFileName,
+        String jobExecutionTimeLogFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
@@ -63,17 +61,16 @@ public class JobLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
-            range
+            jobDetailLogFileName,
+            jobExecutionTimeLogFileName,
+            exception.getGoogleSheetsRollbackRange()
         );
     }
 
     public static String createJobLogsSaveRollbackFailureMessage(
-        Exception rollbackException,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        GoogleSheetsRollbackFailureException rollbackException,
+        String jobDetailLogFileName,
+        String jobExecutionTimeLogFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
@@ -89,17 +86,17 @@ public class JobLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            jobDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
+            jobDetailLogFileName,
+            jobExecutionTimeLogFileName,
+            rollbackException.getGoogleSheetsRollbackRange(),
             rollbackException.getMessage()
         );
     }
 
     public static String createJobLogsSaveUnknownFailureMessage(
         Exception exception,
-        JobDetailLog jobDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String jobDetailLogFileName,
+        String jobExecutionTimeLogFileName
     ) {
         return String.format(
             "%sJob 로그 저장 실패(원인 : %s)%s\n"
@@ -112,8 +109,8 @@ public class JobLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            jobDetailLog,
-            executionTimeLog
+            jobDetailLogFileName,
+            jobExecutionTimeLogFileName
         );
     }
 }

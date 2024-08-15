@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.notification.factory.message;
 
-import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.repository.log.entity.GithubApiLog;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.service.notification.DiscordNotificationService;
 import java.util.UUID;
@@ -24,8 +24,8 @@ public class GithubApiLogsSaveMessageFactory {
 
     public static String createGithubApiLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
@@ -38,16 +38,15 @@ public class GithubApiLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog
+            githubApiLogFileName,
+            executionTimeLogFileName
         );
     }
 
     public static String createGithubApiLogsSaveRollbackSuccessMessage(
-        Exception exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        GoogleSheetsTransactionException exception,
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ){
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
@@ -62,18 +61,17 @@ public class GithubApiLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog,
+            githubApiLogFileName,
+            executionTimeLogFileName,
             "true",
-            range
+            exception.getGoogleSheetsRollbackRange()
         );
     }
 
     public static String createGithubApiLogsSaveRollbackFailureMessage(
-        Exception rollbackException,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        GoogleSheetsRollbackFailureException rollbackException,
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
@@ -89,17 +87,17 @@ public class GithubApiLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            githubApiLog,
-            executionTimeLog,
-            range == null ? "" : range,
+            githubApiLogFileName,
+            executionTimeLogFileName,
+            rollbackException.getGoogleSheetsRollbackRange(),
             rollbackException.getMessage()
         );
     }
 
     public static String createGithubApiLogsSaveUnKnownFailureMessage(
         Exception exception,
-        GithubApiLog githubApiLog,
-        ExecutionTimeLog executionTimeLog
+        String githubApiLogFileName,
+        String executionTimeLogFileName
     ) {
         return String.format(
             "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
@@ -112,8 +110,8 @@ public class GithubApiLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLog,
-            executionTimeLog
+            githubApiLogFileName,
+            executionTimeLogFileName
         );
     }
 }

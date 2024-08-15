@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.notification.factory.message;
 
-import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
-import com.example.review_study_app.repository.log.entity.StepDetailLog;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
+import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.service.notification.DiscordNotificationService;
 import java.util.UUID;
@@ -24,8 +24,8 @@ public class StepLogsSaveMessageFactory {
 
     public static String createStepLogsSaveDetailLogFailureMessage(
         SaveDetailLogException exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String stepDetailLogFileName,
+        String stepExecutionTimeLogFileName
     ) {
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
@@ -38,16 +38,15 @@ public class StepLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog
+            stepDetailLogFileName,
+            stepExecutionTimeLogFileName
         );
     }
 
     public static String createStepLogsSaveRollbackSuccessMessage(
-        Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        GoogleSheetsTransactionException exception,
+        String stepDetailLogFileName,
+        String stepExecutionTimeLogFileName
     ){
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
@@ -62,18 +61,17 @@ public class StepLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
+            stepDetailLogFileName,
+            stepExecutionTimeLogFileName,
             "true",
-            range
+            exception.getGoogleSheetsRollbackRange()
         );
     }
 
     public static String createStepLogsSaveRollbackFailureMessage(
-        Exception rollbackException,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog,
-        String range
+        GoogleSheetsRollbackFailureException rollbackException,
+        String stepDetailLogFileName,
+        String stepExecutionTimeLogFileName
     ) {
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
@@ -89,17 +87,17 @@ public class StepLogsSaveMessageFactory {
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             rollbackException.getMessage(),
-            stepDetailLog,
-            executionTimeLog,
-            range == null ? "" : range,
+            stepDetailLogFileName,
+            stepExecutionTimeLogFileName,
+            rollbackException.getGoogleSheetsRollbackRange(),
             rollbackException.getMessage()
         );
     }
 
     public static String createStepLogsSaveUnKnownFailureMessage(
         Exception exception,
-        StepDetailLog stepDetailLog,
-        ExecutionTimeLog executionTimeLog
+        String stepDetailLogFileName,
+        String stepExecutionTimeLogFileName
     ) {
         return String.format(
             "%sStep 로그 저장 실패(원인 : %s)%s\n"
@@ -112,8 +110,8 @@ public class StepLogsSaveMessageFactory {
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            stepDetailLog,
-            executionTimeLog
+            stepDetailLogFileName,
+            stepExecutionTimeLogFileName
         );
     }
 }

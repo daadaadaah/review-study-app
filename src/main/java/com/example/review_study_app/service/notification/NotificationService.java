@@ -1,7 +1,5 @@
 package com.example.review_study_app.service.notification;
 
-import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import com.example.review_study_app.service.notification.dto.UnSavedLogFile;
 import java.util.List;
 
@@ -10,11 +8,6 @@ public interface NotificationService { // TODO : 도메인별로 messageFactory 
     boolean sendMessage(String message);
 
     <T> boolean sendMessageWithFiles(String message, List<UnSavedLogFile> unSavedLogFiles);
-
-    /** 라벨 생성 **/
-    String createNewLabelCreationSuccessMessage(String weekNumberLabelName);
-
-    String createNewLabelCreationFailureMessage(String weekNumberLabelName, Exception exception);
 
     /** 로그 **/
     String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime);

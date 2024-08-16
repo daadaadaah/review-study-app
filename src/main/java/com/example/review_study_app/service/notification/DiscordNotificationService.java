@@ -127,19 +127,6 @@ public class DiscordNotificationService implements NotificationService {
         }
     }
 
-    /** 라벨 생성 **/
-    @Override
-    public String createNewLabelCreationSuccessMessage(String weekNumberLabelName) {
-        return EMOJI_CONGRATS+" 새로운 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+")) 생성이 성공했습니다. "+ EMOJI_CONGRATS;
-    }
-
-    @Override
-    public String createNewLabelCreationFailureMessage(String weekNumberLabelName,
-        Exception exception) {
-        return EMOJI_WARING+" 새로운 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+")) 생성에 실패했습니다. "+ EMOJI_WARING+" \n"
-            + " 에러 메시지 : "+exception.getMessage();
-    }
-
 
     @Override
     public String createExecutionTimeMessage(String methodName, long totalExecutionTime) {

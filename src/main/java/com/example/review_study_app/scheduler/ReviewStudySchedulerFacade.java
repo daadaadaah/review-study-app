@@ -1,9 +1,9 @@
 package com.example.review_study_app.scheduler;
 
 
-
-import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.LabelCreationMessageFactory.*;
 import static com.example.review_study_app.service.notification.factory.message.IssueCreationMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
 
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
@@ -69,14 +69,14 @@ public class ReviewStudySchedulerFacade {
     }
 
     private void notifyCreateNewWeekNumberLabelSuccessResult(String weekNumberLabelName) {
-        String newLabelCreationSuccessMessage = notificationService.createNewLabelCreationSuccessMessage(
+        String newLabelCreationSuccessMessage = createNewLabelCreationSuccessMessage(
             weekNumberLabelName);
 
         notificationService.sendMessage(newLabelCreationSuccessMessage);
     }
 
     private void notifyCreateNewWeekNumberLabelFailResult(String weekNumberLabelName, Exception exception) {
-        String newLabelCreationFailureMessage = notificationService.createNewLabelCreationFailureMessage(
+        String newLabelCreationFailureMessage = createNewLabelCreationFailureMessage(
             weekNumberLabelName, exception);
 
         notificationService.sendMessage(newLabelCreationFailureMessage);

@@ -1,6 +1,9 @@
 package com.example.review_study_app.scheduler;
 
 
+import static com.example.review_study_app.service.notification.factory.message.LabelCreationMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.IssueCreationMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
 
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
@@ -66,14 +69,14 @@ public class ReviewStudySchedulerFacade {
     }
 
     private void notifyCreateNewWeekNumberLabelSuccessResult(String weekNumberLabelName) {
-        String newLabelCreationSuccessMessage = notificationService.createNewLabelCreationSuccessMessage(
+        String newLabelCreationSuccessMessage = createNewLabelCreationSuccessMessage(
             weekNumberLabelName);
 
         notificationService.sendMessage(newLabelCreationSuccessMessage);
     }
 
     private void notifyCreateNewWeekNumberLabelFailResult(String weekNumberLabelName, Exception exception) {
-        String newLabelCreationFailureMessage = notificationService.createNewLabelCreationFailureMessage(
+        String newLabelCreationFailureMessage = createNewLabelCreationFailureMessage(
             weekNumberLabelName, exception);
 
         notificationService.sendMessage(newLabelCreationFailureMessage);
@@ -96,13 +99,13 @@ public class ReviewStudySchedulerFacade {
         } catch (IsWeekNumberLabelPresentFailException isWeekNumberLabelPresentFailException) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 라벨 존재 여부 파악 실패) : weekNumberLabelName={}, exception={}", weekNumberLabelName, isWeekNumberLabelPresentFailException.getMessage());
 
-            String isWeekNumberLabelPresentFailMessage = notificationService.createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
+            String isWeekNumberLabelPresentFailMessage = createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
 
             notificationService.sendMessage(isWeekNumberLabelPresentFailMessage);
         } catch (Exception exception) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 예상치 못한 예외 발생) : weekNumberLabelName={}, exception={}", weekNumberLabelName, exception.getMessage());
 
-            String unexpectedIssueCreationFailureMessage = notificationService.createUnexpectedIssueCreationFailureMessage(weekNumberLabelName, exception);
+            String unexpectedIssueCreationFailureMessage = createUnexpectedIssueCreationFailureMessage(weekNumberLabelName, exception);
 
             notificationService.sendMessage(unexpectedIssueCreationFailureMessage);
         }
@@ -117,14 +120,14 @@ public class ReviewStudySchedulerFacade {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> notificationService.createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
+                .map(result -> createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // 실패 결과 모음
         String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
             : githubIssueApiFailureResults.stream()
-                .map(result -> notificationService.createNewIssueCreationFailureMessage(weekNumberLabelName, result))
+                .map(result -> createNewIssueCreationFailureMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // 최종 결과
@@ -153,21 +156,21 @@ public class ReviewStudySchedulerFacade {
         } catch (GetIssuesToCloseFailException getIssuesToCloseFailException) {
             log.error("주간 회고 Issue Close Job 실패(원인 : Close할 Issue 목록 가져오기 실패) : labelNameToClose={}, exception={}", labelNameToClose, getIssuesToCloseFailException.getMessage());
 
-            String issueFetchFailureMessage = notificationService.createIssueFetchFailureMessage(labelNameToClose, getIssuesToCloseFailException);
+            String issueFetchFailureMessage = createIssueFetchFailureMessage(labelNameToClose, getIssuesToCloseFailException);
 
             notificationService.sendMessage(issueFetchFailureMessage);
 
         } catch (IssuesToCloseIsEmptyException issuesToCloseIsEmptyException) {
             log.error("주간 회고 Issue Close Job 실패(원인 : Close 할 Issue 없음) : labelNameToClose={}, exception={}", labelNameToClose, issuesToCloseIsEmptyException.getMessage());
 
-            String emptyIssuesToCloseMessage = notificationService.createEmptyIssuesToCloseMessage(labelNameToClose);
+            String emptyIssuesToCloseMessage = createEmptyIssuesToCloseMessage(labelNameToClose);
 
             notificationService.sendMessage(emptyIssuesToCloseMessage);
 
         } catch (Exception exception) {
             log.error("주간 회고 Issue Close Job 실패(원인 : 예상치 못한 예외 발생) : labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
 
-            String unexpectedIssueCloseFailureMessage = notificationService.createUnexpectedIssueCloseFailureMessage(labelNameToClose, exception);
+            String unexpectedIssueCloseFailureMessage = createUnexpectedIssueCloseFailureMessage(labelNameToClose, exception);
 
             notificationService.sendMessage(unexpectedIssueCloseFailureMessage);
         }
@@ -183,7 +186,7 @@ public class ReviewStudySchedulerFacade {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> notificationService.createIssueCloseSuccessMessage(
+                .map(result -> createIssueCloseSuccessMessage(
                     labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
@@ -191,7 +194,7 @@ public class ReviewStudySchedulerFacade {
         String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
             : githubIssueApiFailureResults.stream()
-                .map(result -> notificationService.createIssueCloseFailureMessage(
+                .map(result -> createIssueCloseFailureMessage(
                     labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 

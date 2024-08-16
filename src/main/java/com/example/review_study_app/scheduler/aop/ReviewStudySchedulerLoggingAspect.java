@@ -2,16 +2,14 @@ package com.example.review_study_app.scheduler.aop;
 
 import static com.example.review_study_app.common.utils.MyDateUtils.ZONE_ID_SEOUL;
 import static com.example.review_study_app.common.utils.MyDateUtils.getNow;
+import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_CLOCK;
 
 import com.example.review_study_app.service.notification.NotificationService;
 import java.time.ZonedDateTime;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,10 +47,14 @@ public class ReviewStudySchedulerLoggingAspect {
 
         log.info("Scheduler ({}) has finished. now = {}, duration = {} ms", joinPoint.getSignature().getName(), end, durationMillis);
 
-        String executionTimeMessage = notificationService.createSchedulerLoggingMessage(joinPoint.getSignature().getName(), start, end, durationMillis);
+        String executionTimeMessage = createSchedulerLoggingMessage(joinPoint.getSignature().getName(), start, end, durationMillis);
 
         notificationService.sendMessage(executionTimeMessage);
 
         return result;
+    }
+
+    private String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime) {
+        return EMOJI_CLOCK +" (" +methodName+") : 시작 시간 - "+startTime+", 종료 시간 - "+endTime+", 총 소요시간 - "+totalExecutionTime+" ms, "+EMOJI_CLOCK;
     }
 }

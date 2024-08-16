@@ -41,10 +41,11 @@ public class GoogleSheetsTransactionAspect {
             try {
                 rollback(googleSheetsRollbackRange);
 
-                throw googleSheetsTransactionException;
             } catch (Exception rollbackException) {
-                throw new GoogleSheetsRollbackFailureException(rollbackException, googleSheetsRollbackRange);
+                throw new GoogleSheetsRollbackFailureException(googleSheetsTransactionException, rollbackException, googleSheetsRollbackRange);
             }
+
+            throw googleSheetsTransactionException;
         }
     }
 

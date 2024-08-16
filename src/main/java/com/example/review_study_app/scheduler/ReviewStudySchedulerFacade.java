@@ -3,6 +3,7 @@ package com.example.review_study_app.scheduler;
 
 
 import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
+import static com.example.review_study_app.service.notification.factory.message.IssueCreationMessageFactory.*;
 
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
@@ -98,13 +99,13 @@ public class ReviewStudySchedulerFacade {
         } catch (IsWeekNumberLabelPresentFailException isWeekNumberLabelPresentFailException) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 라벨 존재 여부 파악 실패) : weekNumberLabelName={}, exception={}", weekNumberLabelName, isWeekNumberLabelPresentFailException.getMessage());
 
-            String isWeekNumberLabelPresentFailMessage = notificationService.createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
+            String isWeekNumberLabelPresentFailMessage = createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
 
             notificationService.sendMessage(isWeekNumberLabelPresentFailMessage);
         } catch (Exception exception) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 예상치 못한 예외 발생) : weekNumberLabelName={}, exception={}", weekNumberLabelName, exception.getMessage());
 
-            String unexpectedIssueCreationFailureMessage = notificationService.createUnexpectedIssueCreationFailureMessage(weekNumberLabelName, exception);
+            String unexpectedIssueCreationFailureMessage = createUnexpectedIssueCreationFailureMessage(weekNumberLabelName, exception);
 
             notificationService.sendMessage(unexpectedIssueCreationFailureMessage);
         }
@@ -119,14 +120,14 @@ public class ReviewStudySchedulerFacade {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> notificationService.createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
+                .map(result -> createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // 실패 결과 모음
         String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
             : githubIssueApiFailureResults.stream()
-                .map(result -> notificationService.createNewIssueCreationFailureMessage(weekNumberLabelName, result))
+                .map(result -> createNewIssueCreationFailureMessage(weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // 최종 결과

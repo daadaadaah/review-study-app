@@ -16,15 +16,6 @@ public interface NotificationService { // TODO : 도메인별로 messageFactory 
 
     String createNewLabelCreationFailureMessage(String weekNumberLabelName, Exception exception);
 
-    /** 이슈 생성 **/
-    String createIsWeekNumberLabelPresentFailMessage(String weekNumberLabelName, Exception exception);
-
-    String createUnexpectedIssueCreationFailureMessage(String weekNumberLabelName, Exception exception);
-
-    String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult);
-
-    String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
-
     /** 로그 **/
     String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime);
 

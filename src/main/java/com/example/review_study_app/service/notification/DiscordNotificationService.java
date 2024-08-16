@@ -140,32 +140,6 @@ public class DiscordNotificationService implements NotificationService {
             + " 에러 메시지 : "+exception.getMessage();
     }
 
-    /** 이슈 생성 **/
-    @Override
-    public String createIsWeekNumberLabelPresentFailMessage(String weekNumberLabelName, Exception exception) {
-        return EMOJI_WARING+" ("+weekNumberLabelName+") Issue 생성 Job 실패 (원인 : 라벨(["+weekNumberLabelName+"]("+createLabelUrl()+"))  존재 여부 파악 실패) "+ EMOJI_WARING+" \n"
-            + " 에러 메시지 : "+exception.getMessage();
-    }
-
-    @Override
-    public String createUnexpectedIssueCreationFailureMessage(String weekNumberLabelName, Exception exception) {
-        return EMOJI_WARING+" ("+weekNumberLabelName+") Issue 생성 Job 실패 (원인 : 예상치 못한 예외 발생)"+ EMOJI_WARING+" \n"
-            + " 에러 메시지 : "+exception.getMessage();
-    }
-
-    @Override
-    public String createNewIssueCreationSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult) {
-        int issueNumber = githubApiSuccessResult.issueNumber();
-
-        return EMOJI_CONGRATS +" ("+weekNumberLabelName+") "+ githubApiSuccessResult.issueTitle() + " 새로운 이슈([#"+issueNumber+"]("+ createIssueUrl(issueNumber)+"))가 생성되었습니다. " + EMOJI_CONGRATS;
-    }
-
-    @Override
-    public String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult) {
-        return EMOJI_WARING +" ("+weekNumberLabelName+") "+ githubIssueApiFailureResult.issueTitle()+" 새로운 이슈 생성이 실패했습니다. "+ EMOJI_WARING
-            +"\n"
-            + "에러 메시지 : "+ githubIssueApiFailureResult.errorMessage();
-    }
 
     @Override
     public String createExecutionTimeMessage(String methodName, long totalExecutionTime) {

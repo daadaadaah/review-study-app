@@ -25,17 +25,6 @@ public interface NotificationService { // TODO : 도메인별로 messageFactory 
 
     String createNewIssueCreationFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
 
-    /** 이슈 Close **/
-    String createIssueFetchFailureMessage(String weekNumberLabelName, Exception exception);
-
-    String createEmptyIssuesToCloseMessage(String weekNumberLabelName);
-
-    String createUnexpectedIssueCloseFailureMessage(String weekNumberLabelName, Exception exception);
-
-    String createIssueCloseSuccessMessage(String weekNumberLabelName, GithubIssueApiSuccessResult githubApiSuccessResult);
-
-    String createIssueCloseFailureMessage(String weekNumberLabelName, GithubIssueApiFailureResult githubIssueApiFailureResult);
-
     /** 로그 **/
     String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime);
 

@@ -2,6 +2,8 @@ package com.example.review_study_app.scheduler;
 
 
 
+import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
+
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
 import com.example.review_study_app.service.github.exception.IsWeekNumberLabelPresentFailException;
@@ -153,21 +155,21 @@ public class ReviewStudySchedulerFacade {
         } catch (GetIssuesToCloseFailException getIssuesToCloseFailException) {
             log.error("주간 회고 Issue Close Job 실패(원인 : Close할 Issue 목록 가져오기 실패) : labelNameToClose={}, exception={}", labelNameToClose, getIssuesToCloseFailException.getMessage());
 
-            String issueFetchFailureMessage = notificationService.createIssueFetchFailureMessage(labelNameToClose, getIssuesToCloseFailException);
+            String issueFetchFailureMessage = createIssueFetchFailureMessage(labelNameToClose, getIssuesToCloseFailException);
 
             notificationService.sendMessage(issueFetchFailureMessage);
 
         } catch (IssuesToCloseIsEmptyException issuesToCloseIsEmptyException) {
             log.error("주간 회고 Issue Close Job 실패(원인 : Close 할 Issue 없음) : labelNameToClose={}, exception={}", labelNameToClose, issuesToCloseIsEmptyException.getMessage());
 
-            String emptyIssuesToCloseMessage = notificationService.createEmptyIssuesToCloseMessage(labelNameToClose);
+            String emptyIssuesToCloseMessage = createEmptyIssuesToCloseMessage(labelNameToClose);
 
             notificationService.sendMessage(emptyIssuesToCloseMessage);
 
         } catch (Exception exception) {
             log.error("주간 회고 Issue Close Job 실패(원인 : 예상치 못한 예외 발생) : labelNameToClose={}, exception={}", labelNameToClose, exception.getMessage());
 
-            String unexpectedIssueCloseFailureMessage = notificationService.createUnexpectedIssueCloseFailureMessage(labelNameToClose, exception);
+            String unexpectedIssueCloseFailureMessage = createUnexpectedIssueCloseFailureMessage(labelNameToClose, exception);
 
             notificationService.sendMessage(unexpectedIssueCloseFailureMessage);
         }
@@ -183,7 +185,7 @@ public class ReviewStudySchedulerFacade {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> notificationService.createIssueCloseSuccessMessage(
+                .map(result -> createIssueCloseSuccessMessage(
                     labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
@@ -191,7 +193,7 @@ public class ReviewStudySchedulerFacade {
         String failureResult = githubIssueApiFailureResults.isEmpty()
             ? ""
             : githubIssueApiFailureResults.stream()
-                .map(result -> notificationService.createIssueCloseFailureMessage(
+                .map(result -> createIssueCloseFailureMessage(
                     labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 

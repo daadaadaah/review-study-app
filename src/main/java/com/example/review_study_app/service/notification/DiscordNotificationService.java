@@ -126,15 +126,4 @@ public class DiscordNotificationService implements NotificationService {
             return false;
         }
     }
-
-
-    @Override
-    public String createExecutionTimeMessage(String methodName, long totalExecutionTime) {
-        return EMOJI_CLOCK + " (" +methodName+") 의 총 소요시간 : "+totalExecutionTime+" ms"+" "+EMOJI_CLOCK;
-    }
-
-    @Override
-    public String createSchedulerLoggingMessage(String methodName, String startTime, String endTime, long totalExecutionTime) {
-        return EMOJI_CLOCK +" (" +methodName+") : 시작 시간 - "+startTime+", 종료 시간 - "+endTime+", 총 소요시간 - "+totalExecutionTime+" ms, "+EMOJI_CLOCK;
-    }
 }

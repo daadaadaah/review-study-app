@@ -1,5 +1,7 @@
 package com.example.review_study_app.common.aop;
 
+import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_CLOCK;
+
 import com.example.review_study_app.common.config.LocalEnvironmentCondition;
 import com.example.review_study_app.service.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +36,16 @@ public class LocalMethodExecutionTimeLoggingAspect {
         log.info("[local] "+joinPoint.getSignature().getName() + " executed in " + durationMillis + "ms");
 
         if (localMethodExecutionTimeLogging.isSendNotification()) {
-            String executionTimeMessage = notificationService.createExecutionTimeMessage(joinPoint.getSignature().getName(), durationMillis);
+
+            String executionTimeMessage = createExecutionTimeMessage(joinPoint.getSignature().getName(), durationMillis);
 
             notificationService.sendMessage(executionTimeMessage);
         }
 
         return proceed;
+    }
+
+    private String createExecutionTimeMessage(String methodName, long totalExecutionTime) {
+        return EMOJI_CLOCK + " (" +methodName+") 의 총 소요시간 : "+totalExecutionTime+" ms"+" "+EMOJI_CLOCK;
     }
 }

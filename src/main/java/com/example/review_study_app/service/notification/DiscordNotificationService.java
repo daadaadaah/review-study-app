@@ -81,6 +81,10 @@ public class DiscordNotificationService implements NotificationService {
     @Override
     public <T> boolean sendMessageWithFiles(String message, List<UnSavedLogFile> unSavedLogFiles) {
 
+        if (unSavedLogFiles == null || unSavedLogFiles.isEmpty()) {
+            return sendMessage(message);
+        }
+
         discordRestTemplateHttpClient.validateMessage(message);
 
         discordRestTemplateHttpClient.validateFileCount(unSavedLogFiles);

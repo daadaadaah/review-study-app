@@ -54,10 +54,6 @@ public class DiscordRestTemplateHttpClient {
     }
 
     public  <T> void validateFileCount(List<T> files) {
-        if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("디스코드로 전송할 파일이 없습니다.");
-        }
-
         if(files.size() > MAX_DISCORD_FILE_COUNT) {
             throw new DiscordFileCountExceededException(files.size());
         }

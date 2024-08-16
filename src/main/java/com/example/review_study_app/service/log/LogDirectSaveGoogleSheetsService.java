@@ -71,7 +71,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
      *
      */
     // TODO : 디스코드로! Job, Step, Task 모두 보내면, 디스코드 시끄러울 것 같은데, 이거 어떻게 할지 고민해보기
-    @Async("logSaveTaskExecutor") // TODO : 로그 저장 실패시, 비동기 예외 처리 어떻게 할 것인지 + 트랜잭션 처리
+    @Async("logSaveHandlerExecutor") // TODO : 로그 저장 실패시, 비동기 예외 처리 어떻게 할 것인지 + 트랜잭션 처리
     public void saveJobLog(SaveJobLogDto saveJobLogDto) {
 
         UUID jobId = saveJobLogDto.jobId();
@@ -132,7 +132,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
             String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
 
             String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
-
 
             logSaveResultStack.add(new LogSaveResult(
                 LogSaveResultType.FAILURE,
@@ -234,7 +233,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         return unSavedLogFiles;
     }
 
-    @Async("logSaveTaskExecutor")
+    @Async("logSaveHandlerExecutor")
     public void saveStepLog(SaveStepLogDto saveStepLogDto) {
         UUID stepId = saveStepLogDto.stepId();
 
@@ -363,7 +362,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
     }
 
 
-    @Async("logSaveTaskExecutor") // TODO : 이름이 배치 프로세스의 Task랑 헷갈린다. 다른 용어로 수정 필요!
+    @Async("logSaveHandlerExecutor")
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
 
         UUID stepId = saveTaskLogDto.stepId();

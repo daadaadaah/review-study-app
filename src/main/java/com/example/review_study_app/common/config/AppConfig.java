@@ -23,7 +23,7 @@ public class AppConfig {
     @Bean
     public TaskScheduler scheduledTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setThreadNamePrefix("ScheduledTask-"); // 스레드 이름 접두사
+        scheduler.setThreadNamePrefix("Scheduler-"); // 스레드 이름 접두사
         scheduler.initialize();
         return scheduler;
     }

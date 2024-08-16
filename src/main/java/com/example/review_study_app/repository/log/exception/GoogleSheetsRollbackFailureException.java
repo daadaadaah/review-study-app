@@ -8,14 +8,32 @@ package com.example.review_study_app.repository.log.exception;
  */
 
 public class GoogleSheetsRollbackFailureException extends RuntimeException {
+
+    private final Throwable rollbackCause;
+
     private final String googleSheetsRollbackRange;
 
-    public GoogleSheetsRollbackFailureException(Throwable cause, String googleSheetsRollbackRange) {
+    /**
+     * @param rollbackCause
+     * @param cause
+     * @param googleSheetsRollbackRange
+     */
+
+    public GoogleSheetsRollbackFailureException(
+        Throwable rollbackCause, // rollback 발생에 대한 예외
+        Throwable cause, // rollback 실패 자체에 대한 예외
+        String googleSheetsRollbackRange
+    ) {
         super(cause);
         this.googleSheetsRollbackRange = googleSheetsRollbackRange;
+        this.rollbackCause = rollbackCause;
     }
 
     public String getGoogleSheetsRollbackRange() {
         return googleSheetsRollbackRange;
+    }
+
+    public Throwable getRollbackCause() {
+        return rollbackCause;
     }
 }

@@ -1,116 +1,145 @@
 package com.example.review_study_app.service.notification.factory.message;
 
+import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsRollbackFailureException;
 import com.example.review_study_app.repository.log.exception.GoogleSheetsTransactionException;
 import com.example.review_study_app.repository.log.exception.SaveDetailLogException;
 import com.example.review_study_app.service.notification.DiscordNotificationService;
 import java.util.UUID;
 
-/**
- * GithubApiLogsSaveMessageFactory 는 배치 프로세스 중 Task 단계인 Github Api 통신 결과에 대한 로그 저장시, 상황별 알리 메시지를 만드는 팩토리 클래스이다.
- * 메시지 생성과 사용을 디커플링 시켜서 관심사 분리를 통해 로직을 단순화하고 싶어서 만들었다.
- */
+public class BatchProcessLogsSaveMessageFactory {
 
-public class GithubApiLogsSaveMessageFactory {
-
-    public static String createGithubApiLogsSaveSuccessMessage(UUID taskId) {
+    public static String createLogsSaveSuccessMessage(
+        BatchProcessType batchProcessType,
+        UUID batchProcessId
+    ) {
         return String.format(
-            "%sGithubApi 로그 저장 성공 : taskId=%s %s",
+            "%s %s 로그 저장 성공 : %sId=%s %s",
             DiscordNotificationService.EMOJI_CONGRATS,
-            taskId,
+            batchProcessType.name(),
+            batchProcessType.name().toLowerCase(),
+            batchProcessId,
             DiscordNotificationService.EMOJI_CONGRATS
         );
     }
 
-    public static String createGithubApiLogsSaveDetailLogFailureMessage(
+    public static String createLogsSaveFailureMessage(
+        BatchProcessType batchProcessType,
+        Exception exception,
+        String detailLogFileName,
+        String executionTimeLogFileName
+    ) {
+        if(exception instanceof SaveDetailLogException) {
+            return createLogsSaveDetailLogFailureMessage(batchProcessType, (SaveDetailLogException) exception, detailLogFileName, executionTimeLogFileName);
+        }
+
+        if(exception instanceof GoogleSheetsTransactionException) {
+            return createLogsSaveRollbackSuccessMessage(batchProcessType, (GoogleSheetsTransactionException) exception, detailLogFileName, executionTimeLogFileName);
+        }
+
+        if(exception instanceof GoogleSheetsRollbackFailureException) {
+            return createLogsSaveRollbackFailureMessage(batchProcessType, (GoogleSheetsRollbackFailureException) exception, detailLogFileName, executionTimeLogFileName);
+        }
+
+        return createLogsSaveUnknownFailureMessage(batchProcessType, exception, detailLogFileName, executionTimeLogFileName);
+    }
+
+    private static String createLogsSaveDetailLogFailureMessage(
+        BatchProcessType batchProcessType,
         SaveDetailLogException exception,
-        String githubApiLogFileName,
+        String detailLogFileName,
         String executionTimeLogFileName
     ) {
         return String.format(
-            "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
+            "%s %s 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- detailLog=%s \n"
+                + "- executionTimeLog=%s",
             DiscordNotificationService.EMOJI_WARING,
+            batchProcessType.name(),
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLogFileName,
+            detailLogFileName,
             executionTimeLogFileName
         );
     }
 
-    public static String createGithubApiLogsSaveRollbackSuccessMessage(
+    private static String createLogsSaveRollbackSuccessMessage(
+        BatchProcessType batchProcessType,
         GoogleSheetsTransactionException exception,
-        String githubApiLogFileName,
+        String detailLogFileName,
         String executionTimeLogFileName
-    ){
+    ) {
         return String.format(
-            "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
+            "%s %s 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
+                + "- detailLog=%s \n"
                 + "- executionTimeLog=%s \n"
                 + "<rollback 성공 여부> \n"
-                + "- %s (range : %s)",
+                + "- true (range : %s)",
             DiscordNotificationService.EMOJI_WARING,
+            batchProcessType.name(),
             exception.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLogFileName,
+            detailLogFileName,
             executionTimeLogFileName,
-            "true",
             exception.getGoogleSheetsRollbackRange()
         );
     }
 
-    public static String createGithubApiLogsSaveRollbackFailureMessage(
+    private static String createLogsSaveRollbackFailureMessage(
+        BatchProcessType batchProcessType,
         GoogleSheetsRollbackFailureException rollbackException,
-        String githubApiLogFileName,
+        String detailLogFileName,
         String executionTimeLogFileName
     ) {
         return String.format(
-            "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
+            "%s %s 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
+                + "- detailLog=%s \n"
                 + "- executionTimeLog=%s \n"
                 + "<rollback 성공 여부> \n"
                 + "- false (range : %s) \n"
                 + "- 예외 메시지 : %s",
             DiscordNotificationService.EMOJI_WARING,
+            batchProcessType.name(),
             rollbackException.getClass().getSimpleName(),
             DiscordNotificationService.EMOJI_WARING,
-            rollbackException.getMessage(),
-            githubApiLogFileName,
+            rollbackException.getRollbackCause().getMessage(),
+            detailLogFileName,
             executionTimeLogFileName,
             rollbackException.getGoogleSheetsRollbackRange(),
             rollbackException.getMessage()
         );
     }
 
-    public static String createGithubApiLogsSaveUnKnownFailureMessage(
+    private static String createLogsSaveUnknownFailureMessage(
+        BatchProcessType batchProcessType,
         Exception exception,
-        String githubApiLogFileName,
+        String detailLogFileName,
         String executionTimeLogFileName
     ) {
         return String.format(
-            "%sGithubApi 로그 저장 실패(원인 : %s)%s\n"
+            "%s %s 로그 저장 실패(원인 : %s)%s\n"
                 + "<예외 메시지> \n"
                 + "- %s \n"
                 + "<저장되지 않는 로그> \n"
-                + "- githubApiLog=%s \n"
-                + "- executionTimeLog=%s \n",
+                + "- detailLog=%s \n"
+                + "- executionTimeLog=%s",
             DiscordNotificationService.EMOJI_WARING,
             exception.getClass().getSimpleName(),
+            batchProcessType.name(),
             DiscordNotificationService.EMOJI_WARING,
             exception.getMessage(),
-            githubApiLogFileName,
+            detailLogFileName,
             executionTimeLogFileName
         );
     }

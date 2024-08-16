@@ -1,9 +1,5 @@
 package com.example.review_study_app.service.log;
 
-import static com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_FILE_COUNT;
-import static com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_MESSAGE_LENGTH;
-import static com.example.review_study_app.service.notification.factory.message.BatchProcessLogsSaveMessageFactory.createLogsSaveFailureMessage;
-import static com.example.review_study_app.service.notification.factory.message.BatchProcessLogsSaveMessageFactory.createLogsSaveSuccessMessage;
 
 import com.example.review_study_app.common.enums.BatchProcessType;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
@@ -11,18 +7,10 @@ import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
 import com.example.review_study_app.repository.log.entity.StepDetailLog;
-import com.example.review_study_app.service.log.dto.LogSaveResult;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.log.dto.SaveStepLogDto;
 import com.example.review_study_app.service.log.dto.SaveTaskLogDto;
-import com.example.review_study_app.service.log.enums.LogSaveResultType;
 import com.example.review_study_app.service.log.helper.LogHelper;
-import com.example.review_study_app.service.notification.NotificationService;
-import com.example.review_study_app.service.notification.dto.UnSavedLogFile;
-import com.example.review_study_app.service.notification.factory.file.UnSavedLogFileFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,25 +24,19 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     private final LogGoogleSheetsRepository logGoogleSheetsRepository;
 
-    private final NotificationService notificationService;
-
     private final LogHelper logHelper;
 
-    private final UnSavedLogFileFactory unSavedLogFileFactory;
-
-    private final Stack<LogSaveResult> logSaveResultStack = new Stack<>();
+    private final LogSaveDiscordNotificationFacade logSaveDiscordNotificationFacade;
 
     @Autowired
     public LogDirectSaveGoogleSheetsService(
         LogGoogleSheetsRepository logGoogleSheetsRepository,
-        NotificationService notificationService,
         LogHelper logHelper,
-        UnSavedLogFileFactory unSavedLogFileFactory
+        LogSaveDiscordNotificationFacade logSaveDiscordNotificationFacade
     ) {
         this.logGoogleSheetsRepository = logGoogleSheetsRepository;
-        this.notificationService = notificationService;
         this.logHelper = logHelper;
-        this.unSavedLogFileFactory = unSavedLogFileFactory;
+        this.logSaveDiscordNotificationFacade = logSaveDiscordNotificationFacade;
     }
 
     /**
@@ -99,82 +81,14 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         try {
             logGoogleSheetsRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
 
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.SUCCESS,
-                createLogsSaveSuccessMessage(batchProcessType, jobId),
-                new ArrayList<>()
-            ));
+            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, jobId);
 
         } catch (Exception exception) {
 
-            List<UnSavedLogFile> unSavedLogFiles = createUnSavedJobLogsFiles(jobDetailLog, executionTimeLog);
-
-            String jobDetailLogFileName = unSavedLogFiles.get(0).fileName();
-
-            String jobExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
-
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.FAILURE,
-                createLogsSaveFailureMessage(
-                    batchProcessType,
-                    exception,
-                    jobDetailLogFileName,
-                    jobExecutionTimeLogFileName
-                ),
-                unSavedLogFiles
-            ));
+            logSaveDiscordNotificationFacade.stackJobLogSaveFailureResult(exception, jobDetailLog, executionTimeLog);
         }
 
-        // TODO : 배치
-        notifyBatchProcessTotalResult();
-    }
-
-    private void notifyBatchProcessTotalResult() {
-        List<UnSavedLogFile> logFiles = new ArrayList<>();
-
-        StringBuilder currentMessage = new StringBuilder("");
-
-        while (!logSaveResultStack.isEmpty()) {
-
-            LogSaveResult logSaveResult = logSaveResultStack.pop();
-
-            String newMessage = logSaveResult.message();
-
-            if(
-                currentMessage.length() + newMessage.length() > MAX_DISCORD_MESSAGE_LENGTH ||
-                logFiles.size() + logSaveResult.unSavedLogFiles().size() > MAX_DISCORD_FILE_COUNT
-            ) {
-                notificationService.sendMessageWithFiles(currentMessage.toString(), logFiles);
-
-                currentMessage = new StringBuilder(newMessage);
-
-                logFiles = new ArrayList<>(logSaveResult.unSavedLogFiles());
-
-            } else {
-                currentMessage.append("\n").append(newMessage);
-
-                logFiles.addAll(logSaveResult.unSavedLogFiles());
-            }
-        }
-
-        // 마지막으로 남은 메시지를 전송합니다.
-        if (currentMessage.length() > 0) {
-            notificationService.sendMessageWithFiles(currentMessage.toString(), logFiles);
-        }
-    }
-
-    private List<UnSavedLogFile> createUnSavedJobLogsFiles(JobDetailLog jobDetailLog, ExecutionTimeLog executionTimeLog) {
-        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
-
-        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(jobDetailLog.getClass().getSimpleName() +"_"+ jobDetailLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, jobDetailLog));
-
-        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
-
-        return unSavedLogFiles;
+        logSaveDiscordNotificationFacade.sendBatchProcessResultsNotification();
     }
 
     @Async("logSaveHandlerExecutor")
@@ -211,48 +125,13 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
             logGoogleSheetsRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.SUCCESS,
-                createLogsSaveSuccessMessage(batchProcessType, stepId),
-                new ArrayList<>()
-            ));
+            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, stepId);
 
         } catch (Exception exception) {
 
-            List<UnSavedLogFile> unSavedLogFiles = createUnSavedStepLogsFiles(stepDetailLog, executionTimeLog);
-
-            String stepDetailLogFileName = unSavedLogFiles.get(0).fileName();
-
-            String stepExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
-
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.FAILURE,
-                createLogsSaveFailureMessage(
-                    batchProcessType,
-                    exception,
-                    stepDetailLogFileName,
-                    stepExecutionTimeLogFileName
-                ),
-                unSavedLogFiles
-            ));
+            logSaveDiscordNotificationFacade.stackStepLogSaveFailureResult(exception, stepDetailLog, executionTimeLog);
         }
     }
-
-
-    private List<UnSavedLogFile> createUnSavedStepLogsFiles(StepDetailLog stepDetailLog, ExecutionTimeLog executionTimeLog) {
-        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
-
-        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(stepDetailLog.getClass().getSimpleName() +"_"+ stepDetailLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, stepDetailLog));
-
-        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
-
-        return unSavedLogFiles;
-    }
-
 
     @Async("logSaveHandlerExecutor")
     public void saveTaskLog(SaveTaskLogDto saveTaskLogDto) {
@@ -296,44 +175,11 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
             logGoogleSheetsRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
 
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.SUCCESS,
-                createLogsSaveSuccessMessage(batchProcessType, taskId),
-                new ArrayList<>()
-            ));
+            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, taskId);
 
         } catch (Exception exception) {
 
-            List<UnSavedLogFile> unSavedLogFiles = createUnSavedGithubApiLogFiles(githubApiLog, executionTimeLog);
-
-            String githubApiDetailLogFileName = unSavedLogFiles.get(0).fileName();
-
-            String githubApiExecutionTimeLogFileName = unSavedLogFiles.get(1).fileName();
-
-            logSaveResultStack.add(new LogSaveResult(
-                LogSaveResultType.FAILURE,
-                createLogsSaveFailureMessage(
-                    batchProcessType,
-                    exception,
-                    githubApiDetailLogFileName,
-                    githubApiExecutionTimeLogFileName
-                ),
-                unSavedLogFiles
-            ));
+            logSaveDiscordNotificationFacade.stackTaskLogSaveFailureResult(exception, githubApiLog, executionTimeLog);
         }
-    }
-
-    private List<UnSavedLogFile> createUnSavedGithubApiLogFiles(GithubApiLog githubApiLog, ExecutionTimeLog executionTimeLog) {
-        List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
-
-        String githubApiDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(githubApiLog.getClass().getSimpleName() +"_"+ githubApiLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiDetailLogFileName, githubApiLog));
-
-        String githubApiExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(executionTimeLog.getClass().getSimpleName() +"_"+ executionTimeLog.id());
-
-        unSavedLogFiles.add(new UnSavedLogFile(githubApiExecutionTimeLogFileName, executionTimeLog));
-
-        return unSavedLogFiles;
     }
 }

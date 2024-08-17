@@ -1,11 +1,14 @@
 package com.example.review_study_app.service.github.aop;
 
 
+import com.example.review_study_app.service.github.vo.GithubApiTaskResult;
 import com.example.review_study_app.service.log.LogService;
 import com.example.review_study_app.service.log.dto.SaveJobLogDto;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.common.enums.BatchProcessStatus;
 import com.example.review_study_app.service.log.helper.LogHelper;
+import java.util.ArrayList;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -94,7 +97,10 @@ public class GithubIssueJobLoggingAspect { // TODO : 이름 GithubJobLoggingAspe
                 methodName,
                 BatchProcessStatus.STOPPED,
                 "예외 발생 : "+exception.getMessage(),
-                null,
+                new GithubJobResult(
+                    new ArrayList<>(),
+                    Arrays.asList(new GithubApiTaskResult(false, exception))
+                ),
                 startTime,
                 endTime
             ));

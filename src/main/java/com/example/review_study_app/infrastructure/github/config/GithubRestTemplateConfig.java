@@ -1,6 +1,6 @@
-package com.example.review_study_app.infrastructure.resttemplate.github.config;
+package com.example.review_study_app.infrastructure.github.config;
 
-import com.example.review_study_app.infrastructure.resttemplate.github.interceptor.GitHubApiLoggingInterceptor;
+import com.example.review_study_app.infrastructure.github.interceptor.GitHubApiLoggingInterceptor;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

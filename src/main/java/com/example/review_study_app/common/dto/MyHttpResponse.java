@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.resttemplate.common.dto;
+package com.example.review_study_app.common.dto;
 
 import org.springframework.http.HttpHeaders;
 

@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.log;
 
-import static com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_FILE_COUNT;
-import static com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_MESSAGE_LENGTH;
+import static com.example.review_study_app.infrastructure.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_FILE_COUNT;
+import static com.example.review_study_app.infrastructure.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_MESSAGE_LENGTH;
 import static com.example.review_study_app.service.notification.factory.message.BatchProcessLogsSaveMessageFactory.createLogsSaveFailureMessage;
 import static com.example.review_study_app.service.notification.factory.message.BatchProcessLogsSaveMessageFactory.createLogsSaveSuccessMessage;
 

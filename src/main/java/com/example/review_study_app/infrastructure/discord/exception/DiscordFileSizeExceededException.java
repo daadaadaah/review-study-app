@@ -1,6 +1,6 @@
-package com.example.review_study_app.infrastructure.resttemplate.github.exception;
+package com.example.review_study_app.infrastructure.discord.exception;
 
-import static com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_FILE_SIZE_MB;
+import static com.example.review_study_app.infrastructure.discord.DiscordRestTemplateHttpClient.MAX_DISCORD_FILE_SIZE_MB;
 
 /**
  * DiscordMessageLengthExceededException 는 디스코드의 파일 크기 한도량 초과할 때 발생하는 예외이다.

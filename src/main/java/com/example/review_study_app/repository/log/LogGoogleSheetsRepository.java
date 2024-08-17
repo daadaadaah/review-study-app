@@ -57,6 +57,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
     private String saveJobDetailLog(JobDetailLog jobDetailLog) {
         try {
+//            throw new RuntimeException("가짜 예외");
             String[] jobDetailLogStrings = convertObjectToStringArray(jobDetailLog);
 
             AppendValuesResponse appendValuesResponse = googleSheetsClient.append(jobDetailLog.getClass().getSimpleName(), jobDetailLogStrings);
@@ -82,6 +83,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
     private String saveStepDetailLog(StepDetailLog stepDetailLog) {
         try {
+//            throw new RuntimeException("STep 가짜 예외");
             String[] stepDetailLogStrings = convertObjectToStringArray(stepDetailLog);
 
             AppendValuesResponse appendValuesResponse = googleSheetsClient.append(stepDetailLog.getClass().getSimpleName(), stepDetailLogStrings);
@@ -100,6 +102,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
         try {
             newGithubApiLogRange = saveGithubApiLog(githubApiLog);
 
+//            throw new SaveExecutionTimeLogException(new RuntimeException("가짜"));
             saveExecutionTimeLog(executionTimeLog);
         } catch (SaveExecutionTimeLogException exception) {
             throw new GoogleSheetsTransactionException(exception, newGithubApiLogRange);
@@ -108,6 +111,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
 
     private String saveGithubApiLog(GithubApiLog githubApiLog) {
         try {
+//            throw new RuntimeException("가짜 예외");
             String[] githubApiLogStrings = convertObjectToStringArray(githubApiLog);
 
             AppendValuesResponse appendValuesResponse = googleSheetsClient.append(githubApiLog.getClass().getSimpleName(), githubApiLogStrings);
@@ -129,6 +133,7 @@ public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스
     }
 
     public void remove(String range) throws IOException {
+//        throw new IOException("가짜 IO Ex");
         googleSheetsClient.remove(range);
     }
 

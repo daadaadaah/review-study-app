@@ -1,14 +1,12 @@
 package com.example.review_study_app.service.notification;
 
-import com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient;
+import com.example.review_study_app.infrastructure.discord.DiscordRestTemplateHttpClient;
 import com.example.review_study_app.service.notification.vo.UnSavedLogFile;
 import com.example.review_study_app.service.notification.dto.NotificationMessage;
-import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
-import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
+import com.example.review_study_app.common.dto.MyHttpResponse;
 import com.example.review_study_app.service.notification.factory.file.UnSavedLogFileFactory;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,9 +26,6 @@ public class DiscordNotificationService implements NotificationService {
     public static final String EMOJI_EXCLAMATION_MARK = ":exclamation:";
 
     public static final String EMOJI_CLOCK = ":alarm_clock:";
-
-    @Value("${discord.webhook.url}")
-    private String webhookUrl; // TODO : DiscordRestTemplateHttpClient 에 있는게 더 맞을 것 같긴함. 나중에 수정하기
 
     private final DiscordRestTemplateHttpClient discordRestTemplateHttpClient;
 
@@ -53,9 +48,7 @@ public class DiscordNotificationService implements NotificationService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/json; utf-8");
 
-            MyHttpRequest request = new MyHttpRequest(webhookUrl, httpHeaders, new NotificationMessage(message));
-
-            MyHttpResponse response = discordRestTemplateHttpClient.post(request);
+            MyHttpResponse response = discordRestTemplateHttpClient.post(httpHeaders, new NotificationMessage(message));
 
             int statusCode = response.statusCode();
 
@@ -102,9 +95,7 @@ public class DiscordNotificationService implements NotificationService {
                 body.add("file" + index, fileResource);
             }
 
-            MyHttpRequest request = new MyHttpRequest(webhookUrl, headers, body);
-
-            MyHttpResponse response = discordRestTemplateHttpClient.post(request);
+            MyHttpResponse response = discordRestTemplateHttpClient.post(headers, body);
 
             int statusCode = response.statusCode();
 

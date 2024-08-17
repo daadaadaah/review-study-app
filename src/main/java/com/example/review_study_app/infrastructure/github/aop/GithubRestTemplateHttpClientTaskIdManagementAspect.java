@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.resttemplate.github.aop;
+package com.example.review_study_app.infrastructure.github.aop;
 
 import com.example.review_study_app.service.log.helper.LogHelper;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,7 +22,7 @@ public class GithubRestTemplateHttpClientTaskIdManagementAspect {
         this.logHelper = logHelper;
     }
 
-    @Around("execution(* com.example.review_study_app.infrastructure.resttemplate.github.GithubRestTemplateHttpClient.*(..))")
+    @Around("execution(* com.example.review_study_app.infrastructure.github.GithubRestTemplateHttpClient.*(..))")
     public Object logAroundMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             logHelper.setTaskId();

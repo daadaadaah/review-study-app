@@ -5,8 +5,8 @@ import static com.example.review_study_app.domain.ReviewStudyInfo.createLabelUrl
 import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_CONGRATS;
 import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_WARING;
 
-import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiSuccessResult;
 
 public class IssueCreationMessageFactory {
 

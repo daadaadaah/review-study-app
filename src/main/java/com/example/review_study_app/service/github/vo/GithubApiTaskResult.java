@@ -1,4 +1,4 @@
-package com.example.review_study_app.service.github.domain;
+package com.example.review_study_app.service.github.vo;
 
 
 /**

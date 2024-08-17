@@ -1,15 +1,10 @@
 package com.example.review_study_app.service.notification;
 
-import static com.example.review_study_app.domain.ReviewStudyInfo.createIssueUrl;
-import static com.example.review_study_app.domain.ReviewStudyInfo.createLabelUrl;
-
 import com.example.review_study_app.infrastructure.resttemplate.discord.DiscordRestTemplateHttpClient;
-import com.example.review_study_app.service.notification.dto.UnSavedLogFile;
+import com.example.review_study_app.service.notification.vo.UnSavedLogFile;
 import com.example.review_study_app.service.notification.dto.NotificationMessage;
 import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
 import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
-import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
 import com.example.review_study_app.service.notification.factory.file.UnSavedLogFileFactory;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

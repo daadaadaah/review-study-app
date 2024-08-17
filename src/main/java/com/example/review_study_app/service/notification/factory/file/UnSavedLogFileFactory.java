@@ -1,7 +1,7 @@
 package com.example.review_study_app.service.notification.factory.file;
 
 import com.example.review_study_app.common.enums.FileType;
-import com.example.review_study_app.service.notification.dto.UnSavedLogFile;
+import com.example.review_study_app.service.notification.vo.UnSavedLogFile;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

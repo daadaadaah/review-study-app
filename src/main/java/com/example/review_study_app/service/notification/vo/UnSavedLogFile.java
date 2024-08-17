@@ -1,4 +1,4 @@
-package com.example.review_study_app.service.notification.dto;
+package com.example.review_study_app.service.notification.vo;
 
 /**
  * UnSavedLogFile 는 저장 실패된 데이터를 파일로 담기 위한 클래스이다.

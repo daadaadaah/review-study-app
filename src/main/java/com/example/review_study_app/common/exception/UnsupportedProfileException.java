@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.googlesheets.exception;
+package com.example.review_study_app.common.exception;
 
 /**
  * UnsupportedProfileException 는 지원하지 않는 profile 일 경우에 발생하는 예외이다.

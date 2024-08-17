@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.resttemplate.discord.config;
+package com.example.review_study_app.infrastructure.discord.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -10,7 +10,7 @@ import static com.example.review_study_app.infrastructure.googlesheets.enums.Cre
 import com.example.review_study_app.infrastructure.googlesheets.exception.GoogleCredentialFileNotFoundException;
 import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
 import com.example.review_study_app.infrastructure.googlesheets.exception.CreateSheetsFailException;
-import com.example.review_study_app.infrastructure.googlesheets.exception.UnsupportedProfileException;
+import com.example.review_study_app.common.exception.UnsupportedProfileException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;

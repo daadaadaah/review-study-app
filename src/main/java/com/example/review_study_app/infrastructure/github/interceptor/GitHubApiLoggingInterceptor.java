@@ -1,4 +1,4 @@
-package com.example.review_study_app.infrastructure.resttemplate.github.interceptor;
+package com.example.review_study_app.infrastructure.github.interceptor;
 
 
 import com.example.review_study_app.common.enums.BatchProcessStatus;

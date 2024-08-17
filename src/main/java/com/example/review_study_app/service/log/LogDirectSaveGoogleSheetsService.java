@@ -56,6 +56,8 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
         UUID jobId = saveJobLogDto.jobId();
 
+        log.error("---------------------------------jobId={}", jobId);
+
         long jobDetailLogId = saveJobLogDto.endTime();
 
         JobDetailLog jobDetailLog = JobDetailLog.of(

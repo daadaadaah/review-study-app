@@ -1,16 +1,17 @@
-package com.example.review_study_app.infrastructure.resttemplate.discord;
+package com.example.review_study_app.infrastructure.discord;
 
-import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpRequest;
-import com.example.review_study_app.infrastructure.resttemplate.common.dto.MyHttpResponse;
-import com.example.review_study_app.infrastructure.resttemplate.github.exception.DiscordFileCountExceededException;
-import com.example.review_study_app.infrastructure.resttemplate.github.exception.DiscordFileSizeExceededException;
-import com.example.review_study_app.infrastructure.resttemplate.github.exception.DiscordMessageLengthExceededException;
+import com.example.review_study_app.common.dto.MyHttpResponse;
+import com.example.review_study_app.infrastructure.discord.exception.DiscordFileCountExceededException;
+import com.example.review_study_app.infrastructure.discord.exception.DiscordFileSizeExceededException;
+import com.example.review_study_app.infrastructure.discord.exception.DiscordMessageLengthExceededException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,9 @@ public class DiscordRestTemplateHttpClient {
 
     // 참고 : https://support.discord.com/hc/ko/articles/25444343291031-File-Attachments-FAQ
     public static final long MAX_DISCORD_FILE_SIZE_MB = 25L * 1024 * 1024; // 25MB
+
+    @Value("${discord.webhook.url}")
+    private String webhookUrl;
 
     private final RestTemplate restTemplate;
 
@@ -69,12 +73,12 @@ public class DiscordRestTemplateHttpClient {
         }
     }
 
-    public MyHttpResponse post(MyHttpRequest request) throws Exception {
+    public <T> MyHttpResponse post(HttpHeaders headers, T body) throws Exception {
 
         ResponseEntity<String> response = restTemplate.exchange(
-            request.url(),
+            webhookUrl,
             HttpMethod.POST,
-            new HttpEntity<>(request.body(), request.headers()),
+            new HttpEntity<>(body, headers),
             String.class
         );
 

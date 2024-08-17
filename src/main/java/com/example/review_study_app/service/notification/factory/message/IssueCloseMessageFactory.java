@@ -5,8 +5,8 @@ import static com.example.review_study_app.service.notification.DiscordNotificat
 import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_EXCLAMATION_MARK;
 import static com.example.review_study_app.service.notification.DiscordNotificationService.EMOJI_WARING;
 
-import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiSuccessResult;
 
 public class IssueCloseMessageFactory {
 

@@ -1,6 +1,6 @@
 package com.example.review_study_app.service.github.dto;
 
-import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
+import com.example.review_study_app.service.github.vo.GithubApiTaskResult;
 import java.util.List;
 
 /**

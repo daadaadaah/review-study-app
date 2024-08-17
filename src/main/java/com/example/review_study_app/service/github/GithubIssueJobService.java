@@ -1,11 +1,11 @@
 package com.example.review_study_app.service.github;
 
-import com.example.review_study_app.service.github.domain.GithubApiTaskResult;
+import com.example.review_study_app.service.github.vo.GithubApiTaskResult;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiFailureResult;
-import com.example.review_study_app.service.github.domain.GithubIssueApiSuccessResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiFailureResult;
+import com.example.review_study_app.service.github.vo.GithubIssueApiSuccessResult;
 import com.example.review_study_app.repository.github.GithubIssueRepository;
-import com.example.review_study_app.service.github.domain.GithubLabelApiSuccessResult;
+import com.example.review_study_app.service.github.vo.GithubLabelApiSuccessResult;
 import com.example.review_study_app.repository.github.dto.IssueCreateForm;
 import com.example.review_study_app.repository.github.dto.IssueToClose;
 import com.example.review_study_app.repository.github.dto.LabelCreateForm;

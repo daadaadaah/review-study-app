@@ -127,7 +127,7 @@ public class GoogleSheetsFactory {
      * createCredentialsFromJsonFile 는 JSON 파일로 Google Credentials 을 생성하는 메서드이다.
      */
     private Credential createCredentialsFromJsonFile() throws IOException {
-        ClassLoader loader = LogGoogleSheetsRepository.class.getClassLoader();
+        ClassLoader loader = getClass().getClassLoader();
 
         URL googleCredentialUrl = loader.getResource(CREDENTIALS_FILE_PATH);
 

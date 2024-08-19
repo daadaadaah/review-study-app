@@ -2,7 +2,7 @@ package com.example.review_study_app.service.log;
 
 
 import com.example.review_study_app.common.enums.BatchProcessType;
-import com.example.review_study_app.repository.log.LogGoogleSheetsRepository;
+import com.example.review_study_app.repository.log.LogRepository;
 import com.example.review_study_app.repository.log.entity.ExecutionTimeLog;
 import com.example.review_study_app.repository.log.entity.GithubApiLog;
 import com.example.review_study_app.repository.log.entity.JobDetailLog;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LogDirectSaveGoogleSheetsService implements LogService {
 
-    private final LogGoogleSheetsRepository logGoogleSheetsRepository;
+    private final LogRepository logRepository;
 
     private final LogHelper logHelper;
 
@@ -30,11 +30,11 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     @Autowired
     public LogDirectSaveGoogleSheetsService(
-        LogGoogleSheetsRepository logGoogleSheetsRepository,
+        LogRepository logRepository,
         LogHelper logHelper,
         LogSaveDiscordNotificationFacade logSaveDiscordNotificationFacade
     ) {
-        this.logGoogleSheetsRepository = logGoogleSheetsRepository;
+        this.logRepository = logRepository;
         this.logHelper = logHelper;
         this.logSaveDiscordNotificationFacade = logSaveDiscordNotificationFacade;
     }
@@ -55,8 +55,6 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         BatchProcessType batchProcessType  = BatchProcessType.JOB;
 
         UUID jobId = saveJobLogDto.jobId();
-
-        log.error("---------------------------------jobId={}", jobId);
 
         long jobDetailLogId = saveJobLogDto.endTime();
 
@@ -81,7 +79,8 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
         );
 
         try {
-            logGoogleSheetsRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
+
+            logRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
 
             logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, jobId);
 
@@ -125,7 +124,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
         try {
 
-            logGoogleSheetsRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
+            logRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
             logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, stepId);
 
@@ -175,7 +174,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
         try {
 
-            logGoogleSheetsRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
+            logRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
 
             logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, taskId);
 

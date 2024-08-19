@@ -1,5 +1,6 @@
 package com.example.review_study_app.service.notification.factory.file;
 
+import com.example.review_study_app.common.enums.FileType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,6 +9,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TxtBasicGenerator implements TxtGenerator {
+
+    @Override
+    public String createTxtFileNameWithExtension(String fileNameWithoutExtension) {
+        return fileNameWithoutExtension+"."+ FileType.TXT.getExtension();
+    }
 
     @Override
     public byte[] generateTxt(Object fileData) {

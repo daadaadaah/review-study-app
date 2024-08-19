@@ -1,5 +1,6 @@
 package com.example.review_study_app.service.notification.factory.file;
 
+import com.example.review_study_app.common.enums.FileType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,11 @@ public class JsonJacksonGenerator implements JsonGenerator {
 
     public JsonJacksonGenerator(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public String createJsonFileNameWithExtension(String fileNameWithoutExtension) {
+        return fileNameWithoutExtension+"."+ FileType.JSON.getExtension();
     }
 
     @Override

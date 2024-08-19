@@ -1,5 +1,6 @@
 package com.example.review_study_app.service.notification.factory.file;
 
+import com.example.review_study_app.common.enums.FileType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -22,6 +23,11 @@ public class ExcelPOIGenerator implements ExcelGenerator {
     @Override
     public boolean isExcelValueLengthOverLimit(Object value) {
         return value.toString().length() > POI_MAX_CELL_TEXT_LENGTH;
+    }
+
+    @Override
+    public String createExcelFileNameWithExtension(String fileNameWithoutExtension) {
+        return fileNameWithoutExtension+"."+ FileType.XLSX.getExtension();
     }
 
     @Override

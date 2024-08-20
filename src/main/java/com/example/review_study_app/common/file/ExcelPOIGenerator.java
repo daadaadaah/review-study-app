@@ -1,6 +1,5 @@
-package com.example.review_study_app.service.notification.factory.file;
+package com.example.review_study_app.common.file;
 
-import com.example.review_study_app.common.enums.FileType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -11,22 +10,31 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
 /**
- * ExcelFileFactory 은 Excel 파일을 생성하는 클래스이다.
+ * ExcelPOIGenerator 은 POI 를 이용해서 Excel 파일을 생성하는 클래스이다.
  */
 
 @Component
-public class ExcelFileFactory implements MyFileFactory {
+public class ExcelPOIGenerator implements ExcelGenerator {
+
+    // 참고 : https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
+//    private static final int POI_MAX_CELL_TEXT_LENGTH = 32767;
 
     @Override
-    public String getFileExtension() {
-        return FileType.XLSX.getExtension();
+    public boolean isExcelValueLengthOverLimit(Object value) {
+        return value.toString().length() > ExcelGenerator.MAX_CELL_TEXT_LENGTH;
     }
 
     @Override
-    public byte[] createFileData(Object fileData) {
+    public String createExcelFileNameWithExtension(String fileNameWithoutExtension) {
+        return fileNameWithoutExtension+"."+ ExcelGenerator.FILE_EXTENSION;
+    }
+
+    @Override
+    public byte[] createExcel(String sheetName, Object fileData)  {
+
         try (Workbook workbook = new XSSFWorkbook()) {
 
-            Sheet sheet = workbook.createSheet(fileData.getClass().getSimpleName());
+            Sheet sheet = workbook.createSheet(sheetName);
 
             Field[] fields = fileData.getClass().getDeclaredFields();
 
@@ -55,6 +63,7 @@ public class ExcelFileFactory implements MyFileFactory {
 
     private void createHeaderRow(Sheet sheet, Field[] fields) {
         Row headerRow = sheet.createRow(0);
+
         for (int i = 0; i < fields.length; i++) {
             headerRow.createCell(i).setCellValue(fields[i].getName());
         }
@@ -66,15 +75,28 @@ public class ExcelFileFactory implements MyFileFactory {
         for (int i = 0; i < fields.length; i++) {
             fields[i].setAccessible(true);
 
-            try {
-                Object value = fields[i].get(fileData);
-                dataRow.createCell(i).setCellValue(value != null ? value.toString() : "");
+            String className = fileData.getClass().getSimpleName();
+            String fieldName = fields[i].getName();
+            Object value = null;
 
+            try {
+                value = fields[i].get(fileData);
+
+                if(value != null && isExcelValueLengthOverLimit(value)) { // TODO : GET 요청이고, 갯수가 많을 때, 초과할 수 있음
+
+                    throw new RuntimeException(""); // TODO : 밑의 코드에서 예외 던져주는데, 내가 또 검증 로직을 작성해야 하나?
+                }
+
+                dataRow.createCell(i).setCellValue(value != null ? value.toString() : "");
+            } catch (IllegalArgumentException e) {
+
+                throw new RuntimeException("Excel 파일을 생성하기 위해 객체의 필드 값이 유효하지 않습니다. 필드가 접근 가능한지 확인하고 다시 시도하십시오. 객체="+className+", 필드="+fieldName +", 필드값="+value +", value.size="+value.toString().length(), e); // TODO : 커스텀 예외
             } catch (IllegalAccessException e) {
-                String fieldName = fields[i].getName();
-                String className = fileData.getClass().getSimpleName();
 
                 throw new RuntimeException("Excel 파일을 생성하기 위해 객체의 필드 값을 접근하는 데 실패했습니다. 필드가 접근 가능한지 확인하고 다시 시도하십시오. 객체="+className+", 필드="+fieldName, e); // TODO : 커스텀 예외
+            } catch (Exception exception) {
+
+                throw new RuntimeException("Excel 파일 생성 실패, 원인 모름 객체="+className+", 필드="+fieldName+", 필드값="+value, exception); // TODO : 커스텀 예외
             }
         }
     }

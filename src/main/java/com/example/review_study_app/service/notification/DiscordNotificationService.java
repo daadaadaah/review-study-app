@@ -77,7 +77,7 @@ public class DiscordNotificationService implements NotificationService {
 
         discordRestTemplateHttpClient.validateFileCount(unSavedLogFiles);
 
-        List<ByteArrayResource> fileResources = unSavedLogFileFactory.generateByteArrayResourcesFromUnSavedLogFile(unSavedLogFiles);
+        List<ByteArrayResource> fileResources = unSavedLogFileFactory.generateByteArrayResourcesFromUnSavedLogFiles(unSavedLogFiles);
 
         for(ByteArrayResource fileResource: fileResources) {
             discordRestTemplateHttpClient.validateFileSize(fileResource); // TODO : 여기서 해주는게 맞나? 밑에서 반복문 1개로 하고, 초과되는 것만 뺴고 전송하는것도 방법일 수 있겠다

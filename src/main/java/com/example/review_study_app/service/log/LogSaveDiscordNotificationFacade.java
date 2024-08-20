@@ -49,11 +49,12 @@ public class LogSaveDiscordNotificationFacade {
 
         while (!logSaveResultStack.isEmpty()) {
             LogSaveResult logSaveResult = logSaveResultStack.pop();
+
             String newMessage = logSaveResult.message();
 
             if (
                 currentMessage.length() + newMessage.length() > MAX_DISCORD_MESSAGE_LENGTH
-                    || logFiles.size() + logSaveResult.unSavedLogFiles().size() > MAX_DISCORD_FILE_COUNT
+                || logFiles.size() + logSaveResult.unSavedLogFiles().size() > MAX_DISCORD_FILE_COUNT
             ) {
 
                 notificationService.sendMessageWithFiles(currentMessage.toString(), logFiles);
@@ -78,10 +79,10 @@ public class LogSaveDiscordNotificationFacade {
         BatchProcessType batchProcessType,
         UUID batchProcessId
     ) {
-        logSaveResultStack.add(new LogSaveResult(
+        stackLogSaveResult(
             createLogsSaveSuccessMessage(batchProcessType, batchProcessId),
             new ArrayList<>()
-        ));
+        );
     }
 
     public void stackJobLogSaveFailureResult(
@@ -91,25 +92,25 @@ public class LogSaveDiscordNotificationFacade {
     ) {
         List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
 
-        String jobDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String detailLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             jobDetailLog.getClass().getSimpleName() + "_" + jobDetailLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobDetailLogFileName, jobDetailLog));
+        unSavedLogFiles.add(new UnSavedLogFile(detailLogFileName, jobDetailLog));
 
-        String jobExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String executionTimeLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             executionTimeLog.getClass().getSimpleName() + "_" + executionTimeLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobExecutionTimeLogFileName, executionTimeLog));
+        unSavedLogFiles.add(new UnSavedLogFile(executionTimeLogFileName, executionTimeLog));
 
-        logSaveResultStack.add(new LogSaveResult(
+        stackLogSaveResult(
             createLogsSaveFailureMessage(
                 BatchProcessType.JOB,
                 exception,
-                jobDetailLogFileName,
-                jobExecutionTimeLogFileName
+                detailLogFileName,
+                executionTimeLogFileName
             ),
             unSavedLogFiles
-        ));
+        );
     }
 
     public void stackStepLogSaveFailureResult(
@@ -120,27 +121,26 @@ public class LogSaveDiscordNotificationFacade {
 
         List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
 
-        String jobDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String detailLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             stepDetailLog.getClass().getSimpleName() + "_" + stepDetailLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobDetailLogFileName, stepDetailLog));
+        unSavedLogFiles.add(new UnSavedLogFile(detailLogFileName, stepDetailLog));
 
-        String jobExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String executionTimeLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             executionTimeLog.getClass().getSimpleName() + "_" + executionTimeLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobExecutionTimeLogFileName, executionTimeLog));
+        unSavedLogFiles.add(new UnSavedLogFile(executionTimeLogFileName, executionTimeLog));
 
-        logSaveResultStack.add(new LogSaveResult(
+        stackLogSaveResult(
             createLogsSaveFailureMessage(
                 BatchProcessType.STEP,
                 exception,
-                jobDetailLogFileName,
-                jobExecutionTimeLogFileName
+                detailLogFileName,
+                executionTimeLogFileName
             ),
             unSavedLogFiles
-        ));
+        );
     }
-
 
     public void stackTaskLogSaveFailureResult(
         Exception exception,
@@ -150,24 +150,31 @@ public class LogSaveDiscordNotificationFacade {
 
         List<UnSavedLogFile> unSavedLogFiles = new ArrayList<>();
 
-        String jobDetailLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String detailLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             githubApiLog.getClass().getSimpleName() + "_" + githubApiLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobDetailLogFileName, githubApiLog));
+        unSavedLogFiles.add(new UnSavedLogFile(detailLogFileName, githubApiLog));
 
-        String jobExecutionTimeLogFileName = unSavedLogFileFactory.createFileNameWithExtension(
+        String executionTimeLogFileName = unSavedLogFileFactory.createUnSavedLogFileNameWithExtension(
             executionTimeLog.getClass().getSimpleName() + "_" + executionTimeLog.id());
 
-        unSavedLogFiles.add(new UnSavedLogFile(jobExecutionTimeLogFileName, executionTimeLog));
+        unSavedLogFiles.add(new UnSavedLogFile(executionTimeLogFileName, executionTimeLog));
 
-        logSaveResultStack.add(new LogSaveResult(
+        stackLogSaveResult(
             createLogsSaveFailureMessage(
                 BatchProcessType.TASK,
                 exception,
-                jobDetailLogFileName,
-                jobExecutionTimeLogFileName
+                detailLogFileName,
+                executionTimeLogFileName
             ),
             unSavedLogFiles
-        ));
+        );
+    }
+
+    private <T> void stackLogSaveResult(String message, List<UnSavedLogFile> unSavedLogFiles) {
+
+        List<UnSavedLogFile> newUnSavedLogFiles = unSavedLogFileFactory.transformUnSavedLogFileByExcelMaxCellTextSize(unSavedLogFiles);
+
+        logSaveResultStack.add(new LogSaveResult(message, newUnSavedLogFiles));
     }
 }

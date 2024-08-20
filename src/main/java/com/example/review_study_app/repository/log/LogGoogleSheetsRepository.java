@@ -28,10 +28,7 @@ import org.springframework.stereotype.Repository;
  */
 @Slf4j
 @Repository
-public class LogGoogleSheetsRepository { // TODO : LogRepository 인터페이스 고려해보기 -> 테이블 명 어떻게?
-
-    @Value("${google.spreadsheet.id}")
-    private String SPREAD_SHEET_ID;
+public class LogGoogleSheetsRepository implements LogRepository {
 
     private final GoogleSheetsClient googleSheetsClient;
 

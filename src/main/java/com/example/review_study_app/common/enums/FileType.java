@@ -3,7 +3,8 @@ package com.example.review_study_app.common.enums;
 
 public enum FileType {
     JSON("json"),
-    XLSX("xlsx");
+    XLSX("xlsx"),
+    TXT("txt");
 
     private final String extension;
 

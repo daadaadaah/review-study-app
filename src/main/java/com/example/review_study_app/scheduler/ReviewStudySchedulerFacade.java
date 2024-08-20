@@ -1,10 +1,13 @@
 package com.example.review_study_app.scheduler;
 
 
+import static com.example.review_study_app.domain.ReviewStudyInfo.getReviewStudyMembers;
 import static com.example.review_study_app.service.notification.factory.message.LabelCreationMessageFactory.*;
 import static com.example.review_study_app.service.notification.factory.message.IssueCreationMessageFactory.*;
 import static com.example.review_study_app.service.notification.factory.message.IssueCloseMessageFactory.*;
 
+import com.example.review_study_app.common.enums.ProfileType;
+import com.example.review_study_app.domain.Member;
 import com.example.review_study_app.service.github.dto.GithubJobResult;
 import com.example.review_study_app.service.github.exception.GetIssuesToCloseFailException;
 import com.example.review_study_app.service.github.exception.IsWeekNumberLabelPresentFailException;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 
@@ -32,13 +36,24 @@ public class ReviewStudySchedulerFacade {
 
     private final NotificationService notificationService;
 
+    private final ProfileType activeProfileType;
+
     @Autowired
     public ReviewStudySchedulerFacade(
         GithubIssueJobService githubIssueJobService,
-        NotificationService notificationService
+        NotificationService notificationService,
+        Environment environment
     ) {
         this.githubIssueJobService = githubIssueJobService;
         this.notificationService = notificationService;
+
+        String profile = environment.getProperty("spring.profiles.active");
+
+        if(profile == null || !ProfileType.isSupportedProfile(profile)) {
+            throw new RuntimeException("profile을 확인해주세요, profile="+profile);
+        }
+
+        this.activeProfileType = ProfileType.fromString(profile); // TODO : 이렇게 해도 되나?
     }
 
     /**
@@ -70,14 +85,19 @@ public class ReviewStudySchedulerFacade {
 
     private void notifyCreateNewWeekNumberLabelSuccessResult(String weekNumberLabelName) {
         String newLabelCreationSuccessMessage = createNewLabelCreationSuccessMessage(
-            weekNumberLabelName);
+            activeProfileType,
+            weekNumberLabelName
+        );
 
         notificationService.sendMessage(newLabelCreationSuccessMessage);
     }
 
     private void notifyCreateNewWeekNumberLabelFailResult(String weekNumberLabelName, Exception exception) {
         String newLabelCreationFailureMessage = createNewLabelCreationFailureMessage(
-            weekNumberLabelName, exception);
+            activeProfileType,
+            weekNumberLabelName,
+            exception
+        );
 
         notificationService.sendMessage(newLabelCreationFailureMessage);
     }
@@ -91,7 +111,9 @@ public class ReviewStudySchedulerFacade {
         log.info("주간 회고 Issue 생성 Job 을 시작합니다. weekNumberLabelName = {} ", weekNumberLabelName);
 
         try {
-            GithubJobResult githubJobResult = githubIssueJobService.batchCreateNewWeeklyReviewIssuesJob(ReviewStudyInfo.MEMBERS, year, weekNumber);
+            List<Member> members = getReviewStudyMembers(activeProfileType);
+
+            GithubJobResult githubJobResult = githubIssueJobService.batchCreateNewWeeklyReviewIssuesJob(members, year, weekNumber);
 
             log.info("주간 회고 Issue 생성 Job 이 성공했습니다. weekNumberLabelName={}", weekNumberLabelName);
 
@@ -99,7 +121,7 @@ public class ReviewStudySchedulerFacade {
         } catch (IsWeekNumberLabelPresentFailException isWeekNumberLabelPresentFailException) {
             log.error("주간 회고 Issue 생성 Job 실패(원인 : 라벨 존재 여부 파악 실패) : weekNumberLabelName={}, exception={}", weekNumberLabelName, isWeekNumberLabelPresentFailException.getMessage());
 
-            String isWeekNumberLabelPresentFailMessage = createIsWeekNumberLabelPresentFailMessage(weekNumberLabelName, isWeekNumberLabelPresentFailException);
+            String isWeekNumberLabelPresentFailMessage = createIsWeekNumberLabelPresentFailMessage(activeProfileType, weekNumberLabelName, isWeekNumberLabelPresentFailException);
 
             notificationService.sendMessage(isWeekNumberLabelPresentFailMessage);
         } catch (Exception exception) {
@@ -120,7 +142,7 @@ public class ReviewStudySchedulerFacade {
         String successResult = githubApiSuccessResults.isEmpty()
             ? ""
             : githubApiSuccessResults.stream()
-                .map(result -> createNewIssueCreationSuccessMessage(weekNumberLabelName, result))
+                .map(result -> createNewIssueCreationSuccessMessage(activeProfileType, weekNumberLabelName, result))
                 .collect(Collectors.joining("\n"));
 
         // 실패 결과 모음
@@ -187,7 +209,7 @@ public class ReviewStudySchedulerFacade {
             ? ""
             : githubApiSuccessResults.stream()
                 .map(result -> createIssueCloseSuccessMessage(
-                    labelNameToClose, result))
+                    activeProfileType, labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
         // 실패 결과 모음
@@ -195,7 +217,7 @@ public class ReviewStudySchedulerFacade {
             ? ""
             : githubIssueApiFailureResults.stream()
                 .map(result -> createIssueCloseFailureMessage(
-                    labelNameToClose, result))
+                    activeProfileType, labelNameToClose, result))
                 .collect(Collectors.joining("\n"));
 
         // 최종 결과

@@ -179,7 +179,7 @@ public class UnSavedLogFileFactory<T> {
     }
 
     /** UnSavedLogFileFactory 의 역할 3. UnSavedLogFile 목록을 토대로 ByteArrayResources 생성 **/
-    public List<ByteArrayResource> generateByteArrayResourcesFromUnSavedLogFile(List<UnSavedLogFile> files) {
+    public List<ByteArrayResource> generateByteArrayResourcesFromUnSavedLogFiles(List<UnSavedLogFile> files) {
         return files.stream()
             .map(file -> createByteArrayResourceFromFileData(file.fileName(), (T) file.fileData()))
             .toList();

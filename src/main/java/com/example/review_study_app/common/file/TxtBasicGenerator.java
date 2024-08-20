@@ -12,7 +12,7 @@ public class TxtBasicGenerator implements TxtGenerator {
 
     @Override
     public String createTxtFileNameWithExtension(String fileNameWithoutExtension) {
-        return fileNameWithoutExtension+"."+ FileType.TXT.getExtension();
+        return fileNameWithoutExtension+"."+ TxtGenerator.FILE_EXTENSION;
     }
 
     @Override

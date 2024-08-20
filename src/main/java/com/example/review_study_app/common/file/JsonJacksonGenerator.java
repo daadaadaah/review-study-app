@@ -21,7 +21,7 @@ public class JsonJacksonGenerator implements JsonGenerator {
 
     @Override
     public String createJsonFileNameWithExtension(String fileNameWithoutExtension) {
-        return fileNameWithoutExtension+"."+ FileType.JSON.getExtension();
+        return fileNameWithoutExtension+"."+ JsonGenerator.FILE_EXTENSION;
     }
 
     @Override

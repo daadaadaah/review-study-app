@@ -1,4 +1,4 @@
-package com.example.review_study_app.service.notification.factory.file;
+package com.example.review_study_app.common.file;
 
 import com.example.review_study_app.common.enums.FileType;
 import com.fasterxml.jackson.core.JsonProcessingException;

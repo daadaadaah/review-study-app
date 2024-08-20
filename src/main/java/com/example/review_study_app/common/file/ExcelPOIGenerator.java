@@ -1,6 +1,5 @@
-package com.example.review_study_app.service.notification.factory.file;
+package com.example.review_study_app.common.file;
 
-import com.example.review_study_app.common.enums.FileType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -18,16 +17,16 @@ import org.springframework.stereotype.Component;
 public class ExcelPOIGenerator implements ExcelGenerator {
 
     // 참고 : https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
-    private static final int POI_MAX_CELL_TEXT_LENGTH = 32767;
+//    private static final int POI_MAX_CELL_TEXT_LENGTH = 32767;
 
     @Override
     public boolean isExcelValueLengthOverLimit(Object value) {
-        return value.toString().length() > POI_MAX_CELL_TEXT_LENGTH;
+        return value.toString().length() > ExcelGenerator.MAX_CELL_TEXT_LENGTH;
     }
 
     @Override
     public String createExcelFileNameWithExtension(String fileNameWithoutExtension) {
-        return fileNameWithoutExtension+"."+ FileType.XLSX.getExtension();
+        return fileNameWithoutExtension+"."+ ExcelGenerator.FILE_EXTENSION;
     }
 
     @Override

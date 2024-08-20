@@ -1,4 +1,4 @@
-package com.example.review_study_app.service.notification.factory.file;
+package com.example.review_study_app.common.file;
 
 public interface TxtGenerator {
 

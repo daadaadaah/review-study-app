@@ -108,7 +108,7 @@ public class GithubIssueJobService {
 
             try {
 
-                String issueBody = ReviewStudyInfo.WEEKLY_REVIEW_ISSUE_BODY_TEMPLATE;
+                String issueBody = member.template();
 
                 List<String> assignees = Arrays.asList(member.githubName());
 

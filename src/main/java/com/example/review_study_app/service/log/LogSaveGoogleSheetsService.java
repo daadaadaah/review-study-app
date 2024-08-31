@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class LogDirectSaveGoogleSheetsService implements LogService {
+public class LogSaveGoogleSheetsService implements LogService {
 
     private final LogRepository logRepository;
 
@@ -29,7 +29,7 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
     private final LogSaveDiscordNotificationService logSaveDiscordNotificationService;
 
     @Autowired
-    public LogDirectSaveGoogleSheetsService(
+    public LogSaveGoogleSheetsService(
         LogRepository logRepository,
         LogHelper logHelper,
         LogSaveDiscordNotificationService logSaveDiscordNotificationService

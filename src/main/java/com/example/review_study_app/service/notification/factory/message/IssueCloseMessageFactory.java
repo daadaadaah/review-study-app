@@ -8,8 +8,16 @@ import static com.example.review_study_app.service.notification.DiscordNotificat
 import com.example.review_study_app.common.enums.ProfileType;
 import com.example.review_study_app.service.github.vo.GithubIssueApiFailureResult;
 import com.example.review_study_app.service.github.vo.GithubIssueApiSuccessResult;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class IssueCloseMessageFactory {
+
+    private final ProfileType profileType; // TODO : 알림 메시지 만드는 팩토리 클래스를 static -> 일반 메서드로 바꾸고, DI 받는 형식으로 바꿀까?
+
+    @Autowired
+    public IssueCloseMessageFactory(ProfileType profileType) {
+        this.profileType = profileType;
+    }
 
     /** 이슈 Close **/
     public static String createIssueFetchFailureMessage(String weekNumberLabelName, Exception exception) {

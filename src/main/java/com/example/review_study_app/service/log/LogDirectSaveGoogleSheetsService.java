@@ -26,17 +26,17 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
     private final LogHelper logHelper;
 
-    private final LogSaveDiscordNotificationFacade logSaveDiscordNotificationFacade;
+    private final LogSaveDiscordNotificationService logSaveDiscordNotificationService;
 
     @Autowired
     public LogDirectSaveGoogleSheetsService(
         LogRepository logRepository,
         LogHelper logHelper,
-        LogSaveDiscordNotificationFacade logSaveDiscordNotificationFacade
+        LogSaveDiscordNotificationService logSaveDiscordNotificationService
     ) {
         this.logRepository = logRepository;
         this.logHelper = logHelper;
-        this.logSaveDiscordNotificationFacade = logSaveDiscordNotificationFacade;
+        this.logSaveDiscordNotificationService = logSaveDiscordNotificationService;
     }
 
     /**
@@ -82,14 +82,14 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
             logRepository.saveJobLogsWithTx(jobDetailLog, executionTimeLog);
 
-            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, jobId);
+            logSaveDiscordNotificationService.stackBatchProcessLogSaveSuccessResult(batchProcessType, jobId);
 
         } catch (Exception exception) {
 
-            logSaveDiscordNotificationFacade.stackJobLogSaveFailureResult(exception, jobDetailLog, executionTimeLog);
+            logSaveDiscordNotificationService.stackJobLogSaveFailureResult(exception, jobDetailLog, executionTimeLog);
         }
 
-        logSaveDiscordNotificationFacade.sendBatchProcessResultsNotification();
+        logSaveDiscordNotificationService.sendBatchProcessResultsNotification();
     }
 
     @Async("logSaveHandlerExecutor")
@@ -126,11 +126,11 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
             logRepository.saveStepLogsWithTx(stepDetailLog, executionTimeLog);
 
-            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, stepId);
+            logSaveDiscordNotificationService.stackBatchProcessLogSaveSuccessResult(batchProcessType, stepId);
 
         } catch (Exception exception) {
 
-            logSaveDiscordNotificationFacade.stackStepLogSaveFailureResult(exception, stepDetailLog, executionTimeLog);
+            logSaveDiscordNotificationService.stackStepLogSaveFailureResult(exception, stepDetailLog, executionTimeLog);
         }
     }
 
@@ -176,11 +176,11 @@ public class LogDirectSaveGoogleSheetsService implements LogService {
 
             logRepository.saveGithubApiLogsWithTx(githubApiLog, executionTimeLog);
 
-            logSaveDiscordNotificationFacade.stackBatchProcessLogSaveSuccessResult(batchProcessType, taskId);
+            logSaveDiscordNotificationService.stackBatchProcessLogSaveSuccessResult(batchProcessType, taskId);
 
         } catch (Exception exception) {
 
-            logSaveDiscordNotificationFacade.stackTaskLogSaveFailureResult(exception, githubApiLog, executionTimeLog);
+            logSaveDiscordNotificationService.stackTaskLogSaveFailureResult(exception, githubApiLog, executionTimeLog);
         }
     }
 }

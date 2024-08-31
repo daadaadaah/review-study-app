@@ -18,12 +18,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile("prod")
-public class ReviewStudyProdScheduler {
+public class ReviewStudySchedulerProdConfig {
 
     private final ReviewStudySchedulerService reviewStudySchedulerService;
 
     @Autowired
-    public ReviewStudyProdScheduler(
+    public ReviewStudySchedulerProdConfig(
         ReviewStudySchedulerService reviewStudySchedulerService
     ) {
         this.reviewStudySchedulerService = reviewStudySchedulerService;

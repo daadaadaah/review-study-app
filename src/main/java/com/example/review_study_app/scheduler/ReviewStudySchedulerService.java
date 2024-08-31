@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * ReviewStudySchedulerFacade 는 Github Job 작업을 실행하고, 그 결과를 Notification 으로 전달하는 책임을 담당하는 클래스이다.
+ * ReviewStudySchedulerService 는 Github Job 작업을 실행하고, 그 결과를 Notification 으로 전달하는 책임을 담당하는 클래스이다.
  */
 @Slf4j
 @Component
-public class ReviewStudySchedulerFacade {
+public class ReviewStudySchedulerService {
 
     private final GithubIssueJobService githubIssueJobService;
 
@@ -39,7 +39,7 @@ public class ReviewStudySchedulerFacade {
     private final ProfileType activeProfileType;
 
     @Autowired
-    public ReviewStudySchedulerFacade(
+    public ReviewStudySchedulerService(
         GithubIssueJobService githubIssueJobService,
         NotificationService notificationService,
         Environment environment

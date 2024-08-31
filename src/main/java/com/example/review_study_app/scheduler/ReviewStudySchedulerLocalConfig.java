@@ -7,7 +7,6 @@ import java.time.ZonedDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,15 +29,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile("local")
-public class ReviewStudyLocalScheduler {
+public class ReviewStudySchedulerLocalConfig {
 
-    private final ReviewStudySchedulerFacade reviewStudySchedulerFacade;
+    private final ReviewStudySchedulerService reviewStudySchedulerService;
 
     @Autowired
-    public ReviewStudyLocalScheduler(
-        ReviewStudySchedulerFacade reviewStudySchedulerFacade
+    public ReviewStudySchedulerLocalConfig(
+        ReviewStudySchedulerService reviewStudySchedulerService
     ) {
-        this.reviewStudySchedulerFacade = reviewStudySchedulerFacade;
+        this.reviewStudySchedulerService = reviewStudySchedulerService;
     }
 
 //    @Scheduled(fixedRate = 60000)
@@ -49,7 +48,7 @@ public class ReviewStudyLocalScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.createNewWeekNumberLabel(currentYear, currentWeekNumber);
+        reviewStudySchedulerService.createNewWeekNumberLabel(currentYear, currentWeekNumber);
     }
 
 //    @Scheduled(fixedRate = 60000)
@@ -60,7 +59,7 @@ public class ReviewStudyLocalScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.createNewWeeklyReviewIssues(currentYear, currentWeekNumber);
+        reviewStudySchedulerService.createNewWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 
 //    @Scheduled(fixedRate = 60000)
@@ -71,6 +70,6 @@ public class ReviewStudyLocalScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.closeWeeklyReviewIssues(currentYear, currentWeekNumber);
+        reviewStudySchedulerService.closeWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 }

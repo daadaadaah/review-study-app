@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile("prod")
-public class ReviewStudyProdScheduler {
+public class ReviewStudySchedulerProdConfig {
 
-    private final ReviewStudySchedulerFacade reviewStudySchedulerFacade;
+    private final ReviewStudySchedulerService reviewStudySchedulerService;
 
     @Autowired
-    public ReviewStudyProdScheduler(
-        ReviewStudySchedulerFacade reviewStudySchedulerFacade
+    public ReviewStudySchedulerProdConfig(
+        ReviewStudySchedulerService reviewStudySchedulerService
     ) {
-        this.reviewStudySchedulerFacade = reviewStudySchedulerFacade;
+        this.reviewStudySchedulerService = reviewStudySchedulerService;
     }
 
     /**
@@ -40,7 +40,7 @@ public class ReviewStudyProdScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.createNewWeekNumberLabel(currentYear, currentWeekNumber);
+        reviewStudySchedulerService.createNewWeekNumberLabel(currentYear, currentWeekNumber);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ReviewStudyProdScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.createNewWeeklyReviewIssues(currentYear, currentWeekNumber);
+        reviewStudySchedulerService.createNewWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 
     /**
@@ -68,6 +68,6 @@ public class ReviewStudyProdScheduler {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerFacade.closeWeeklyReviewIssues(currentYear, currentWeekNumber-1);
+        reviewStudySchedulerService.closeWeeklyReviewIssues(currentYear, currentWeekNumber-1);
     }
 }

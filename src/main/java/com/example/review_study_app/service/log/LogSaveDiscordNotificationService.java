@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class LogSaveDiscordNotificationFacade {
+public class LogSaveDiscordNotificationService {
 
     private NotificationService notificationService;
 
@@ -34,7 +34,7 @@ public class LogSaveDiscordNotificationFacade {
     private final Stack<LogSaveResult> logSaveResultStack = new Stack<>();
 
     @Autowired
-    public LogSaveDiscordNotificationFacade(
+    public LogSaveDiscordNotificationService(
         NotificationService notificationService,
         UnSavedLogFileFactory unSavedLogFileFactory
     ) {

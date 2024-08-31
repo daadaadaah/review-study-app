@@ -29,12 +29,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile("local")
-public class ReviewStudyLocalScheduler {
+public class ReviewStudySchedulerLocalConfig {
 
     private final ReviewStudySchedulerService reviewStudySchedulerService;
 
     @Autowired
-    public ReviewStudyLocalScheduler(
+    public ReviewStudySchedulerLocalConfig(
         ReviewStudySchedulerService reviewStudySchedulerService
     ) {
         this.reviewStudySchedulerService = reviewStudySchedulerService;

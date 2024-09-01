@@ -68,6 +68,6 @@ public class ReviewStudySchedulerProdConfig {
 
         int currentWeekNumber = MyDateUtils.getCurrentWeekNumber(seoulDateTime);
 
-        reviewStudySchedulerService.closeWeeklyReviewIssues(currentYear, currentWeekNumber-1);
+        reviewStudySchedulerService.closeWeeklyReviewIssues(currentYear, currentWeekNumber);
     }
 }

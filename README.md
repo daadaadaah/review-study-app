@@ -1,11 +1,17 @@
 # review-study-app
 ## 🙇‍♀️ 소개
-- [주간 회고 스터디](https://github.com/daadaadaah/reviewStudy/issues)용 주간 회고 이슈를 매주 자동으로 생성 및 관리하여 수작업 대비 n배 효율을 제공하는 스프링 스케줄러 서버
+- [주간 회고 스터디](https://github.com/daadaadaah/reviewStudy/issues)용 주간 회고 이슈를 매주 자동으로 생성 및 관리하여 수작업 대비 3배 효율을 제공하는 스프링 스케줄러 서버
 
 ```bash
-## 1. 수작업 대비 n배 효율 향상 -> 계산할 떄, GPT 도움 받기
-https://chatgpt.com/c/333d6971-56bf-4535-8d6a-cbdb8b324942
-> 이 배치 프로그램을 만듬으로써 수작업 대비 얼마나 향상되었는지
+# 수작업 : 1인당 30초
+Github 레포 열기: 1초
+이슈 목록에서 내 Issue 클릭하기: 1초
+Close 하기: 1초
+다음 주차 계산하기: 3초
+다음 주차 Label 생성하기: 3초
+이슈 내용 기재하고 주차 Label 추가 및 생성 : 21초
+
+# 자동화 : 평균 10초
 ```
 
 ### 🎈주요 기능

@@ -51,6 +51,3 @@ https://chatgpt.com/c/333d6971-56bf-4535-8d6a-cbdb8b324942
 
 ## 🍎 주요 클래스 구조 ([링크](https://app.diagrams.net/#G1G6XFKNdc9-xQOxY04WzSRmKNUTCcTDhS#%7B%22pageId%22%3A%22Ko9q1aU8WVFJBuZZ_9kq%22%7D))
 <img width="1446" alt="스크린샷 2024-08-22 오후 3 35 12" src="https://github.com/user-attachments/assets/964d458a-9e60-4deb-9f46-ceb8c9e3de0a">
-
-## 시스템 설계 및 로직
-- [draw.io](https://app.diagrams.net/#G1G6XFKNdc9-xQOxY04WzSRmKNUTCcTDhS#%7B%22pageId%22%3A%222YBvvXClWsGukQMizWep%22%7D)

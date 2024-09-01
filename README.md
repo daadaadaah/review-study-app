@@ -46,7 +46,7 @@ https://chatgpt.com/c/333d6971-56bf-4535-8d6a-cbdb8b324942
 - 팩토리 패턴과 Bean 등록으로 Google Sheets 객체 생성과 사용 디커플링시킴으로써 애플리케이션의 안정성 향상시켰고, Google Sheets 객체를 사용함으로써 메모리와 리소스 낭비 감소 시킴
 
 #### (3) AOP 활용하여 재시도 메커니즘의 유지보수성 향상
-- @Retryable 애노테이션이 적용된 메서드 호출 전, 클래스명과 메서드명을 RetryContext에 저장하는 AOP 컴포넌트 개발하여 재시도 메커니즘의 투명성과 유지보수성 향상.
+- @Retryable 애노테이션이 적용된 메서드 호출 전, 클래스명과 메서드명을 RetryContext에 저장하는 AOP 컴포넌트 개발하여 재시도 메커니즘의 투명성과 유지보수성 향상. ([관련 코드](https://github.com/daadaadaah/review-study-app/blob/main/src/main/java/com/example/review_study_app/common/retry/RetryableExecutionContextAspect.java)
 
 ## 🍎 주요 클래스 구조 ([링크](https://app.diagrams.net/#G1G6XFKNdc9-xQOxY04WzSRmKNUTCcTDhS#%7B%22pageId%22%3A%22Ko9q1aU8WVFJBuZZ_9kq%22%7D))
 <img width="1446" alt="스크린샷 2024-08-22 오후 3 35 12" src="https://github.com/user-attachments/assets/964d458a-9e60-4deb-9f46-ceb8c9e3de0a">

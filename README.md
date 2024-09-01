@@ -48,5 +48,6 @@ https://chatgpt.com/c/333d6971-56bf-4535-8d6a-cbdb8b324942
 #### (3) AOP 활용하여 재시도 메커니즘의 유지보수성 향상([관련 코드](https://github.com/daadaadaah/review-study-app/blob/main/src/main/java/com/example/review_study_app/common/retry/RetryableExecutionContextAspect.java))
 - @Retryable 애노테이션이 적용된 메서드 호출 전, 클래스명과 메서드명을 RetryContext에 저장하는 AOP 컴포넌트 개발하여 재시도 메커니즘의 투명성과 유지보수성 향상. 
 
-## 🍎 주요 클래스 구조 ([링크](https://app.diagrams.net/#G1G6XFKNdc9-xQOxY04WzSRmKNUTCcTDhS#%7B%22pageId%22%3A%222YBvvXClWsGukQMizWep%22%7D))
+## 🍎 주요 클래스 구조 ([크게 보기](https://github.com/user-attachments/assets/e9635852-a7e3-4e85-838f-72b5b1501aa5))
 <img width="1446" alt="스크린샷 2024-08-22 오후 3 35 12" src="https://github.com/user-attachments/assets/964d458a-9e60-4deb-9f46-ceb8c9e3de0a">
+

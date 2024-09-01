@@ -45,9 +45,8 @@ https://chatgpt.com/c/333d6971-56bf-4535-8d6a-cbdb8b324942
 #### (2) 구글 시트 객체을 Bean으로 등록하여 조기 문제 밸견 및 해결로 애플리케이션 안정성 향상과 메모리와 리소스 낭비 감소 ([관련 링크](https://github.com/daadaadaah/review-study-app/blob/23d8bd5e1929f31f9c85583f57cf1fbede2c219d/src/main/java/com/example/review_study_app/infrastructure/googlesheets/config/GoogleSheetsConfig.java#L12))
 - 팩토리 패턴과 Bean 등록으로 Google Sheets 객체 생성과 사용 디커플링시킴으로써 애플리케이션의 안정성 향상시켰고, Google Sheets 객체를 사용함으로써 메모리와 리소스 낭비 감소 시킴
 
-#### (3) AOP 활용하여 00 향상
--  커스텀 AOP, RetryListener를 활용하여 어떤 클래스의 어떤 메서드가 몇번 재시도하는지에 대한 로깅 구현 
-- @Retryable 애노테이션이 적용된 메서드 호출 전, 클래스명과 메서드명을 RetryContext에 저장하는 AOP 컴포넌트 개발 -> AOP를 활용하여 재시도 메커니즘의 투명성과 유지보수성 향상.
+#### (3) AOP 활용하여 재시도 메커니즘의 유지보수성 향상
+- @Retryable 애노테이션이 적용된 메서드 호출 전, 클래스명과 메서드명을 RetryContext에 저장하는 AOP 컴포넌트 개발하여 재시도 메커니즘의 투명성과 유지보수성 향상.
 
 ## 🍎 주요 클래스 구조 ([링크](https://app.diagrams.net/#G1G6XFKNdc9-xQOxY04WzSRmKNUTCcTDhS#%7B%22pageId%22%3A%22Ko9q1aU8WVFJBuZZ_9kq%22%7D))
 <img width="1446" alt="스크린샷 2024-08-22 오후 3 35 12" src="https://github.com/user-attachments/assets/964d458a-9e60-4deb-9f46-ceb8c9e3de0a">

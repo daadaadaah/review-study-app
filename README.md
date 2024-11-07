@@ -27,7 +27,7 @@ Close 하기: 1초
 - Discord Webhook API를 활용하여 로깅 또는 배치 작업의 성공/실패 여부 등을 Discord 채널에 알림을 전송한다.
 - 예를 들어, 로깅 또는 배치 작업의 성공/실패 여부을 알리는 데 사용된다.
 
-#### 3. 📝 로깅 기능
+#### 3. 📝 로깅 기능 ([관련 구글 시트](https://docs.google.com/spreadsheets/d/1FI3mykwcAC8pHQTpENOGmPtXBMOgofUTIOPCdEZIVV8/edit?gid=210406224#gid=210406224))
 - Google Sheets API를 활용하여 GitHub API 통신 및 작업별 수행 시간 등을 Google 스프레드시트에 저장한다.
 - AOP와 Interceptor 활용하여 로깅 기능 구현
 
